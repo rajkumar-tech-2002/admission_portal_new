@@ -181,9 +181,14 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                                 <th>App No</th>
                                 <th>Date & Time</th>
                                 <th>Name</th>
+                                <th>DOB</th>
+                                <th>Gender</th>
                                 <th>Mobile</th>
+                                <th>Aadhaar</th>
                                 <th>College</th>
                                 <th>Dept</th>
+                                <th>Quota</th>
+                                <th>District</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -196,9 +201,14 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                                         <td><strong>{record.application_no}</strong></td>
                                         <td>{formatDateTime(record.created_at)}</td>
                                         <td>{record.student_name}</td>
+                                        <td>{record.dob ? record.dob.substring(0, 10) : ''}</td>
+                                        <td>{record.gender}</td>
                                         <td>{record.student_mobile_no}</td>
+                                        <td>{record.aadhaar_no}</td>
                                         <td>{record.college}</td>
                                         <td>{record.department}</td>
+                                        <td>{record.quota}</td>
+                                        <td>{record.district}</td>
                                         <td>
                                             <span className={`${styles.statusBadge} ${styles['status-' + record.student_status]}`}>
                                                 {record.student_status}
