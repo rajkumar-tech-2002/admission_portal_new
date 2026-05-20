@@ -7,10 +7,14 @@ import {
 import apiService from '../../services/api.service';
 import toast from 'react-hot-toast';
 import styles from '../../components/css/AdmissionProcess.module.css';
+import AdmissionList from './AdmissionList';
 
 const AdmissionProcess = ({ defaultSection = 'entry' }) => {
     // Left sub-sidebar tab selection: 'entry', 'staff', 'certificates'
     const [activeSection, setActiveSection] = useState(defaultSection);
+    const [isEntryFormVisible, setIsEntryFormVisible] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [rawAdmissions, setRawAdmissions] = useState([]);
 
     // Keep activeSection in sync with the route prop
     useEffect(() => {
@@ -98,7 +102,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         address2: '',
         pincode: '',
         country: 'India',
-        state: 'Tamil Nadu',
+        state: '',
         district: '',
         city: '',
 
@@ -254,6 +258,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         try {
             const res = await apiService.get('/admissions/list');
             if (res.data.success) {
+                setRawAdmissions(res.data.data);
                 const dbStudents = res.data.data.map(adm => ({
                     id: `ADM${String(adm.id).padStart(7, '0')}`,
                     name: adm.student_name || 'N/A',
@@ -273,7 +278,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
     };
 
     useEffect(() => {
-        if (activeSection === 'staff') {
+        if (activeSection === 'staff' || activeSection === 'entry') {
             fetchAdmissionsList();
         }
     }, [activeSection]);
@@ -281,6 +286,24 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
     // Helper: Handle input changes
     const handleChange = async (e) => {
         const { name, value } = e.target;
+
+        if (name === 'state') {
+            setFormData(prev => ({ 
+                ...prev, 
+                state: value,
+                district: '' 
+            }));
+            return;
+        }
+
+        if (name === 'college') {
+            setFormData(prev => ({ 
+                ...prev, 
+                college: value,
+                department: '' 
+            }));
+            return;
+        }
 
         // 1. Handlers for twelfthRegNo Autocomplete Suggestions
         if (name === 'twelfthRegNo') {
@@ -448,7 +471,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             firstGraduate: '', status: '', remark: '', aadharNo: '', schoolType: '', fee: '', rRemark: '', referenceAmount1: '', rPaidAmount: '',
             community: '', fatherName: '', motherName: '', fatherMobile: '', studentMobile: '',
             motherMobile: '', fatherOccupation: '', fatherAnnualIncome: '', religion: '', casteName: '', gender: '',
-            studentEmail: '', address1: '', address2: '', pincode: '', country: 'India', state: 'Tamil Nadu', district: '', city: '',
+            studentEmail: '', address1: '', address2: '', pincode: '', country: 'India', state: '', district: '', city: '',
             tenthSchoolDistrict: '', tenthSchoolCity: '', tenthSchool: '', tenthMark: '', regNo10th: '', totalMarks10th: '500', percentage10th: '', tenthYOP: '',
             twelfthSchoolDistrict: '', twelfthSchoolCity: '', twelfthSchool: '', twelfthMarkSheetStatus: 'No', twelfthYOP: '', twelfthGroup: '', languageStudied: 'Tamil',
             subject1Name: 'Tamil / Sanskrit Option', subject1Mark: '',
@@ -466,17 +489,114 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         toast.success('Admission Form Reset Successfully!');
     };
 
+
+    const handleEdit = (record) => {
+        setFormData({
+            twelfthRegNo: record.reg_no_12th || '',
+            studentName: record.student_name || '',
+            dob: record.dob ? record.dob.substring(0, 10) : '',
+            college: record.college || '',
+            admissionDate: record.admission_date ? record.admission_date.substring(0, 10) : '',
+            department: record.department || '',
+            year: record.admission_year || '',
+            quota: record.quota || '',
+            firstGraduate: record.first_graduate || '',
+            status: record.student_status || '',
+            remark: record.remark || '',
+            aadharNo: record.aadhaar_no || '',
+            schoolType: record.school_type || '',
+            fee: record.fee || '',
+            rRemark: record.reference_remark || '',
+            referenceAmount1: record.reference_amount_1 || '',
+            rPaidAmount: record.reference_paid_amount || '',
+
+            community: record.community || '',
+            fatherName: record.father_name || '',
+            motherName: record.mother_name || '',
+            fatherMobile: record.father_mobile_no || '',
+            studentMobile: record.student_mobile_no || '',
+            motherMobile: record.mother_mobile_no || '',
+            fatherOccupation: record.father_occupation || '',
+            fatherAnnualIncome: record.father_annual_income || '',
+            religion: record.religion || '',
+            casteName: record.caste_name || '',
+            gender: record.gender || '',
+
+            studentEmail: record.student_email || '',
+            address1: record.address_1 || '',
+            address2: record.address_2 || '',
+            pincode: record.pincode || '',
+            country: record.country || 'India',
+            state: record.state || '',
+            district: record.district || '',
+            city: record.city || '',
+
+            tenthSchoolDistrict: record.school_10th_district || '',
+            tenthSchoolCity: record.school_10th_city || '',
+            tenthSchool: record.school_10th_name || '',
+            tenthMark: record.mark_10th || '',
+            regNo10th: record.reg_no_10th || '',
+            totalMarks10th: record.total_marks_10th || '500',
+            percentage10th: record.percentage_10th || '',
+            tenthYOP: record.yop_10th || '',
+
+            twelfthSchoolDistrict: record.school_12th_district || '',
+            twelfthSchoolCity: record.school_12th_city || '',
+            twelfthSchool: record.school_12th_name || '',
+            twelfthMarkSheetStatus: record.mark_sheet_given_status || 'No',
+            twelfthYOP: record.yop_12th || '',
+            twelfthGroup: record.group_in_12th || '',
+            languageStudied: 'Tamil',
+            subject1Name: record.subject_1_name || 'Tamil / Sanskrit Option',
+            subject1Mark: record.subject_1_mark || '',
+            subject2Name: record.subject_2_name || 'English',
+            englishMark: record.subject_2_mark || '',
+            subject3Name: record.subject_3_name || 'Physics/Theory I',
+            subject2Mark: record.subject_3_mark || '',
+            subject4Name: record.subject_4_name || 'Chemistry / Practical I',
+            subject3Mark: record.subject_4_mark || '',
+            subject5Name: record.subject_5_name || 'Biology / CS / Practical II',
+            subject4Mark: record.subject_5_mark || '',
+            subject6Name: record.subject_6_name || 'Maths',
+            subject5Mark: record.subject_6_mark || '',
+            totalMarks12th: record.total_marks_12th || '',
+            percentage12th: record.percentage_12th || '',
+
+            ugUniversity: record.ug_university || '',
+
+            referenceType: record.reference_type || '',
+            referenceCollege: record.reference_college || '',
+            referenceDepartment: record.reference_department || '',
+            referenceByName: record.reference_by_name || '',
+            referenceByMobile: record.reference_by_mobile || '',
+            consultancyName: record.consultancy_name || '',
+            consultancyPersonName: record.consultancy_person_name || '',
+            consultancyMobile: record.consultancy_mobile || '',
+
+            courseStudied: record.course_studied || '',
+            medium: record.studied_medium || 'English',
+            boardUniversity: record.board_university || '',
+            nativity: record.nativity || 'Tamil Nadu'
+        });
+        setEditingId(record.id);
+        setIsEntryFormVisible(true);
+    };
+
     // Helper: Submit full form to backend DB
     const handleSubmitForm = async (e) => {
         e.preventDefault();
         toast.loading('Saving and Processing Admission Entry...', { id: 'submit-load' });
 
         try {
-            const res = await apiService.post('/admissions/submit', formData);
+            const res = editingId 
+                ? await apiService.put(`/admissions/${editingId}`, formData)
+                : await apiService.post('/admissions/submit', formData);
             toast.dismiss('submit-load');
 
             if (res.data.success) {
-                toast.success('Congratulations! Admission record created successfully in student_admission_master!');
+                toast.success(editingId ? 'Admission record updated successfully!' : 'Congratulations! Admission record created successfully in student_admission_master!');
+                setEditingId(null);
+                setIsEntryFormVisible(false);
                 handleResetForm();
                 fetchAdmissionsList(); // Load real admissions
                 setActiveSection('staff'); // Navigate to Staff View
@@ -545,11 +665,30 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             <main className={styles.contentArea} style={{ padding: '0' }}>
                 
                 {/* 1. ADMISSION ENTRY PORTAL */}
-                {activeSection === 'entry' && (
+                {activeSection === 'entry' && !isEntryFormVisible && (
+                    <AdmissionList 
+                        admissions={rawAdmissions}
+                        onAdd={() => {
+                            handleResetForm();
+                            setEditingId(null);
+                            setIsEntryFormVisible(true);
+                        }}
+                        onEdit={handleEdit}
+                        onRefresh={fetchAdmissionsList}
+                    />
+                )}
+                {activeSection === 'entry' && isEntryFormVisible && (
                     <form onSubmit={handleSubmitForm}>
                         <div className={styles.pageHeader}>
-                            <h1 className={styles.pageTitle}>New Admission Entry</h1>
-                            <p className={styles.pageDescription}>Enter high-fidelity registration and application details below to admit the student.</p>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                            <h1 className={styles.pageTitle}>{editingId ? "Edit Admission Entry" : "New Admission Entry"}</h1>
+                            <p className={styles.pageDescription}>{editingId ? 'Edit admission entry details below.' : 'Enter high-fidelity registration and application details below to admit the student.'}</p>
+                                </div>
+                                <button type="button" onClick={() => setIsEntryFormVisible(false)} style={{ background: '#6b7280', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', alignSelf: 'flex-start' }}>
+                                    Back to List
+                                </button>
+                            </div>
                         </div>
 
                         {/* STICKY HORIZONTAL TABS */}
@@ -603,15 +742,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                     <div 
                                                         key={idx}
                                                         onClick={async () => {
-                                                            let collegeName = '';
                                                             const course = student.selected_course || '';
-                                                            if (course.startsWith('NEC')) {
-                                                                collegeName = 'Nandha Engineering College';
-                                                            } else if (course.startsWith('NCT')) {
-                                                                collegeName = 'Nandha College of Technology';
-                                                            } else if (course.startsWith('NPC')) {
-                                                                collegeName = 'Nandha Polytechnic College';
-                                                            }
+                                                            const collegeName = course.split('-')[0] || '';
 
                                                             setFormData(prev => ({
                                                                 ...prev,
@@ -686,9 +818,9 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         <label className={styles.inputLabel}>college <span className={styles.requiredAsterisk}>*</span></label>
                                         <select name="college" value={formData.college} onChange={handleChange} required className={`${styles.inputField} ${styles.selectField}`}>
                                             <option value="">Select College</option>
-                                            <option value="Nandha Engineering College">Nandha Engineering College</option>
-                                            <option value="Nandha College of Technology">Nandha College of Technology</option>
-                                            <option value="Nandha Polytechnic College">Nandha Polytechnic College</option>
+                                            {Array.from(new Set(masterData.departments.map(d => d.institution ? d.institution.trim() : '').filter(Boolean))).map(inst => (
+                                                <option key={inst} value={inst}>{inst}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className={styles.inputGroup}>
@@ -699,7 +831,9 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         <label className={styles.inputLabel}>department <span className={styles.requiredAsterisk}>*</span></label>
                                         <select name="department" value={formData.department} onChange={handleChange} required className={`${styles.inputField} ${styles.selectField}`}>
                                             <option value="">Select Department</option>
-                                            {masterData.departments.map(d => <option key={d.id} value={d.department}>{d.department}</option>)}
+                                            {masterData.departments
+                                                .filter(d => formData.college ? (d.institution ? d.institution.trim() : '') === formData.college : true)
+                                                .map(d => <option key={d.id} value={d.department}>{d.department}</option>)}
                                         </select>
                                     </div>
                                     <div className={styles.inputGroup}>
@@ -829,7 +963,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         <input type="text" name="casteName" value={formData.casteName} onChange={handleChange} className={styles.inputField} placeholder="Caste Name" />
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>Gender</label>
+                                        <label className={styles.inputLabel}>Gender <span style={{ color: 'red' }}>*</span></label>
                                         <select name="gender" value={formData.gender} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
                                             <option value="">Select Gender</option>
                                             <option value="Male">Male</option>
@@ -864,17 +998,28 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Country</label>
-                                        <input type="text" name="country" value={formData.country} readOnly className={styles.inputField} style={{ backgroundColor: '#f1f5f9' }} />
+                                        <select name="country" value={formData.country} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
+                                            <option value="">Select Country</option>
+                                            <option value="India">India</option>
+                                            <option value="Other">Other</option>
+                                        </select>
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>State</label>
-                                        <input type="text" name="state" value={formData.state} readOnly className={styles.inputField} style={{ backgroundColor: '#f1f5f9' }} />
+                                        <select name="state" value={formData.state} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
+                                            <option value="">Select State</option>
+                                            {Array.from(new Set(masterData.districts.map(d => d.state_name).filter(Boolean))).map(st => (
+                                                <option key={st} value={st}>{st}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>District</label>
                                         <select name="district" value={formData.district} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
                                             <option value="">Select District</option>
-                                            {masterData.districts.map(d => <option key={d.id} value={d.district_name}>{d.district_name}</option>)}
+                                            {masterData.districts
+                                                .filter(d => formData.state ? d.state_name === formData.state : true)
+                                                .map(d => <option key={d.id} value={d.district_name}>{d.district_name}</option>)}
                                         </select>
                                     </div>
                                     <div className={styles.inputGroup}>

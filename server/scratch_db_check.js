@@ -11,8 +11,8 @@ async function checkDB() {
         const [religions] = await db.execute('SELECT * FROM religion_master');
         console.log('RELIGIONS:', religions);
 
-        const [departments] = await db.execute('SELECT * FROM department_master');
-        console.log('DEPARTMENTS COUNT:', departments.length);
+        const [records] = await db.execute('SELECT selected_dept, selected_course, reference_institution FROM record_master LIMIT 10');
+        console.log('EXISTING RECORDS:', records);
 
         process.exit(0);
     } catch (err) {

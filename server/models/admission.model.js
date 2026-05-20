@@ -57,6 +57,15 @@ class Admission {
     static async createAdmission(data) {
         const toNull = (val) => (val === undefined || val === null || val === '') ? null : val;
 
+        // Auto-generate application_no: APPYYYYXXXX (e.g., APP20260001)
+        const now = new Date();
+        const currentYear = now.getFullYear().toString();
+        const [countRows] = await db.execute(
+            `SELECT COUNT(*) AS cnt FROM student_admission_master WHERE YEAR(created_at) = YEAR(CURDATE())`
+        );
+        const seq = (countRows[0].cnt || 0) + 1;
+        const applicationNo = `APP${currentYear}${String(seq).padStart(4, '0')}`;
+
         // Auto determine is_10th
         const has10th = data.tenthSchool || data.tenthMark || data.regNo10th;
         const is10th = has10th ? 'Yes' : 'No';
@@ -67,7 +76,7 @@ class Admission {
 
         const sql = `
             INSERT INTO student_admission_master (
-                reg_no_12th, student_name, dob, college, admission_date, department, admission_year, quota,
+                application_no, reg_no_12th, student_name, dob, college, admission_date, department, admission_year, quota,
                 first_graduate, student_status, remark, aadhaar_no, school_type, fee, reference_remark,
                 reference_amount_1, reference_paid_amount, community, father_name, mother_name, father_mobile_no,
                 student_mobile_no, mother_mobile_no, father_occupation, father_annual_income, religion, caste_name,
@@ -81,7 +90,7 @@ class Admission {
                 reference_department, reference_by_name, reference_by_mobile, consultancy_name,
                 consultancy_person_name, consultancy_mobile, course_studied, studied_medium, board_university, nativity
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
@@ -98,6 +107,7 @@ class Admission {
         `;
 
         const values = [
+            applicationNo,
             toNull(data.twelfthRegNo),
             toNull(data.studentName),
             toNull(data.dob),
@@ -130,8 +140,8 @@ class Admission {
             toNull(data.address1),
             toNull(data.address2),
             toNull(data.pincode),
-            toNull(data.country || 'India'),
-            toNull(data.state || 'Tamil Nadu'),
+            toNull(data.country),
+            toNull(data.state),
             toNull(data.district),
             toNull(data.city),
             is10th,
@@ -150,17 +160,17 @@ class Admission {
             toNull(data.twelfthMarkSheetStatus),
             toNull(data.twelfthYOP),
             toNull(data.twelfthGroup),
-            toNull(data.subject1Name || 'Tamil / Sanskrit Option'),
+            toNull(data.subject1Name),
             toNull(data.subject1Mark),
-            toNull(data.subject2Name || 'English'),
+            toNull(data.subject2Name),
             toNull(data.englishMark),
-            toNull(data.subject3Name || 'Physics/Theory I'),
+            toNull(data.subject3Name),
             toNull(data.subject2Mark),
-            toNull(data.subject4Name || 'Chemistry / Practical I'),
+            toNull(data.subject4Name),
             toNull(data.subject3Mark),
-            toNull(data.subject5Name || 'Biology / CS / Practical II'),
+            toNull(data.subject5Name),
             toNull(data.subject4Mark),
-            toNull(data.subject6Name || 'Maths'),
+            toNull(data.subject6Name),
             toNull(data.subject5Mark),
             toNull(data.totalMarks12th),
             toNull(data.percentage12th),
@@ -176,11 +186,63 @@ class Admission {
             toNull(data.courseStudied),
             toNull(data.medium),
             toNull(data.boardUniversity),
-            toNull(data.nativity || 'Tamil Nadu')
+            toNull(data.nativity)
         ];
 
         const [result] = await db.execute(sql, values);
-        return result.insertId;
+        return { insertId: result.insertId, applicationNo };
+    }
+
+    
+    static async updateAdmission(id, data) {
+        const toNull = (val) => (val === undefined || val === null || val === '') ? null : val;
+        
+        const has10th = data.tenthSchool || data.tenthMark || data.regNo10th;
+        const is10th = has10th ? 'Yes' : 'No';
+
+        const has12th = data.twelfthSchool || data.twelfthGroup || data.totalMarks12th;
+        const is12th = has12th ? 'Yes' : 'No';
+
+        const sql = `
+            UPDATE student_admission_master SET
+                reg_no_12th=?, student_name=?, dob=?, college=?, admission_date=?, department=?, admission_year=?, quota=?,
+                first_graduate=?, student_status=?, remark=?, aadhaar_no=?, school_type=?, fee=?, reference_remark=?,
+                reference_amount_1=?, reference_paid_amount=?, community=?, father_name=?, mother_name=?, father_mobile_no=?,
+                student_mobile_no=?, mother_mobile_no=?, father_occupation=?, father_annual_income=?, religion=?, caste_name=?,
+                gender=?, student_email=?, address_1=?, address_2=?, pincode=?, country=?, state=?, district=?, city=?,
+                is_10th=?, school_10th_district=?, school_10th_city=?, school_10th_name=?, mark_10th=?, reg_no_10th=?,
+                total_marks_10th=?, percentage_10th=?, yop_10th=?, is_12th=?, school_12th_district=?, school_12th_city=?,
+                school_12th_name=?, mark_sheet_given_status=?, yop_12th=?, group_in_12th=?,
+                subject_1_name=?, subject_1_mark=?, subject_2_name=?, subject_2_mark=?, subject_3_name=?, subject_3_mark=?,
+                subject_4_name=?, subject_4_mark=?, subject_5_name=?, subject_5_mark=?, subject_6_name=?, subject_6_mark=?,
+                total_marks_12th=?, percentage_12th=?, ug_university=?, reference_type=?, reference_college=?,
+                reference_department=?, reference_by_name=?, reference_by_mobile=?, consultancy_name=?,
+                consultancy_person_name=?, consultancy_mobile=?, course_studied=?, studied_medium=?, board_university=?, nativity=?
+            WHERE id=?
+        `;
+
+        const values = [
+            toNull(data.twelfthRegNo), toNull(data.studentName), toNull(data.dob), toNull(data.college), toNull(data.admissionDate), toNull(data.department), toNull(data.year), toNull(data.quota),
+            toNull(data.firstGraduate), toNull(data.status), toNull(data.remark), toNull(data.aadharNo), toNull(data.schoolType), toNull(data.fee), toNull(data.rRemark),
+            toNull(data.referenceAmount1), toNull(data.rPaidAmount), toNull(data.community), toNull(data.fatherName), toNull(data.motherName), toNull(data.fatherMobile),
+            toNull(data.studentMobile), toNull(data.motherMobile), toNull(data.fatherOccupation), toNull(data.fatherAnnualIncome), toNull(data.religion), toNull(data.casteName),
+            toNull(data.gender), toNull(data.studentEmail), toNull(data.address1), toNull(data.address2), toNull(data.pincode), toNull(data.country), toNull(data.state), toNull(data.district), toNull(data.city),
+            is10th, toNull(data.tenthSchoolDistrict), toNull(data.tenthSchoolCity), toNull(data.tenthSchool), toNull(data.tenthMark), toNull(data.regNo10th),
+            toNull(data.totalMarks10th), toNull(data.percentage10th), toNull(data.tenthYOP), is12th, toNull(data.twelfthSchoolDistrict), toNull(data.twelfthSchoolCity),
+            toNull(data.twelfthSchool), toNull(data.twelfthMarkSheetStatus), toNull(data.twelfthYOP), toNull(data.twelfthGroup),
+            toNull(data.subject1Name), toNull(data.subject1Mark), toNull(data.subject2Name), toNull(data.englishMark), toNull(data.subject3Name), toNull(data.subject2Mark),
+            toNull(data.subject4Name), toNull(data.subject3Mark), toNull(data.subject5Name), toNull(data.subject4Mark), toNull(data.subject6Name), toNull(data.subject5Mark),
+            toNull(data.totalMarks12th), toNull(data.percentage12th), toNull(data.ugUniversity), toNull(data.referenceType), toNull(data.referenceCollege),
+            toNull(data.referenceDepartment), toNull(data.referenceByName), toNull(data.referenceByMobile), toNull(data.consultancyName),
+            toNull(data.consultancyPersonName), toNull(data.consultancyMobile), toNull(data.courseStudied), toNull(data.medium), toNull(data.boardUniversity), toNull(data.nativity),
+            id
+        ];
+
+        await db.execute(sql, values);
+    }
+
+    static async deleteAdmission(id) {
+        await db.execute('DELETE FROM student_admission_master WHERE id = ?', [id]);
     }
 
     static async getAdmissions() {

@@ -89,11 +89,12 @@ exports.submitAdmission = async (req, res, next) => {
             });
         }
 
-        const insertId = await Admission.createAdmission(data);
+        const result = await Admission.createAdmission(data);
         res.status(201).json({
             success: true,
-            message: 'Admission record saved successfully in student_admission_master!',
-            id: insertId
+            message: `Admission record saved successfully! Application No: ${result.applicationNo}`,
+            id: result.insertId,
+            applicationNo: result.applicationNo
         });
     } catch (error) {
         next(error);
@@ -104,6 +105,28 @@ exports.getAdmissions = async (req, res, next) => {
     try {
         const admissions = await Admission.getAdmissions();
         res.status(200).json({ success: true, data: admissions });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.updateAdmission = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const data = req.body;
+        // Validation logic can be added here
+        await Admission.updateAdmission(id, data);
+        res.status(200).json({ success: true, message: 'Admission record updated successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteAdmission = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await Admission.deleteAdmission(id);
+        res.status(200).json({ success: true, message: 'Admission record deleted successfully' });
     } catch (error) {
         next(error);
     }

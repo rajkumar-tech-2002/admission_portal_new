@@ -13,5 +13,7 @@ router.get('/consultancies', authMiddleware, admissionController.getConsultancie
 // Admission Process Actions
 router.post('/submit', authMiddleware, admissionController.submitAdmission);
 router.get('/list', authMiddleware, admissionController.getAdmissions);
+router.put('/:id', authMiddleware, admissionController.updateAdmission);
+router.delete('/:id', authMiddleware, admissionController.deleteAdmission);
 
 module.exports = router;
