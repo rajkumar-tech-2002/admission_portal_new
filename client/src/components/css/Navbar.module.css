@@ -1,0 +1,91 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 2rem;
+    background-color: var(--surface-color, #ffffff);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
+    height: 70px;
+    z-index: 50;
+    position: sticky;
+    top: 0;
+}
+
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.leftContent {
+    display: flex;
+    align-items: center;
+}
+
+.logoContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logoImage {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+.collegeName {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--primary-color, #4f46e5);
+    font-weight: 700;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+    
+    .logoImage {
+        height: 40px;
+    }
+
+    .collegeName {
+        font-size: 1rem;
+    }
+    
+    .leftSection {
+        gap: 0.5rem;
+    }
+}
+
+.clockContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-right: 1.5rem;
+    font-family: monospace;
+    color: var(--text-secondary);
+}
+
+.clockDate {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.clockTime {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .clockContainer {
+        display: none;
+    }
+}

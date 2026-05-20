@@ -1,0 +1,175 @@
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.pageContainer {
+    flex: 1;
+    background: linear-gradient(135deg, #f6f8fd 0%, #f1f5f9 100%);
+    padding: 3rem 1rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.title {
+    font-size: 2.75rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+    position: relative;
+    display: inline-block;
+}
+
+.title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background-color: var(--secondary-color);
+    border-radius: 2px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    margin-top: 1rem;
+}
+
+.textInfo {
+    color: var(--danger-color);
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+.formContainer {
+    max-width: 100%;
+    margin: 0 auto;
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05); 
+}
+
+.formSection {
+    padding: 2.5rem 3rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #ffffff;
+}
+
+.formSection:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.formSectionTitle {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+    position: relative;
+}
+
+.formSectionTitle::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.footer {
+    padding: 2rem 3rem;
+    background: #f9fafb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.submitBtn {
+    padding: 0.8rem 2.5rem;
+    font-size: 1.1rem;
+}
+
+.resetBtn {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+}
+
+.successMessage {
+    background-color: #d1fae5;
+    color: #065f46;
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+@keyframes flip {
+    0% { transform: perspective(400px) rotateX(0); }
+    15% { transform: perspective(400px) rotateX(180deg); }
+    30% { transform: perspective(400px) rotateX(360deg); }
+    100% { transform: perspective(400px) rotateX(360deg); }
+}
+
+.publicBadge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+    animation: flip 5s infinite cubic-bezier(0.455, 0.030, 0.515, 0.955);
+}
+
+.loginBadge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: white;
+    color: #4f46e5;
+    border: 2px solid #4f46e5;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.loginBadge:hover {
+    background: #4f46e5;
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+}
+
+.required {
+    color: var(--danger-color);
+    margin-left: 0.25rem;
+}

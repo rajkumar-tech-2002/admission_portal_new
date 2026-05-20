@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
+        .reportPage { width: 210mm; min-height: 296mm; background: #fff; padding: 8mm; box-sizing: border-box; color: #000; }
+        .reportHeader { display: flex; align-items: center; background: #d42a2a; padding: 4px 8px; gap: 8px; min-height: 60px; color: #fff; }
+        .headerLogo { width: 150px; height: 60px; object-fit: contain; }
+        .headerText { flex: 1; text-align: center; padding-right: 70px; }
+        .headerText h1 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+        .headerText h2 { margin: 2px 0 0 0; font-size: 14px; font-weight: 700; opacity: 0.95; }
+        
+        .detailTable { width: 100%; border: 1px solid #000; margin-top: 3px; border-collapse: collapse; }
+        .detailTable td { padding: 3px 8px; border-bottom: 1px solid #000; font-size: 14px; line-height: 1.45; }
+        .metaRow { font-weight: 400; }
+        .boldLabel { font-weight: 700; font-size: 14px; margin-right: 4px; }
+        
+        .sectionHeader { background: #F0F4F8; color: #000; padding: 3px 8px; font-size: 14px; border: 1px solid #000; margin-top: 3px; font-weight: 700; }
+        
+        .feesTable { width: 100%; border-collapse: collapse; border: 1px solid #000; margin-top: 3px; }
+        .feesTable th, .feesTable td { padding: 3px 8px; border: 1px solid #000; font-size: 14px; line-height: 1.45; text-align: left; }
+        .feesTable th { background: #fff; text-align: center; font-weight: 700; }
+        
+        .reportFooter { margin-top: 40px; padding: 0 20px; display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; }
+        
+        .refRow { display: flex; gap: 20px; padding-left: 55px; }
+        .refType { min-width: 150px; }
+    </style>
+</head>
+<body>
+    <div class="reportPage">
+        <div class="reportHeader">
+            <div class="headerText" style="padding-right: 0; flex: 1; text-align: center;">
+                <h1 style="color: white;">NANDHA EDUCATIONAL INSTITUTIONS</h1>
+                <h2 style="color: white;">Erode - 52.</h2>
+            </div>
+        </div>
+
+        <table class="detailTable">
+            <tr>
+                <td style="border-right: 1px solid #000; width: 45%;">Enquiry Number : <%= record.reg_id %></td>
+                <td style="text-align: right;">
+                    <strong>Admission Date :</strong> <%= formatDate(record.admission_date_time) %>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <strong>Time :</strong> <%= formatTime(record.admission_date_time) %>
+                </td>
+            </tr>
+            <tr><td colspan="2">+2 Reg. Number : <%= record.reg_no_12th || '' %></td></tr>
+            <tr><td colspan="2"><span class="boldLabel">1. Student Name :</span> <%= (record.std_name || '').toUpperCase() %></td></tr>
+            <tr><td colspan="2"><span class="boldLabel">2. Date of Birth :</span> <%= formatDate(record.std_dob) %></td></tr>
+            <tr><td colspan="2"><span class="boldLabel">3. Contact Number :</span> <%= record.std_mobile_no %></td></tr>
+            <tr>
+                <td colspan="2">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span><span class="boldLabel">4. Name of the College / School Last Studied :</span> <%= record.last_studied_name || '' %></span>
+                        <span>Last Studied : <%= record.last_studied || '' %></span>
+                    </div>
+                </td>
+            </tr>
+            <tr><td colspan="2"><span class="boldLabel">5. Name of the Course :</span> <%= record.selected_dept %>-<%= record.selected_ug_pg %>.<%= record.selected_course %></td></tr>
+            <tr>
+                <td colspan="2">
+                    <span class="boldLabel">6. Community :</span> <%= record.community || '' %>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="boldLabel">Quota :</span> <%= record.admission_quota || '' %>
+                </td>
+            </tr>
+            <tr><td colspan="2"><span class="boldLabel">7. First Graduate :</span></td></tr>
+            <tr>
+                <td colspan="2">
+                    <span class="boldLabel">8. Admission Recommended Person :</span>
+                    <div class="refRow">
+                        <div class="refType">
+                            <%= record.reference_type || '' %>
+                            <% if (record.reference_type === 'Student' && record.reference_way) { %>
+                                (<%= record.reference_way %>)
+                            <% } %>
+                        </div>
+                        <div>
+                            <%= record.reference_dept || '' %> 
+                            <% if (record.reference_dept && record.reference_name) { %> - <% } %> 
+                            <%= record.reference_name || '' %>
+                            <% if (record.reference_contact_no) { %> - <%= record.reference_contact_no %><% } %>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="sectionHeader">9. Fees Details</div>
+        <table class="feesTable">
+            <tr><td>Fees Fixed</td><td></td></tr>
+            <tr><td>Type of Scholarship</td><td></td></tr>
+            <tr><td>Scholarship Amount</td><td></td></tr>
+            <tr><td>Fees to be Paid</td><td></td></tr>
+        </table>
+
+        <div class="sectionHeader">10. Fees Pay Details</div>
+        <table class="feesTable">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Date</th>
+                    <th style="width: 25%;">Paid Amount</th>
+                    <th style="width: 25%;">Balance</th>
+                    <th style="width: 25%;">Remark</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td style="height: 20px;"></td><td></td><td></td><td></td></tr>
+                <tr><td style="height: 20px;"></td><td></td><td></td><td></td></tr>
+                <tr><td style="height: 20px;"></td><td></td><td></td><td></td></tr>
+            </tbody>
+        </table>
+
+        <div class="reportFooter">
+            <span>Student Signature</span>
+            <span>Parent Signature</span>
+            <span>AO / Office Signature</span>
+        </div>
+    </div>
+</body>
+</html>
