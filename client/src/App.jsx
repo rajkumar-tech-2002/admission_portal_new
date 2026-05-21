@@ -5,17 +5,16 @@ import Login from './pages/Admin/Login';
 import ChangePassword from './pages/Admin/ChangePassword';
 import EmailLogs from './pages/Admin/Master/EmailLogs';
 import MasterManagementPage from './pages/Admin/Master/MasterManagementPage';
+import UserMaster from './pages/Admin/Master/UserMaster';
 import AdminLayout from './components/layout/AdminLayout';
 import ToastProvider from './components/layout/ToastProvider';
-import ReportPrint from './pages/Admin/ReportPrint';
+import ReportPrint from './pages/AO/ReportPrint';
 
 // Role-based page folder structure imports
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminArchivedList from './pages/Admin/ArchivedList';
-import ConsolidateReport from './pages/Admin/ConsolidateReport';
+import ConsolidateReport from './pages/AO/ConsolidateReport';
 
-import AdmissionDashboard from './pages/Admission/Dashboard';
-import AdmissionArchivedList from './pages/Admission/ArchivedList';
 import AdmissionProcess from './pages/Admission/AdmissionProcess';
 
 import EnquiryDashboard from './pages/Enquiry/Dashboard';
@@ -50,9 +49,6 @@ const DashboardWrapper = () => {
   if (role.includes('enquiry')) {
     return <EnquiryDashboard />;
   }
-  if (role.includes('admission')) {
-    return <AdmissionDashboard />;
-  }
   return <AdminDashboard />;
 };
 
@@ -61,9 +57,6 @@ const ArchivedListWrapper = () => {
   if (role.includes('enquiry')) {
     return <EnquiryArchivedList />;
   }
-  if (role.includes('admission')) {
-    return <AdmissionArchivedList />;
-  }
   return <AdminArchivedList />;
 };
 
@@ -71,6 +64,9 @@ const AdminIndexRedirect = () => {
   const role = (sessionStorage.getItem('role') || 'admin').toLowerCase();
   if (role.includes('admission')) {
     return <Navigate to="admission-entry" replace />;
+  }
+  if (role === 'ao') {
+    return <Navigate to="consolidate-report" replace />;
   }
   return <Navigate to="dashboard" replace />;
 };
@@ -104,9 +100,9 @@ function App() {
           } />
           <Route path="change-password" element={<ChangePassword />} />
 
-          {/* Consolidate Report - Only for Admin */}
+          {/* Consolidate Report - For AO */}
           <Route path="consolidate-report" element={
-            <RoleRoute allowedRoles={['admin']}>
+            <RoleRoute allowedRoles={['ao']}>
               <ConsolidateReport />
             </RoleRoute>
           } />
@@ -125,6 +121,11 @@ function App() {
           <Route path="certificate-entry" element={
             <RoleRoute allowedRoles={['admin', 'admission_team']}>
               <AdmissionProcess defaultSection="certificates" />
+            </RoleRoute>
+          } />
+          <Route path="fees-entry" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <AdmissionProcess defaultSection="fees" />
             </RoleRoute>
           } />
 
@@ -373,6 +374,12 @@ function App() {
                 columns={[{key: 'role_name', label: 'Role Name'}]}
                 fields={[{name: 'role_name', label: 'Role Name', required: true}]}
               />
+            </RoleRoute>
+          } />
+
+          <Route path="master/users" element={
+            <RoleRoute allowedRoles={['admin']}>
+              <UserMaster />
             </RoleRoute>
           } />
 

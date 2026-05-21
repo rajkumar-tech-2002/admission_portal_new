@@ -131,3 +131,94 @@ exports.deleteAdmission = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getCertificates = async (req, res, next) => {
+    try {
+        const certificates = await Admission.getCertificates();
+        res.status(200).json({ success: true, data: certificates });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.saveCertificate = async (req, res, next) => {
+    try {
+        const data = req.body;
+        if (!data.student_id) {
+            return res.status(400).json({ success: false, message: 'Student ID is required' });
+        }
+        const result = await Admission.saveCertificate(data);
+        res.status(200).json({ success: true, message: 'Certificate details saved successfully', result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteCertificate = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await Admission.deleteCertificate(id);
+        res.status(200).json({ success: true, message: 'Certificate record deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getFeesStudents = async (req, res, next) => {
+    try {
+        const { college, department, year } = req.query;
+        const students = await Admission.getFeesStudents(college, department, year);
+        res.status(200).json({ success: true, data: students });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.saveFee = async (req, res, next) => {
+    try {
+        const data = req.body;
+        if (!data.student_application_no || !data.paid_amount || !data.paid_date) {
+            return res.status(400).json({ success: false, message: 'Required fields missing' });
+        }
+        const insertId = await Admission.saveFee(data);
+        res.status(200).json({ success: true, message: 'Fee record saved successfully', id: insertId });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getAllFees = async (req, res, next) => {
+    try {
+        const fees = await Admission.getAllFees();
+        res.status(200).json({ success: true, data: fees });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteFee = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const success = await Admission.deleteFee(id);
+        if (success) {
+            res.status(200).json({ success: true, message: 'Fee deleted successfully' });
+        } else {
+            res.status(404).json({ success: false, message: 'Fee not found' });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.importAdmissions = async (req, res, next) => {
+    try {
+        const { records } = req.body;
+        if (!records || !Array.isArray(records)) {
+            return res.status(400).json({ success: false, message: 'Invalid records format' });
+        }
+        const result = await Admission.importAdmissions(records);
+        res.status(200).json({ success: true, message: 'Records imported successfully', result });
+    } catch (error) {
+        next(error);
+    }
+};

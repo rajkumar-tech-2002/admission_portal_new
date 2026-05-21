@@ -3,7 +3,7 @@ import { Search, Users } from 'lucide-react';
 import styles from '../../components/css/Dashboard.module.css';
 import apiService from '../../services/api.service';
 
-const StaffList = () => {
+const StaffView = () => {
     // Staff data
     const [staffList, setStaffList] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -328,4 +328,4 @@ const StaffList = () => {
     );
 };
 
-export default StaffList;
+export default StaffView;

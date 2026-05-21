@@ -130,11 +130,20 @@ const AdminLayout = ({ children }) => {
                                     <Award size={20} />
                                     Certificate Entry
                                 </NavLink>
+
+                                <NavLink 
+                                    to="/admin/fees-entry" 
+                                    className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+                                    onClick={closeSidebar}
+                                >
+                                    <FileCheck size={20} />
+                                    Fees Entry
+                                </NavLink>
                             </>
                         )}
 
-                        {/* Consolidate Report - Only for Admin */}
-                        {role === 'admin' && (
+                        {/* Consolidate Report - Only for AO */}
+                        {(role === 'ao' || role === 'AO') && (
                             <NavLink 
                                 to="/admin/consolidate-report" 
                                 className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
@@ -209,6 +218,9 @@ const AdminLayout = ({ children }) => {
                                         </NavLink>
                                         <NavLink to="/admin/master/roles" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <UserPlus size={16} /> Role Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/users" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Users size={16} /> User Master
                                         </NavLink>
                                         <NavLink to="/admin/master/email-logs" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <Mail size={16} /> Email Logs

@@ -284,21 +284,20 @@ const ArchivedList = () => {
                                             <td>
                                                 <div style={{ display: 'flex', gap: '5px' }}>
                                                     <button 
-                                                        className={reportStyles.actionBtn}
+                                                        className={styles.viewBtn}
                                                         onClick={() => {
                                                             window.open(`/report-print/${record.id}`, '_blank');
                                                         }}
                                                         title="View PDF"
                                                     >
-                                                        <FileText size={14} /> PDF
+                                                        <FileText size={16} />
                                                     </button>
                                                     <button 
-                                                        className={reportStyles.actionBtn}
-                                                        style={{ background: '#059669' }}
+                                                        className={styles.mailBtn}
                                                         onClick={() => handleSendEmail(record.id)}
-                                                        title="Resend Email"
+                                                        title="Send/Resend Email"
                                                     >
-                                                        <Mail size={14} /> Resend
+                                                        <Mail size={16} />
                                                     </button>
                                                 </div>
                                             </td>

@@ -8,10 +8,12 @@ import apiService from '../../services/api.service';
 import toast from 'react-hot-toast';
 import styles from '../../components/css/AdmissionProcess.module.css';
 import AdmissionList from './AdmissionList';
-import StaffList from './StaffList';
+import StaffView from './StaffView';
+import CertificateEntry from './CertificateEntry';
+import FeesEntry from './FeesEntry';
 
 const AdmissionProcess = ({ defaultSection = 'entry' }) => {
-    // Left sub-sidebar tab selection: 'entry', 'staff', 'certificates'
+    // Left sub-sidebar tab selection: 'entry', 'staff', 'certificates', 'fees'
     const [activeSection, setActiveSection] = useState(defaultSection);
     const [isEntryFormVisible, setIsEntryFormVisible] = useState(false);
     const [editingId, setEditingId] = useState(null);
@@ -172,16 +174,6 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [deptFilter, setDeptFilter] = useState('');
-
-    // Certificate Upload States
-    const [uploadedFiles, setUploadedFiles] = useState({
-        tenthMarksheet: null,
-        twelfthMarksheet: null,
-        transferCertificate: null,
-        communityCertificate: null,
-        aadharCard: null,
-        ugDegree: null
-    });
 
     // Fetch Master Data & Admissions Autocomplete Lists on Mount
     useEffect(() => {
@@ -624,30 +616,6 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                 toast.error(err.response?.data?.message || 'Failed to submit admission record. Please try again.');
             }
         }
-    };
-
-    // Helper: Handle file changes in Certificate Upload
-    const handleFileChange = (e, key) => {
-        const file = e.target.files[0];
-        if (file) {
-            setUploadedFiles(prev => ({
-                ...prev,
-                [key]: {
-                    name: file.name,
-                    size: (file.size / (1024 * 1024)).toFixed(2) + ' MB'
-                }
-            }));
-            toast.success(`Successfully uploaded ${file.name}!`);
-        }
-    };
-
-    // Helper: Remove file preview
-    const handleRemoveFile = (key) => {
-        setUploadedFiles(prev => ({
-            ...prev,
-            [key]: null
-        }));
-        toast.error('File removed.');
     };
 
     // Filters for simulated student table
@@ -1516,66 +1484,17 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
 
                 {/* 2. STAFF VIEW PORTAL */}
                 {activeSection === 'staff' && (
-                    <StaffList />
+                    <StaffView />
                 )}
 
                 {/* 3. CERTIFICATE ENTRY PORTAL */}
                 {activeSection === 'certificates' && (
-                    <div>
-                        <div className={styles.pageHeader}>
-                            <h1 className={styles.pageTitle}>Admitted Student Certificate Entry</h1>
-                            <p className={styles.pageDescription}>Upload scanned files and verify mandatory student certificates for record compliance.</p>
-                        </div>
+                    <CertificateEntry />
+                )}
 
-                        {/* COMPLIANCE CERTIFICATE UPLOAD GRID */}
-                        <div className={styles.uploadGrid}>
-                            {[
-                                { key: 'tenthMarksheet', title: '10th Marksheet', subtitle: 'Max Size: 2MB (PDF/JPG)' },
-                                { key: 'twelfthMarksheet', title: '12th Marksheet', subtitle: 'Max Size: 2MB (PDF/JPG)' },
-                                { key: 'transferCertificate', title: 'Transfer Certificate (TC)', subtitle: 'Max Size: 2MB (PDF/JPG)' },
-                                { key: 'communityCertificate', title: 'Community Certificate', subtitle: 'Max Size: 1MB (PDF/JPG)' },
-                                { key: 'aadharCard', title: 'Aadhar Card Copy', subtitle: 'Max Size: 1MB (PDF/JPG)' },
-                                { key: 'ugDegree', title: 'UG Provisional / Degree', subtitle: 'Max Size: 3MB (PDF/JPG)' }
-                            ].map(cert => (
-                                <div key={cert.key} className={styles.uploadCard}>
-                                    <div className={styles.uploadIconWrapper}>
-                                        <UploadCloud size={24} />
-                                    </div>
-                                    <div className={styles.uploadTitle}>{cert.title}</div>
-                                    <div className={styles.uploadSubtitle}>{cert.subtitle}</div>
-
-                                    {/* Simulated Upload Preview */}
-                                    {uploadedFiles[cert.key] ? (
-                                        <div className={styles.filePreviewContainer}>
-                                            <Check size={18} style={{ color: '#10b981', flexShrink: 0 }} />
-                                            <div className={styles.fileDetails}>
-                                                <div className={styles.fileName}>{uploadedFiles[cert.key].name}</div>
-                                                <div className={styles.fileSize}>{uploadedFiles[cert.key].size}</div>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                className={styles.removeFileBtn}
-                                                onClick={() => handleRemoveFile(cert.key)}
-                                                title="Delete File"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <label className={`${styles.btn} ${styles.btnPrimary}`} style={{ fontSize: '0.8rem', padding: '0.5rem 1rem', cursor: 'pointer' }}>
-                                            <FileUp size={14} /> Upload File
-                                            <input
-                                                type="file"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                className={styles.fileInputHidden}
-                                                onChange={(e) => handleFileChange(e, cert.key)}
-                                            />
-                                        </label>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                {/* 4. FEES ENTRY PORTAL */}
+                {activeSection === 'fees' && (
+                    <FeesEntry />
                 )}
 
             </main>

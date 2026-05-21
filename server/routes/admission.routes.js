@@ -12,8 +12,20 @@ router.get('/consultancies', authMiddleware, admissionController.getConsultancie
 
 // Admission Process Actions
 router.post('/submit', authMiddleware, admissionController.submitAdmission);
+router.post('/import', authMiddleware, admissionController.importAdmissions);
 router.get('/list', authMiddleware, admissionController.getAdmissions);
 router.put('/:id', authMiddleware, admissionController.updateAdmission);
 router.delete('/:id', authMiddleware, admissionController.deleteAdmission);
+
+// Certificate Actions
+router.get('/certificates/list', authMiddleware, admissionController.getCertificates);
+router.post('/certificates/save', authMiddleware, admissionController.saveCertificate);
+router.delete('/certificates/:id', authMiddleware, admissionController.deleteCertificate);
+
+// Fees Actions
+router.get('/fees-students', authMiddleware, admissionController.getFeesStudents);
+router.post('/fees/save', authMiddleware, admissionController.saveFee);
+router.get('/fees/list', authMiddleware, admissionController.getAllFees);
+router.delete('/fees/:id', authMiddleware, admissionController.deleteFee);
 
 module.exports = router;

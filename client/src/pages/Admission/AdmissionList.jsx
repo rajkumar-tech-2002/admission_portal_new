@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Plus, Edit2, Trash2, UserPlus, Download, Upload } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import styles from '../../components/css/Dashboard.module.css';
 import reportStyles from '../../components/css/RecordReport.module.css';
 import { formatDate, formatDateTime } from '../../utils/dateFormatter';
@@ -8,6 +9,7 @@ import { confirmAction } from '../../components/layout/Toast';
 import apiService from '../../services/api.service';
 
 const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
+    const fileInputRef = useRef(null);
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(100);
@@ -85,16 +87,100 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
         });
     };
 
+    const importColumns = [
+        'application_no', 'reg_no_12th', 'student_name', 'dob', 'college', 'admission_date', 'department', 'admission_year', 'quota',
+        'first_graduate', 'student_status', 'remark', 'aadhaar_no', 'school_type', 'fee', 'reference_remark',
+        'reference_amount_1', 'reference_paid_amount', 'community', 'father_name', 'mother_name', 'father_mobile_no',
+        'student_mobile_no', 'mother_mobile_no', 'father_occupation', 'father_annual_income', 'religion', 'caste_name',
+        'gender', 'student_email', 'address_1', 'address_2', 'pincode', 'country', 'state', 'district', 'city',
+        'is_10th', 'school_10th_district', 'school_10th_city', 'school_10th_name', 'mark_10th', 'reg_no_10th',
+        'total_marks_10th', 'percentage_10th', 'yop_10th', 'is_12th', 'school_12th_district', 'school_12th_city',
+        'school_12th_name', 'mark_sheet_given_status', 'yop_12th', 'group_in_12th',
+        'subject_1_name', 'subject_1_mark', 'subject_2_name', 'subject_2_mark', 'subject_3_name', 'subject_3_mark',
+        'subject_4_name', 'subject_4_mark', 'subject_5_name', 'subject_5_mark', 'subject_6_name', 'subject_6_mark',
+        'total_marks_12th', 'percentage_12th', 'ug_university', 'reference_type', 'reference_college',
+        'reference_department', 'reference_by_name', 'reference_by_mobile', 'consultancy_name',
+        'consultancy_person_name', 'consultancy_mobile', 'course_studied', 'studied_medium', 'board_university', 'nativity'
+    ];
+
+    const handleExportTemplate = () => {
+        const ws = XLSX.utils.aoa_to_sheet([importColumns]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Template");
+        XLSX.writeFile(wb, "Admission_Import_Template.xlsx");
+    };
+
+    const handleExportRecords = () => {
+        if (filteredRecords.length === 0) return toast.error("No records to export");
+        const exportData = filteredRecords.map(r => {
+            const row = {};
+            importColumns.forEach(col => {
+                row[col] = r[col] || '';
+            });
+            return row;
+        });
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Admissions");
+        XLSX.writeFile(wb, `Admissions_Export_${new Date().getTime()}.xlsx`);
+    };
+
+    const handleImport = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const bstr = evt.target.result;
+                const wb = XLSX.read(bstr, { type: 'binary' });
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                const data = XLSX.utils.sheet_to_json(ws, { raw: false, dateNF: 'yyyy-mm-dd', defval: null });
+                
+                if (data.length === 0) return toast.error("Empty file");
+
+                const loadingToast = toast.loading('Importing records...');
+                const response = await apiService.post('/admissions/import', { records: data });
+                
+                if (response.data.success) {
+                    toast.success(`Successfully imported ${response.data.result?.imported || 0} records`, { id: loadingToast });
+                    if (onRefresh) onRefresh();
+                } else {
+                    toast.error(response.data.message || 'Import failed', { id: loadingToast });
+                }
+            } catch (err) {
+                console.error(err);
+                toast.error('Error importing file');
+            }
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        };
+        reader.readAsBinaryString(file);
+    };
+
     return (
         <div className={styles.dashboard} style={{ padding: '0' }}>
             <div className={styles.mainCard}>
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <UserPlus size={22} style={{ color: 'var(--primary-color)' }} />
                         <h2 style={{color:"var(--primary-color)", margin: 0}}>Admission Records</h2>
                     </div>
-                    <button onClick={onAdd} className={styles.exportBtn} style={{ background: 'var(--primary-color)', color: '#fff', border: 'none' }}>
-                        <Plus size={18} /> Add Application
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input type="file" ref={fileInputRef} onChange={handleImport} accept=".xlsx, .xls" style={{ display: 'none' }} />
+                        <button onClick={() => fileInputRef.current.click()} className={styles.exportBtn} style={{ background: '#10b981', color: '#fff', border: 'none' }}>
+                            <Upload size={18} /> Import Excel
+                        </button>
+                        <button onClick={handleExportTemplate} className={styles.exportBtn}>
+                            <Download size={18} /> Template
+                        </button>
+                        <button onClick={handleExportRecords} className={styles.exportBtn}>
+                            <Download size={18} /> Export
+                        </button>
+                        <button onClick={onAdd} className={styles.exportBtn} style={{ background: 'var(--primary-color)', color: '#fff', border: 'none' }}>
+                            <Plus size={18} /> Add Application
+                        </button>
+                    </div>
                 </div>
 
                 <div className={styles.filters}>
@@ -201,7 +287,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                                         <td><strong>{record.application_no}</strong></td>
                                         <td>{formatDateTime(record.created_at)}</td>
                                         <td>{record.student_name}</td>
-                                        <td>{record.dob ? record.dob.substring(0, 10) : ''}</td>
+                                        <td>{record.dob ? record.dob.substring(0, 10).split('-').reverse().join('-') : ''}</td>
                                         <td>{record.gender}</td>
                                         <td>{record.student_mobile_no}</td>
                                         <td>{record.aadhaar_no}</td>
@@ -217,20 +303,18 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                                         <td>
                                             <div style={{ display: 'flex', gap: '5px' }}>
                                                 <button 
-                                                    className={reportStyles.actionBtn}
-                                                    style={{ background: '#3b82f6' }}
+                                                    className={styles.editBtn}
                                                     onClick={() => onEdit(record)}
                                                     title="Edit Record"
                                                 >
-                                                    <Edit size={14} /> Edit
+                                                    <Edit2 size={16} />
                                                 </button>
                                                 <button 
-                                                    className={reportStyles.actionBtn}
-                                                    style={{ background: '#ef4444' }}
+                                                    className={styles.deleteBtn}
                                                     onClick={() => handleDelete(record.id)}
                                                     title="Delete Record"
                                                 >
-                                                    <Trash2 size={14} /> Delete
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </div>
                                         </td>

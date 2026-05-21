@@ -48,6 +48,8 @@ const Login = () => {
                 
                 if (userRole.toLowerCase().includes('admission')) {
                     navigate('/admin/admission-entry');
+                } else if (userRole.toLowerCase() === 'ao') {
+                    navigate('/admin/consolidate-report');
                 } else {
                     navigate('/admin/dashboard');
                 }
