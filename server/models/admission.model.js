@@ -8,12 +8,12 @@ class Admission {
                    reference_name, reference_dept, reference_institution, 
                    reference_contact_no, city, selected_dept, selected_course
             FROM record_master
-            WHERE admission_status = 'Admitted'
             ORDER BY std_name ASC
         `);
         return rows;
     }
 
+    // WHERE admission_status = 'Admitted'
     static async getStaffInstitutions() {
         const [rows] = await db.execute(`
             SELECT DISTINCT staff_institution 

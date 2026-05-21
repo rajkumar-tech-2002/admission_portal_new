@@ -12,6 +12,7 @@ import ReportPrint from './pages/Admin/ReportPrint';
 // Role-based page folder structure imports
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminArchivedList from './pages/Admin/ArchivedList';
+import ConsolidateReport from './pages/Admin/ConsolidateReport';
 
 import AdmissionDashboard from './pages/Admission/Dashboard';
 import AdmissionArchivedList from './pages/Admission/ArchivedList';
@@ -102,6 +103,13 @@ function App() {
             </RoleRoute>
           } />
           <Route path="change-password" element={<ChangePassword />} />
+
+          {/* Consolidate Report - Only for Admin */}
+          <Route path="consolidate-report" element={
+            <RoleRoute allowedRoles={['admin']}>
+              <ConsolidateReport />
+            </RoleRoute>
+          } />
           
           {/* Admission Process Routes */}
           <Route path="admission-entry" element={

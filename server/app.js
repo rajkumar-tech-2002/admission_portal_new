@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth.routes');
 const masterRoutes = require('./routes/master.routes');
 const recordRoutes = require('./routes/record.routes');
 const admissionRoutes = require('./routes/admission.routes');
+const consolidateReportRoutes = require('./routes/consolidateReport.routes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/master', masterRoutes);
 app.use('/api/records', recordRoutes);
 app.use('/api/admissions', admissionRoutes);
+app.use('/api/consolidate-report', consolidateReportRoutes);
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../client/dist')));

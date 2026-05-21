@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { 
     LayoutDashboard, LogOut, Menu, X, Archive, Settings, ChevronDown, ChevronRight,
     Building2, GraduationCap, Users2, FileCheck, UserPlus, Activity, Calendar, KeyRound, Mail,
-    Users, Award
+    Users, Award, BarChart3
 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -131,6 +131,18 @@ const AdminLayout = ({ children }) => {
                                     Certificate Entry
                                 </NavLink>
                             </>
+                        )}
+
+                        {/* Consolidate Report - Only for Admin */}
+                        {role === 'admin' && (
+                            <NavLink 
+                                to="/admin/consolidate-report" 
+                                className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+                                onClick={closeSidebar}
+                            >
+                                <BarChart3 size={20} />
+                                Consolidate Report
+                            </NavLink>
                         )}
 
                         {/* Master Module - ONLY for Admin */}
