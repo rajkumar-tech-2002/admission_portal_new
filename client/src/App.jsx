@@ -126,10 +126,11 @@ function App() {
               <MasterManagementPage 
                 title="Department Master" 
                 tableType="departments"
-                columns={[{key: 'department', label: 'Department'}, {key: 'type', label: 'Type'}]}
+                columns={[{key: 'department', label: 'Department'}, {key: 'type', label: 'Type'}, {key: 'intake_count', label: 'Intake Count'}]}
                 fields={[
                   {name: 'department', label: 'Department Name', required: true},
-                  {name: 'type', label: 'Type', type: 'select', options: ['UG', 'PG', 'DIPLOMA'], required: true}
+                  {name: 'type', label: 'Type', type: 'select', options: ['UG', 'PG', 'DIPLOMA'], required: true},
+                  {name: 'intake_count', label: 'Intake Count', type: 'number', defaultValue: 0}
                 ]}
               />
             </RoleRoute>
@@ -280,6 +281,7 @@ function App() {
                 columns={[
                   {key: 'staff_code', label: 'Staff Code'},
                   {key: 'staff_name', label: 'Staff Name'},
+                  {key: 'staff_institution', label: 'Institution'},
                   {key: 'staff_department', label: 'Department'},
                   {key: 'staff_type', label: 'Type'},
                   {key: 'staff_phone', label: 'Phone'}
@@ -287,15 +289,13 @@ function App() {
                 fields={[
                   {name: 'staff_code', label: 'Staff Code', required: true},
                   {name: 'staff_name', label: 'Staff Name', required: true},
-                  {name: 'staff_department', label: 'Department'},
-                  {name: 'staff_institution', label: 'Institution'},
+                  {name: 'staff_institution', label: 'Institution', type: 'select', optionsKey: 'institutions'},
+                  {name: 'staff_department', label: 'Department', type: 'select', optionsKey: 'departments', dependsOn: 'staff_institution'},
                   {name: 'staff_type', label: 'Type'},
                   {name: 'staff_email', label: 'Email'},
                   {name: 'staff_phone', label: 'Phone'},
                   {name: 'staff_address', label: 'Address'},
                   {name: 'individual_target', label: 'Individual Target', type: 'number', defaultValue: 0},
-                  {name: 'admission_count', label: 'Admission Count', type: 'number', defaultValue: 0},
-                  {name: 'connection_field', label: 'Connection Field'},
                   {name: 'password', label: 'Password'}
                 ]}
               />

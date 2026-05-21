@@ -18,7 +18,7 @@ const EnquiryForm = () => {
     const [formData, setFormData] = useState({
         reg_no_12th: '', aadhaar_no: '', std_dob: '', std_name: '', std_mobile_no: '',
         std_whatsapp_no: '', city: '', last_studied_name: '', last_studied: '',
-        community: '', admission_quota: '', reference_type: '', reference_way: '',
+        admission_quota: '', reference_type: '', reference_way: '',
         reference_name: '', reference_email: '', reference_institution: '', reference_dept: '',
         reference_contact_no: '', selected_dept: '', selected_ug_pg: '', selected_course: ''
     });
@@ -45,7 +45,8 @@ const EnquiryForm = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'selected_dept') {
-            setFormData({ ...formData, [name]: value, selected_course: value });
+            const selectedText = e.target.options[e.target.selectedIndex]?.text || value;
+            setFormData({ ...formData, [name]: value, selected_course: selectedText });
         } else if (name === 'reference_type') {
             const selectedRef = masterData.referenceTypes.find(r => r.reference_type === value);
             setFormData({ 
@@ -63,7 +64,7 @@ const EnquiryForm = () => {
             setFormData({
                 reg_no_12th: '', aadhaar_no: '', std_dob: '', std_name: '', std_mobile_no: '',
                 std_whatsapp_no: '', city: '', last_studied_name: '', last_studied: '',
-                community: '', admission_quota: '', reference_type: '', reference_way: '',
+                admission_quota: '', reference_type: '', reference_way: '',
                 reference_name: '', reference_email: '', reference_institution: '', reference_dept: '',
                 reference_contact_no: '', selected_dept: '', selected_ug_pg: '', selected_course: ''
             });
@@ -127,7 +128,7 @@ const EnquiryForm = () => {
                 setFormData({
                     reg_no_12th: '', aadhaar_no: '', std_dob: '', std_name: '', std_mobile_no: '',
                     std_whatsapp_no: '', city: '', last_studied_name: '', last_studied: '',
-                    community: '', admission_quota: '', reference_type: '', reference_way: '',
+                    admission_quota: '', reference_type: '', reference_way: '',
                     reference_name: '', reference_email: '', reference_institution: '', reference_dept: '',
                     reference_contact_no: '', selected_dept: '', selected_ug_pg: '', selected_course: ''
                 });
@@ -173,6 +174,10 @@ const EnquiryForm = () => {
                             <h3 className={styles.formSectionTitle}>1. Personal Details</h3>
                             <div className={styles.grid}>
                                 <div className="form-group">
+                                    <label className="form-label">12th Registration No <span className={styles.required}>*</span></label>
+                                    <input type="text" name="reg_no_12th" value={formData.reg_no_12th} onChange={handleChange} className="form-input" required />
+                                </div>
+                                <div className="form-group">
                                     <label className="form-label">Student Name <span className={styles.required}>*</span></label>
                                     <input type="text" name="std_name" value={formData.std_name} onChange={handleChange} className="form-input" required />
                                 </div>
@@ -196,13 +201,6 @@ const EnquiryForm = () => {
                                     <label className="form-label">City</label>
                                     <input type="text" name="city" value={formData.city} onChange={handleChange} className="form-input" />
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">Community</label>
-                                    <select name="community" value={formData.community} onChange={handleChange} className="form-select">
-                                        <option value="">Select Community</option>
-                                        {masterData.communities.map(c => <option key={c.id} value={c.community}>{c.community}</option>)}
-                                    </select>
-                                </div>
                             </div>
                         </div>
 
@@ -210,10 +208,6 @@ const EnquiryForm = () => {
                         <div className={styles.formSection}>
                             <h3 className={styles.formSectionTitle}>2. Academic Details</h3>
                             <div className={styles.grid}>
-                                <div className="form-group">
-                                    <label className="form-label">12th Registration No <span className={styles.required}>*</span></label>
-                                    <input type="text" name="reg_no_12th" value={formData.reg_no_12th} onChange={handleChange} className="form-input" required />
-                                </div>
                                 <div className="form-group">
                                     <label className="form-label">Last Studied School / College</label>
                                     <input type="text" name="last_studied_name" value={formData.last_studied_name} onChange={handleChange} className="form-input" />
@@ -254,7 +248,16 @@ const EnquiryForm = () => {
                                         <option value="">Select Department</option>
                                         {masterData.departments
                                             .filter(d => formData.selected_ug_pg ? d.type === formData.selected_ug_pg : true)
-                                            .map(d => <option key={d.id} value={d.department}>{d.department}</option>)}
+                                            .map(d => {
+                                                const parts = [];
+                                                if (d.institution) parts.push(d.institution);
+                                                if (d.program && d.program !== 'null' && d.program !== 'Null' && d.program !== '(Null)') {
+                                                    parts.push(d.program);
+                                                }
+                                                if (d.department) parts.push(d.department);
+                                                const displayText = parts.join('_');
+                                                return <option key={d.id} value={displayText}>{displayText}</option>;
+                                            })}
                                     </select>
                                 </div>
                                 <div className="form-group">

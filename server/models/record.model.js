@@ -63,7 +63,7 @@ class Record {
             recordData.reference_way, recordData.reference_name, recordData.reference_email, recordData.reference_institution,
             recordData.reference_dept, recordData.reference_contact_no, recordData.selected_dept, recordData.selected_ug_pg,
             recordData.selected_course
-        ];
+        ].map(val => val === undefined ? null : val);
 
         const [result] = await db.execute(sql, values);
         return { id: result.insertId, reg_id: regId };

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    UserPlus, Users, Award, Search, FileText, CheckCircle, 
-    ArrowRight, ArrowLeft, Trash2, UploadCloud, Check, RotateCcw, 
+import {
+    UserPlus, Users, Award, Search, FileText, CheckCircle,
+    ArrowRight, ArrowLeft, Trash2, UploadCloud, Check, RotateCcw,
     FileUp, Calendar, AlertCircle
 } from 'lucide-react';
 import apiService from '../../services/api.service';
 import toast from 'react-hot-toast';
 import styles from '../../components/css/AdmissionProcess.module.css';
 import AdmissionList from './AdmissionList';
+import StaffList from './StaffList';
 
 const AdmissionProcess = ({ defaultSection = 'entry' }) => {
     // Left sub-sidebar tab selection: 'entry', 'staff', 'certificates'
@@ -79,9 +80,9 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         aadharNo: '',
         schoolType: '',
         fee: '',
-        rRemark: '',
-        referenceAmount1: '',
-        rPaidAmount: '',
+        // rRemark: '',
+        // referenceAmount1: '',
+        // rPaidAmount: '',
 
         // Tab 2: Personal
         community: '',
@@ -288,19 +289,19 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         const { name, value } = e.target;
 
         if (name === 'state') {
-            setFormData(prev => ({ 
-                ...prev, 
+            setFormData(prev => ({
+                ...prev,
                 state: value,
-                district: '' 
+                district: ''
             }));
             return;
         }
 
         if (name === 'college') {
-            setFormData(prev => ({ 
-                ...prev, 
+            setFormData(prev => ({
+                ...prev,
                 college: value,
-                department: '' 
+                department: ''
             }));
             return;
         }
@@ -309,7 +310,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         if (name === 'twelfthRegNo') {
             setFormData(prev => ({ ...prev, twelfthRegNo: value }));
             if (value.trim().length > 0) {
-                const filtered = admittedStudents.filter(student => 
+                const filtered = admittedStudents.filter(student =>
                     (student.reg_no_12th || '').toLowerCase().includes(value.toLowerCase())
                 );
                 setFilteredSuggestions(filtered);
@@ -365,12 +366,12 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
 
         // 2. Cascading handler for Reference College (Institution)
         if (name === 'referenceCollege' && formData.referenceType === 'Staff') {
-            setFormData(prev => ({ 
-                ...prev, 
+            setFormData(prev => ({
+                ...prev,
                 referenceCollege: value,
                 referenceDepartment: '',
                 referenceByName: '',
-                referenceByMobile: '' 
+                referenceByMobile: ''
             }));
             setStaffDepartments([]);
             setStaffMembers([]);
@@ -389,11 +390,11 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
 
         // 3. Cascading handler for Reference Department
         if (name === 'referenceDepartment' && formData.referenceType === 'Staff') {
-            setFormData(prev => ({ 
-                ...prev, 
+            setFormData(prev => ({
+                ...prev,
                 referenceDepartment: value,
                 referenceByName: '',
-                referenceByMobile: '' 
+                referenceByMobile: ''
             }));
             setStaffMembers([]);
             if (value) {
@@ -412,8 +413,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         // 4. Cascading handler for Reference By Name (Staff Name)
         if (name === 'referenceByName' && formData.referenceType === 'Staff') {
             const selectedStaff = staffMembers.find(s => s.staff_name === value);
-            setFormData(prev => ({ 
-                ...prev, 
+            setFormData(prev => ({
+                ...prev,
                 referenceByName: value,
                 referenceByMobile: selectedStaff ? (selectedStaff.staff_phone || '') : ''
             }));
@@ -444,7 +445,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
 
             // Dynamic calculation for 12th Marks Total and Percentage
             if ([
-                'subject1Mark', 'englishMark', 'subject2Mark', 
+                'subject1Mark', 'englishMark', 'subject2Mark',
                 'subject3Mark', 'subject4Mark', 'subject5Mark', 'subject6Mark'
             ].includes(name)) {
                 const sub1 = parseFloat(name === 'subject1Mark' ? value : prev.subject1Mark) || 0;
@@ -468,7 +469,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
     const handleResetForm = () => {
         setFormData({
             twelfthRegNo: '', studentName: '', dob: '', college: '', admissionDate: '', department: '', year: '', quota: '',
-            firstGraduate: '', status: '', remark: '', aadharNo: '', schoolType: '', fee: '', rRemark: '', referenceAmount1: '', rPaidAmount: '',
+            firstGraduate: '', status: '', remark: '', aadharNo: '', schoolType: '', fee: '',
+            // rRemark: '', referenceAmount1: '', rPaidAmount: '',
             community: '', fatherName: '', motherName: '', fatherMobile: '', studentMobile: '',
             motherMobile: '', fatherOccupation: '', fatherAnnualIncome: '', religion: '', casteName: '', gender: '',
             studentEmail: '', address1: '', address2: '', pincode: '', country: 'India', state: '', district: '', city: '',
@@ -506,9 +508,9 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             aadharNo: record.aadhaar_no || '',
             schoolType: record.school_type || '',
             fee: record.fee || '',
-            rRemark: record.reference_remark || '',
-            referenceAmount1: record.reference_amount_1 || '',
-            rPaidAmount: record.reference_paid_amount || '',
+            // rRemark: record.reference_remark || '',
+            // referenceAmount1: record.reference_amount_1 || '',
+            // rPaidAmount: record.reference_paid_amount || '',
 
             community: record.community || '',
             fatherName: record.father_name || '',
@@ -588,7 +590,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         toast.loading('Saving and Processing Admission Entry...', { id: 'submit-load' });
 
         try {
-            const res = editingId 
+            const res = editingId
                 ? await apiService.put(`/admissions/${editingId}`, formData)
                 : await apiService.post('/admissions/submit', formData);
             toast.dismiss('submit-load');
@@ -650,7 +652,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
 
     // Filters for simulated student table
     const filteredStudents = students.filter(s => {
-        const matchesSearch = 
+        const matchesSearch =
             s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             s.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
             s.regno.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -663,10 +665,10 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         <div className={styles.container}>
             {/* MAIN CONTENT AREA */}
             <main className={styles.contentArea} style={{ padding: '0' }}>
-                
+
                 {/* 1. ADMISSION ENTRY PORTAL */}
                 {activeSection === 'entry' && !isEntryFormVisible && (
-                    <AdmissionList 
+                    <AdmissionList
                         admissions={rawAdmissions}
                         onAdd={() => {
                             handleResetForm();
@@ -682,8 +684,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                         <div className={styles.pageHeader}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div>
-                            <h1 className={styles.pageTitle}>{editingId ? "Edit Admission Entry" : "New Admission Entry"}</h1>
-                            <p className={styles.pageDescription}>{editingId ? 'Edit admission entry details below.' : 'Enter high-fidelity registration and application details below to admit the student.'}</p>
+                                    <h1 className={styles.pageTitle}>{editingId ? "Edit Admission Entry" : "New Admission Entry"}</h1>
+                                    <p className={styles.pageDescription}>{editingId ? 'Edit admission entry details below.' : 'Enter high-fidelity registration and application details below to admit the student.'}</p>
                                 </div>
                                 <button type="button" onClick={() => setIsEntryFormVisible(false)} style={{ background: '#6b7280', color: '#fff', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', alignSelf: 'flex-start' }}>
                                     Back to List
@@ -739,7 +741,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                 marginTop: '0.25rem'
                                             }}>
                                                 {filteredSuggestions.map((student, idx) => (
-                                                    <div 
+                                                    <div
                                                         key={idx}
                                                         onClick={async () => {
                                                             const course = student.selected_course || '';
@@ -772,7 +774,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                                         if (depRes.data.success) {
                                                                             setStaffDepartments(depRes.data.data);
                                                                         }
-                                                                        
+
                                                                         if (student.reference_dept) {
                                                                             const memRes = await apiService.get(`/admissions/staff-members?institution=${encodeURIComponent(student.reference_institution)}&department=${encodeURIComponent(student.reference_dept)}`);
                                                                             if (memRes.data.success) {
@@ -853,8 +855,17 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         </select>
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>First Graduate <span className={styles.requiredAsterisk}>*</span></label>
-                                        <select name="firstGraduate" value={formData.firstGraduate} onChange={handleChange} required className={`${styles.inputField} ${styles.selectField}`}>
+                                        <label className={styles.inputLabel}>
+                                            First Graduate
+                                            {formData.quota === 'Government Quota' && <span className={styles.requiredAsterisk}>*</span>}
+                                        </label>
+                                        <select
+                                            name="firstGraduate"
+                                            value={formData.firstGraduate}
+                                            onChange={handleChange}
+                                            required={formData.quota === 'Government Quota'}
+                                            className={`${styles.inputField} ${styles.selectField}`}
+                                        >
                                             <option value="">Select First Graduate Status</option>
                                             <option value="COUNSELLING - SG">COUNSELLING - SG</option>
                                             <option value="COUNSELLING - FG">COUNSELLING - FG</option>
@@ -873,7 +884,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Adhaar Number</label>
-                                        <input type="text" name="aadharNo" value={formData.aadharNo} onChange={handleChange} maxLength={12} className={styles.inputField} placeholder="12-digit Aadhaar Number" />
+                                        <input type="text" name="aadharNo" value={formData.aadharNo} onChange={handleChange} maxLength={12} className={styles.inputField} placeholder="12-digit Aadhaar Number" pattern="[0-9]*" />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>School Type</label>
@@ -886,7 +897,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         <label className={styles.inputLabel}>Fee</label>
                                         <input type="number" name="fee" value={formData.fee} onChange={handleChange} className={styles.inputField} placeholder="Fee Amount" />
                                     </div>
-                                    <div className={styles.inputGroup}>
+                                    {/* <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>R Remark</label>
                                         <input type="text" name="rRemark" value={formData.rRemark} onChange={handleChange} className={styles.inputField} placeholder="Reference Remark" />
                                     </div>
@@ -897,7 +908,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>R Paid Amount</label>
                                         <input type="number" name="rPaidAmount" value={formData.rPaidAmount} onChange={handleChange} className={styles.inputField} placeholder="Reference Paid Amount" />
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         )}
@@ -926,15 +937,15 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>father Mobile Number <span className={styles.requiredAsterisk}>*</span></label>
-                                        <input type="tel" name="fatherMobile" value={formData.fatherMobile} onChange={handleChange} required className={styles.inputField} placeholder="Father Mobile" />
+                                        <input type="tel" name="fatherMobile" value={formData.fatherMobile} onChange={handleChange} required className={styles.inputField} placeholder="Father Mobile" maxLength={10} pattern="[0-9]*" />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Student Mobile</label>
-                                        <input type="tel" name="studentMobile" value={formData.studentMobile} onChange={handleChange} className={styles.inputField} placeholder="Student Mobile" />
+                                        <input type="tel" name="studentMobile" value={formData.studentMobile} onChange={handleChange} className={styles.inputField} placeholder="Student Mobile" maxLength={10} pattern="[0-9]*" />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Mother Mobile</label>
-                                        <input type="tel" name="motherMobile" value={formData.motherMobile} onChange={handleChange} className={styles.inputField} placeholder="Mother Mobile" />
+                                        <input type="tel" name="motherMobile" value={formData.motherMobile} onChange={handleChange} className={styles.inputField} placeholder="Mother Mobile" maxLength={10} pattern="[0-9]*" />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Father Occupation</label>
@@ -1048,13 +1059,13 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup} style={{ position: 'relative' }}>
                                         <label className={styles.inputLabel}>10th School</label>
-                                        <input 
-                                            type="text" 
-                                            name="tenthSchool" 
-                                            value={formData.tenthSchool} 
-                                            onChange={handleChange} 
-                                            className={styles.inputField} 
-                                            placeholder="School Name" 
+                                        <input
+                                            type="text"
+                                            name="tenthSchool"
+                                            value={formData.tenthSchool}
+                                            onChange={handleChange}
+                                            className={styles.inputField}
+                                            placeholder="School Name"
                                             autoComplete="off"
                                             onFocus={(e) => {
                                                 const val = e.target.value;
@@ -1108,7 +1119,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                 marginTop: '0.25rem'
                                             }} onClick={(e) => e.stopPropagation()}>
                                                 {tenthSchoolSuggestions.map((school, idx) => (
-                                                    <div 
+                                                    <div
                                                         key={idx}
                                                         onClick={() => {
                                                             setFormData(prev => ({
@@ -1177,13 +1188,13 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup} style={{ position: 'relative' }}>
                                         <label className={styles.inputLabel}>12th School</label>
-                                        <input 
-                                            type="text" 
-                                            name="twelfthSchool" 
-                                            value={formData.twelfthSchool} 
-                                            onChange={handleChange} 
-                                            className={styles.inputField} 
-                                            placeholder="School Name" 
+                                        <input
+                                            type="text"
+                                            name="twelfthSchool"
+                                            value={formData.twelfthSchool}
+                                            onChange={handleChange}
+                                            className={styles.inputField}
+                                            placeholder="School Name"
                                             autoComplete="off"
                                             onFocus={(e) => {
                                                 const val = e.target.value;
@@ -1237,7 +1248,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                 marginTop: '0.25rem'
                                             }} onClick={(e) => e.stopPropagation()}>
                                                 {twelfthSchoolSuggestions.map((school, idx) => (
-                                                    <div 
+                                                    <div
                                                         key={idx}
                                                         onClick={() => {
                                                             setFormData(prev => ({
@@ -1412,7 +1423,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Reference By Mobile</label>
-                                        <input type="tel" name="referenceByMobile" value={formData.referenceByMobile} onChange={handleChange} className={styles.inputField} placeholder="Referrer Mobile" />
+                                        <input type="tel" name="referenceByMobile" value={formData.referenceByMobile} onChange={handleChange} className={styles.inputField} placeholder="Referrer Mobile" maxLength={10} pattern="[0-9]*" />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Consultancy Name</label>
@@ -1429,7 +1440,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Consultancy Mobile</label>
-                                        <input type="tel" name="consultancyMobile" value={formData.consultancyMobile} onChange={handleChange} className={styles.inputField} placeholder="Agent Mobile" />
+                                        <input type="tel" name="consultancyMobile" value={formData.consultancyMobile} onChange={handleChange} className={styles.inputField} placeholder="Agent Mobile" maxLength={10} pattern="[0-9]*" />
                                     </div>
                                 </div>
                             </div>
@@ -1505,118 +1516,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
 
                 {/* 2. STAFF VIEW PORTAL */}
                 {activeSection === 'staff' && (
-                    <div>
-                        <div className={styles.pageHeader}>
-                            <h1 className={styles.pageTitle}>Admitted Student Register (Staff View)</h1>
-                            <p className={styles.pageDescription}>Real-time college ERP view to query, filter, and review completed admission entries.</p>
-                        </div>
-
-                        {/* FILTER & SEARCH BAR */}
-                        <div className={styles.filterBar}>
-                            <div className={styles.searchContainer}>
-                                <Search size={18} className={styles.searchIcon} />
-                                <input
-                                    type="text"
-                                    placeholder="Search by ID, Name, RegNo, Mobile..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className={styles.searchInput}
-                                />
-                            </div>
-
-                            <div className={styles.filterControls}>
-                                <select 
-                                    className={`${styles.inputField} ${styles.selectField}`} 
-                                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
-                                    value={deptFilter}
-                                    onChange={(e) => setDeptFilter(e.target.value)}
-                                >
-                                    <option value="">All Departments</option>
-                                    <option value="Information Technology">Information Technology</option>
-                                    <option value="Computer Science">Computer Science</option>
-                                    <option value="Artificial Intelligence">Artificial Intelligence</option>
-                                    <option value="Electrical Engineering">Electrical Engineering</option>
-                                    <option value="Mechanical Engineering">Mechanical Engineering</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* STUDENT LIST TABLE */}
-                        <div className={styles.tableContainer}>
-                            <table className={styles.erpTable}>
-                                <thead>
-                                    <tr>
-                                        <th>Application ID</th>
-                                        <th>Student Name</th>
-                                        <th>Reg No</th>
-                                        <th>Aadhar</th>
-                                        <th>Department</th>
-                                        <th>Reference Type</th>
-                                        <th>Contact Mobile</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredStudents.length > 0 ? (
-                                        filteredStudents.map(student => (
-                                            <tr key={student.id}>
-                                                <td style={{ fontWeight: '600', color: '#1e3a8a' }}>{student.id}</td>
-                                                <td style={{ fontWeight: '500' }}>{student.name}</td>
-                                                <td>{student.regno}</td>
-                                                <td>{student.aadhar}</td>
-                                                <td>{student.dept}</td>
-                                                <td>
-                                                    <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', background: '#f1f5f9', fontSize: '0.75rem', fontWeight: '600' }}>
-                                                        {student.type}
-                                                    </span>
-                                                </td>
-                                                <td>{student.mobile}</td>
-                                                <td>
-                                                    <span style={{ 
-                                                        padding: '0.2rem 0.5rem', 
-                                                        borderRadius: '30px', 
-                                                        fontSize: '0.75rem', 
-                                                        fontWeight: '700',
-                                                        backgroundColor: student.status === 'Admitted' ? '#ecfdf5' : student.status === 'Pending' ? '#fffbeb' : '#fef2f2',
-                                                        color: student.status === 'Admitted' ? '#047857' : student.status === 'Pending' ? '#b45309' : '#b91c1c'
-                                                    }}>
-                                                        {student.status}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <button 
-                                                        className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
-                                                        title="View Details"
-                                                        onClick={() => toast(`Viewing profile of ${student.name} (${student.id})`, { icon: '🧑‍🎓' })}
-                                                    >
-                                                        <FileText size={14} />
-                                                    </button>
-                                                    <button 
-                                                        className={styles.actionBtn}
-                                                        title="Edit Entry"
-                                                        onClick={() => {
-                                                            toast.success(`Loading ${student.name} profile into editor...`);
-                                                            setActiveSection('entry');
-                                                        }}
-                                                    >
-                                                        <RotateCcw size={14} style={{ transform: 'rotate(90deg)' }} />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan="9" style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-                                                <AlertCircle size={32} style={{ margin: '0 auto 0.5rem auto', display: 'block', color: '#cbd5e1' }} />
-                                                No admitted student records match your query.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <StaffList />
                 )}
 
                 {/* 3. CERTIFICATE ENTRY PORTAL */}
@@ -1652,8 +1552,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                 <div className={styles.fileName}>{uploadedFiles[cert.key].name}</div>
                                                 <div className={styles.fileSize}>{uploadedFiles[cert.key].size}</div>
                                             </div>
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 className={styles.removeFileBtn}
                                                 onClick={() => handleRemoveFile(cert.key)}
                                                 title="Delete File"
@@ -1664,8 +1564,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     ) : (
                                         <label className={`${styles.btn} ${styles.btnPrimary}`} style={{ fontSize: '0.8rem', padding: '0.5rem 1rem', cursor: 'pointer' }}>
                                             <FileUp size={14} /> Upload File
-                                            <input 
-                                                type="file" 
+                                            <input
+                                                type="file"
                                                 accept=".pdf,.jpg,.jpeg,.png"
                                                 className={styles.fileInputHidden}
                                                 onChange={(e) => handleFileChange(e, cert.key)}

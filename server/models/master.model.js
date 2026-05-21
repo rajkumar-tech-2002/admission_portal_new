@@ -4,11 +4,9 @@ class Master {
     static async getAllDepartments() {
         // We select the raw department and also parse it for institution/dept_name
         const [rows] = await db.execute(`
-            SELECT *, 
-                SUBSTRING_INDEX(department, '-', 1) AS institution,
-                SUBSTRING(department, LENGTH(SUBSTRING_INDEX(department, '-', 1)) + 2) AS dept_name
+            SELECT *
             FROM department_master
-            ORDER BY department
+            ORDER BY institution
         `);
         return rows;
     }

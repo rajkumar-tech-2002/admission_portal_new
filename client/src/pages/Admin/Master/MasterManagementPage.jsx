@@ -295,14 +295,14 @@ const MasterManagementPage = ({ title, tableType, columns, fields }) => {
             {/* Modal */}
             {isModalOpen && (
                 <div className={styles.modalOverlay}>
-                    <div className={styles.modal}>
+                    <div className={`${styles.modal} ${fields.length > 6 ? styles.largeModal : ''}`}>
                         <div className={styles.modalHeader}>
                             <h3>{editingItem ? `Edit ${title}` : `Add New ${title}`}</h3>
                             <button className={styles.closeBtn} onClick={handleCloseModal}>
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleSubmit} className={styles.modalForm}>
+                        <form onSubmit={handleSubmit} className={`${styles.modalForm} ${fields.length > 6 ? styles.modalFormGrid : ''}`}>
                             {fields.map(field => (
                                 <div className={styles.formGroup} key={field.name}>
                                     <label className={styles.label}>{field.label}</label>
@@ -315,7 +315,18 @@ const MasterManagementPage = ({ title, tableType, columns, fields }) => {
                                             required={field.required}
                                         >
                                             <option value="">Select {field.label}</option>
-                                            {field.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                            {(() => {
+                                                let options = field.options || [];
+                                                if (field.optionsKey === 'institutions' && allMasterData.departments) {
+                                                    options = [...new Set(allMasterData.departments.map(d => d.institution).filter(Boolean))];
+                                                } else if (field.optionsKey === 'departments' && allMasterData.departments) {
+                                                    const depList = field.dependsOn 
+                                                        ? allMasterData.departments.filter(d => d.institution === formData[field.dependsOn])
+                                                        : allMasterData.departments;
+                                                    options = [...new Set(depList.map(d => d.department).filter(Boolean))];
+                                                }
+                                                return options.map(opt => <option key={opt} value={opt}>{opt}</option>);
+                                            })()}
                                         </select>
                                     ) : field.type === 'checkbox-group' ? (
                                         <div className={styles.checkboxGroup}>
