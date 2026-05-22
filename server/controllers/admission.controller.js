@@ -53,6 +53,19 @@ exports.getConsultancies = async (req, res, next) => {
     }
 };
 
+exports.getCourseFee = async (req, res, next) => {
+    try {
+        const { college, department, year, quota } = req.query;
+        if (!college || !department || !year || !quota) {
+            return res.status(400).json({ success: false, message: 'Missing parameters for fee fetch' });
+        }
+        const fee = await Admission.getCourseFee(college, department, year, quota);
+        res.status(200).json({ success: true, data: fee });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.submitAdmission = async (req, res, next) => {
     try {
         const data = req.body;

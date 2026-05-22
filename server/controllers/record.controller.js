@@ -9,24 +9,10 @@ exports.createRecord = async (req, res, next) => {
         console.log('[DEBUG] File:', req.file ? `Received (${req.file.size} bytes)` : 'MISSING');
         
         const result = await Record.create(req.body);
-        const pdfFile = req.file; // Received via multer
-        const fullRecord = await Record.getById(result.id);
-        if (fullRecord && fullRecord.reference_email) {
-            (async () => {
-                try {
-                    // Use the PDF buffer sent from the frontend
-                    const pdfBuffer = pdfFile ? pdfFile.buffer : null;
-                    await emailService.sendEnquiryEmail(fullRecord, pdfBuffer);
-                } catch (err) {
-                    console.error('Auto-email background process failed:', err);
-                }
-            })();
-        }
-
         res.status(201).json({
             success: true,
             message: 'Enquiry submitted successfully',
-            data: { reg_id: result.reg_id }
+            data: { id: result.id, reg_id: result.reg_id }
         });
     } catch (error) {
         next(error);

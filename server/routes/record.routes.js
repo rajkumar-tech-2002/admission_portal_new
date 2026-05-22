@@ -24,6 +24,9 @@ router.put('/:id/status', authMiddleware, recordController.updateStatus);
 // Protected route to send/resend email with optional PDF upload
 router.post('/:id/send-email', authMiddleware, upload.single('pdf'), recordController.sendEmail);
 
+// Public route to attach PDF and send email immediately after creation
+router.post('/:id/public-email', upload.single('pdf'), recordController.sendEmail);
+
 // Protected route to view PDF directly
 router.get('/:id/pdf', authMiddleware, recordController.viewPdf);
 

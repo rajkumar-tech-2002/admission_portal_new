@@ -6,7 +6,7 @@ class Master {
         const [rows] = await db.execute(`
             SELECT *
             FROM department_master
-            ORDER BY institution
+            ORDER BY department
         `);
         return rows;
     }

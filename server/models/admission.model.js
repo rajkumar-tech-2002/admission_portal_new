@@ -54,17 +54,35 @@ class Admission {
         return rows;
     }
 
+    static async getCourseFee(college, department, year, quota) {
+        let mappedQuota = quota;
+        if (quota === 'Government Quota') mappedQuota = 'COUNSELLING';
+        else if (quota === 'Management Quota') mappedQuota = 'MANAGEMENT';
+
+        const [rows] = await db.execute(`
+            SELECT fees 
+            FROM course_fee_structure 
+            WHERE institution = ? AND department = ? AND year = ? AND quota = ?
+            LIMIT 1
+        `, [college, department, year, mappedQuota]);
+        return rows.length > 0 ? rows[0].fees : null;
+    }
+
     static async createAdmission(data) {
         const toNull = (val) => (val === undefined || val === null || val === '') ? null : val;
 
-        // Auto-generate application_no: APPYYYYXXXX (e.g., APP20260001)
-        const now = new Date();
-        const currentYear = now.getFullYear().toString();
-        const [countRows] = await db.execute(
-            `SELECT COUNT(*) AS cnt FROM student_admission_master WHERE YEAR(created_at) = YEAR(CURDATE())`
-        );
-        const seq = (countRows[0].cnt || 0) + 1;
-        const applicationNo = `APP${currentYear}${String(seq).padStart(4, '0')}`;
+        // Auto-generate application_no: purely integer increment based on highest existing numeric value
+        const [maxRow] = await db.execute(`
+            SELECT MAX(CAST(application_no AS UNSIGNED)) AS max_val 
+            FROM student_admission_master 
+            WHERE application_no REGEXP '^[0-9]+$'
+        `);
+        
+        let nextAppNo = 14375; // default fallback if no numeric application numbers exist
+        if (maxRow[0].max_val !== null) {
+            nextAppNo = maxRow[0].max_val + 1;
+        }
+        const applicationNo = nextAppNo.toString();
 
         // Auto determine is_10th
         const has10th = data.tenthSchool || data.tenthMark || data.regNo10th;
@@ -76,7 +94,7 @@ class Admission {
 
         const sql = `
             INSERT INTO student_admission_master (
-                application_no, reg_no_12th, student_name, dob, college, admission_date, department, admission_year, quota,
+                application_no, reg_no_12th, student_name, dob, college, admission_date, department, programme, programme_type, admission_year, quota,
                 first_graduate, student_status, remark, aadhaar_no, school_type, fee, reference_remark,
                 reference_amount_1, reference_paid_amount, community, father_name, mother_name, father_mobile_no,
                 student_mobile_no, mother_mobile_no, father_occupation, father_annual_income, religion, caste_name,
@@ -86,11 +104,11 @@ class Admission {
                 school_12th_name, mark_sheet_given_status, yop_12th, group_in_12th,
                 subject_1_name, subject_1_mark, subject_2_name, subject_2_mark, subject_3_name, subject_3_mark,
                 subject_4_name, subject_4_mark, subject_5_name, subject_5_mark, subject_6_name, subject_6_mark,
-                total_marks_12th, percentage_12th, ug_university, reference_type, reference_college,
+                total_marks_12th, percentage_12th, ug_college, diploma_college, reference_type, reference_college,
                 reference_department, reference_by_name, reference_by_mobile, consultancy_name,
                 consultancy_person_name, consultancy_mobile, course_studied, studied_medium, board_university, nativity
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
@@ -100,9 +118,11 @@ class Admission {
                 ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?,
                 ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?
             )
         `;
 
@@ -114,6 +134,8 @@ class Admission {
             toNull(data.college),
             toNull(data.admissionDate),
             toNull(data.department),
+            toNull(data.programme),
+            toNull(data.programmeType),
             toNull(data.year),
             toNull(data.quota),
             toNull(data.firstGraduate),
@@ -174,7 +196,8 @@ class Admission {
             toNull(data.subject5Mark),
             toNull(data.totalMarks12th),
             toNull(data.percentage12th),
-            toNull(data.ugUniversity),
+            toNull(data.ugCollege),
+            toNull(data.diplomaCollege),
             toNull(data.referenceType),
             toNull(data.referenceCollege),
             toNull(data.referenceDepartment),
@@ -205,7 +228,7 @@ class Admission {
 
         const sql = `
             UPDATE student_admission_master SET
-                reg_no_12th=?, student_name=?, dob=?, college=?, admission_date=?, department=?, admission_year=?, quota=?,
+                reg_no_12th=?, student_name=?, dob=?, college=?, admission_date=?, department=?, programme=?, programme_type=?, admission_year=?, quota=?,
                 first_graduate=?, student_status=?, remark=?, aadhaar_no=?, school_type=?, fee=?, reference_remark=?,
                 reference_amount_1=?, reference_paid_amount=?, community=?, father_name=?, mother_name=?, father_mobile_no=?,
                 student_mobile_no=?, mother_mobile_no=?, father_occupation=?, father_annual_income=?, religion=?, caste_name=?,
@@ -215,14 +238,14 @@ class Admission {
                 school_12th_name=?, mark_sheet_given_status=?, yop_12th=?, group_in_12th=?,
                 subject_1_name=?, subject_1_mark=?, subject_2_name=?, subject_2_mark=?, subject_3_name=?, subject_3_mark=?,
                 subject_4_name=?, subject_4_mark=?, subject_5_name=?, subject_5_mark=?, subject_6_name=?, subject_6_mark=?,
-                total_marks_12th=?, percentage_12th=?, ug_university=?, reference_type=?, reference_college=?,
+                total_marks_12th=?, percentage_12th=?, ug_college=?, diploma_college=?, reference_type=?, reference_college=?,
                 reference_department=?, reference_by_name=?, reference_by_mobile=?, consultancy_name=?,
                 consultancy_person_name=?, consultancy_mobile=?, course_studied=?, studied_medium=?, board_university=?, nativity=?
             WHERE id=?
         `;
 
         const values = [
-            toNull(data.twelfthRegNo), toNull(data.studentName), toNull(data.dob), toNull(data.college), toNull(data.admissionDate), toNull(data.department), toNull(data.year), toNull(data.quota),
+            toNull(data.twelfthRegNo), toNull(data.studentName), toNull(data.dob), toNull(data.college), toNull(data.admissionDate), toNull(data.department), toNull(data.programme), toNull(data.programmeType), toNull(data.year), toNull(data.quota),
             toNull(data.firstGraduate), toNull(data.status), toNull(data.remark), toNull(data.aadharNo), toNull(data.schoolType), toNull(data.fee), toNull(data.rRemark),
             toNull(data.referenceAmount1), toNull(data.rPaidAmount), toNull(data.community), toNull(data.fatherName), toNull(data.motherName), toNull(data.fatherMobile),
             toNull(data.studentMobile), toNull(data.motherMobile), toNull(data.fatherOccupation), toNull(data.fatherAnnualIncome), toNull(data.religion), toNull(data.casteName),
@@ -232,7 +255,7 @@ class Admission {
             toNull(data.twelfthSchool), toNull(data.twelfthMarkSheetStatus), toNull(data.twelfthYOP), toNull(data.twelfthGroup),
             toNull(data.subject1Name), toNull(data.subject1Mark), toNull(data.subject2Name), toNull(data.englishMark), toNull(data.subject3Name), toNull(data.subject2Mark),
             toNull(data.subject4Name), toNull(data.subject3Mark), toNull(data.subject5Name), toNull(data.subject4Mark), toNull(data.subject6Name), toNull(data.subject5Mark),
-            toNull(data.totalMarks12th), toNull(data.percentage12th), toNull(data.ugUniversity), toNull(data.referenceType), toNull(data.referenceCollege),
+            toNull(data.totalMarks12th), toNull(data.percentage12th), toNull(data.ugCollege), toNull(data.diplomaCollege), toNull(data.referenceType), toNull(data.referenceCollege),
             toNull(data.referenceDepartment), toNull(data.referenceByName), toNull(data.referenceByMobile), toNull(data.consultancyName),
             toNull(data.consultancyPersonName), toNull(data.consultancyMobile), toNull(data.courseStudied), toNull(data.medium), toNull(data.boardUniversity), toNull(data.nativity),
             id
@@ -371,7 +394,7 @@ class Admission {
         
         let imported = 0;
         const columns = [
-            'application_no', 'reg_no_12th', 'student_name', 'dob', 'college', 'admission_date', 'department', 'admission_year', 'quota',
+            'application_no', 'reg_no_12th', 'student_name', 'dob', 'college', 'admission_date', 'department', 'programme', 'programme_type', 'admission_year', 'quota',
             'first_graduate', 'student_status', 'remark', 'aadhaar_no', 'school_type', 'fee', 'reference_remark',
             'reference_amount_1', 'reference_paid_amount', 'community', 'father_name', 'mother_name', 'father_mobile_no',
             'student_mobile_no', 'mother_mobile_no', 'father_occupation', 'father_annual_income', 'religion', 'caste_name',
@@ -381,7 +404,7 @@ class Admission {
             'school_12th_name', 'mark_sheet_given_status', 'yop_12th', 'group_in_12th',
             'subject_1_name', 'subject_1_mark', 'subject_2_name', 'subject_2_mark', 'subject_3_name', 'subject_3_mark',
             'subject_4_name', 'subject_4_mark', 'subject_5_name', 'subject_5_mark', 'subject_6_name', 'subject_6_mark',
-            'total_marks_12th', 'percentage_12th', 'ug_university', 'reference_type', 'reference_college',
+            'total_marks_12th', 'percentage_12th', 'ug_college', 'diploma_college', 'reference_type', 'reference_college',
             'reference_department', 'reference_by_name', 'reference_by_mobile', 'consultancy_name',
             'consultancy_person_name', 'consultancy_mobile', 'course_studied', 'studied_medium', 'board_university', 'nativity'
         ];
@@ -390,13 +413,16 @@ class Admission {
             // Determine application_no
             let applicationNo = record.application_no;
             if (!applicationNo) {
-                const now = new Date();
-                const currentYear = now.getFullYear().toString();
-                const [countRows] = await db.execute(
-                    `SELECT COUNT(*) AS cnt FROM student_admission_master WHERE YEAR(created_at) = YEAR(CURDATE())`
-                );
-                const seq = (countRows[0].cnt || 0) + 1;
-                applicationNo = `APP${currentYear}${String(seq).padStart(4, '0')}`;
+                const [maxRow] = await db.execute(`
+                    SELECT MAX(CAST(application_no AS UNSIGNED)) AS max_val 
+                    FROM student_admission_master 
+                    WHERE application_no REGEXP '^[0-9]+$'
+                `);
+                let nextAppNo = 14375;
+                if (maxRow[0].max_val !== null) {
+                    nextAppNo = maxRow[0].max_val + 1;
+                }
+                applicationNo = nextAppNo.toString();
             }
 
             // Check if exists

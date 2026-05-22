@@ -74,6 +74,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         college: '',
         admissionDate: '',
         department: '',
+        programme: '',
+        programmeType: '',
         year: '',
         quota: '',
         firstGraduate: '',
@@ -115,7 +117,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         tenthSchool: '',
         tenthMark: '',
         regNo10th: '',
-        totalMarks10th: '500',
+        totalMarks10th: '',
         percentage10th: '',
         tenthYOP: '',
 
@@ -126,25 +128,26 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         twelfthMarkSheetStatus: 'No',
         twelfthYOP: '',
         twelfthGroup: '',
-        languageStudied: 'Tamil',
-        subject1Name: 'Tamil / Sanskrit Option',
+        languageStudied: '',
+        subject1Name: '',
         subject1Mark: '',
-        subject2Name: 'English',
+        subject2Name: '',
         englishMark: '',
-        subject3Name: 'Physics/Theory I',
+        subject3Name: '',
         subject2Mark: '',
-        subject4Name: 'Chemistry / Practical I',
+        subject4Name: '',
         subject3Mark: '',
-        subject5Name: 'Biology / CS / Practical II',
+        subject5Name: '',
         subject4Mark: '',
-        subject6Name: 'Maths',
+        subject6Name: '',
         subject5Mark: '',
         subject6Mark: '',
         totalMarks12th: '',
         percentage12th: '',
 
         // Tab 6: UG Details
-        ugUniversity: '',
+        ugCollege: '',
+        diplomaCollege: '',
 
         // Tab 7: Reference Details
         referenceType: '',
@@ -158,7 +161,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
 
         // Tab 8: Last Studied
         courseStudied: '',
-        medium: 'English',
+        medium: '',
         boardUniversity: '',
         nativity: 'Tamil Nadu'
     });
@@ -276,6 +279,41 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         }
     }, [activeSection]);
 
+    const prevFeeDeps = React.useRef({ college: '', department: '', year: '', quota: '' });
+
+    // Auto-fetch fee based on college, department, year, quota
+    useEffect(() => {
+        const fetchFee = async () => {
+            const { college, department, year, quota } = formData;
+            
+            // Only fetch if the user actually changed one of the dependencies
+            if (
+                college !== prevFeeDeps.current.college ||
+                department !== prevFeeDeps.current.department ||
+                year !== prevFeeDeps.current.year ||
+                quota !== prevFeeDeps.current.quota
+            ) {
+                prevFeeDeps.current = { college, department, year, quota };
+                
+                if (college && department && year && quota) {
+                    try {
+                        const res = await apiService.get(`/admissions/course-fee?college=${encodeURIComponent(college)}&department=${encodeURIComponent(department)}&year=${encodeURIComponent(year)}&quota=${encodeURIComponent(quota)}`);
+                        if (res.data.success && res.data.data !== null) {
+                            setFormData(prev => ({ ...prev, fee: res.data.data }));
+                            toast.success(`Fee auto-fetched for ${college} - ${department} (${quota})`);
+                        } else {
+                            setFormData(prev => ({ ...prev, fee: '' }));
+                        }
+                    } catch (err) {
+                        console.error("Failed to fetch course fee:", err);
+                    }
+                }
+            }
+        };
+
+        fetchFee();
+    }, [formData.college, formData.department, formData.year, formData.quota]);
+
     // Helper: Handle input changes
     const handleChange = async (e) => {
         const { name, value } = e.target;
@@ -293,7 +331,23 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             setFormData(prev => ({
                 ...prev,
                 college: value,
-                department: ''
+                department: '',
+                programme: '',
+                programmeType: ''
+            }));
+            return;
+        }
+
+        if (name === 'department') {
+            const selectedDept = masterData.departments.find(d => 
+                d.department === value && 
+                (formData.college ? (d.institution || '').trim() === formData.college : true)
+            );
+            setFormData(prev => ({
+                ...prev,
+                department: value,
+                programme: selectedDept ? selectedDept.program || '' : '',
+                programmeType: selectedDept ? selectedDept.type || '' : ''
             }));
             return;
         }
@@ -460,7 +514,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
     // Helper: Reset form state
     const handleResetForm = () => {
         setFormData({
-            twelfthRegNo: '', studentName: '', dob: '', college: '', admissionDate: '', department: '', year: '', quota: '',
+            twelfthRegNo: '', studentName: '', dob: '', college: '', admissionDate: '', department: '', programme: '', programmeType: '', year: '', quota: '',
             firstGraduate: '', status: '', remark: '', aadharNo: '', schoolType: '', fee: '',
             // rRemark: '', referenceAmount1: '', rPaidAmount: '',
             community: '', fatherName: '', motherName: '', fatherMobile: '', studentMobile: '',
@@ -475,10 +529,11 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             subject5Name: 'Biology / CS / Practical II', subject4Mark: '',
             subject6Name: 'Maths', subject5Mark: '', subject6Mark: '',
             totalMarks12th: '', percentage12th: '',
-            ugUniversity: '',
+            ugCollege: '', diplomaCollege: '',
             referenceType: '', referenceCollege: '', referenceDepartment: '', referenceByName: '', referenceByMobile: '', consultancyName: '', consultancyPersonName: '', consultancyMobile: '',
             courseStudied: '', medium: 'English', boardUniversity: '', nativity: 'Tamil Nadu'
         });
+        prevFeeDeps.current = { college: '', department: '', year: '', quota: '' };
         setActiveFormTab(1);
         toast.success('Admission Form Reset Successfully!');
     };
@@ -490,8 +545,10 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             studentName: record.student_name || '',
             dob: record.dob ? record.dob.substring(0, 10) : '',
             college: record.college || '',
-            admissionDate: record.admission_date ? record.admission_date.substring(0, 10) : '',
+            admissionDate: record.admission_date ? record.admission_date.split('T')[0] : '',
             department: record.department || '',
+            programme: record.programme || '',
+            programmeType: record.programme_type || '',
             year: record.admission_year || '',
             quota: record.quota || '',
             firstGraduate: record.first_graduate || '',
@@ -556,7 +613,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             totalMarks12th: record.total_marks_12th || '',
             percentage12th: record.percentage_12th || '',
 
-            ugUniversity: record.ug_university || '',
+            ugCollege: record.ug_college || '',
+            diplomaCollege: record.diploma_college || '',
 
             referenceType: record.reference_type || '',
             referenceCollege: record.reference_college || '',
@@ -572,6 +630,12 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             boardUniversity: record.board_university || '',
             nativity: record.nativity || 'Tamil Nadu'
         });
+        prevFeeDeps.current = {
+            college: record.college || '',
+            department: record.department || '',
+            year: record.admission_year || '',
+            quota: record.quota || ''
+        };
         setEditingId(record.id);
         setIsEntryFormVisible(true);
     };
@@ -731,8 +795,13 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                                 referenceByMobile: student.reference_contact_no || '',
                                                                 city: student.city || '',
                                                                 department: student.selected_dept || '',
+                                                                programme: '', // You may fetch this or leave it to be updated if needed
+                                                                programmeType: '', // You may fetch this or leave it to be updated if needed
                                                                 college: collegeName
                                                             }));
+                                                            
+                                                            // We deliberately do not update prevFeeDeps here so the useEffect WILL trigger and fetch the fee
+                                                            // for the auto-filled college and department.
 
                                                             // Handle cascading fetch for Staff reference details
                                                             if (student.reference_type === 'Staff') {
@@ -807,6 +876,14 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         </select>
                                     </div>
                                     <div className={styles.inputGroup}>
+                                        <label className={styles.inputLabel}>Programme</label>
+                                        <input type="text" name="programme" value={formData.programme} readOnly className={styles.inputField} style={{ backgroundColor: '#f1f5f9' }} placeholder="Auto-fetched" />
+                                    </div>
+                                    <div className={styles.inputGroup}>
+                                        <label className={styles.inputLabel}>Programme Type</label>
+                                        <input type="text" name="programmeType" value={formData.programmeType} readOnly className={styles.inputField} style={{ backgroundColor: '#f1f5f9' }} placeholder="Auto-fetched" />
+                                    </div>
+                                    <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Year <span className={styles.requiredAsterisk}>*</span></label>
                                         <select name="year" value={formData.year} onChange={handleChange} required className={`${styles.inputField} ${styles.selectField}`}>
                                             <option value="">Select Year</option>
@@ -847,10 +924,6 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         </select>
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>Remark</label>
-                                        <input type="text" name="remark" value={formData.remark} onChange={handleChange} className={styles.inputField} placeholder="Remark" />
-                                    </div>
-                                    <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Adhaar Number</label>
                                         <input type="text" name="aadharNo" value={formData.aadharNo} onChange={handleChange} maxLength={12} className={styles.inputField} placeholder="12-digit Aadhaar Number" pattern="[0-9]*" />
                                     </div>
@@ -864,6 +937,10 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Fee</label>
                                         <input type="number" name="fee" value={formData.fee} onChange={handleChange} className={styles.inputField} placeholder="Fee Amount" />
+                                    </div>
+                                    <div className={styles.inputGroup} style={{ gridColumn: '1 / -1' }}>
+                                        <label className={styles.inputLabel}>Remark</label>
+                                        <input type="text" name="remark" value={formData.remark} onChange={handleChange} className={styles.inputField} style={{ minHeight: '45px', fontSize: '1.05rem' }} placeholder="Remark" />
                                     </div>
                                     {/* <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>R Remark</label>
@@ -993,8 +1070,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         </select>
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>District</label>
-                                        <select name="district" value={formData.district} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
+                                        <label className={styles.inputLabel}>District <span className={styles.requiredAsterisk}>*</span></label>
+                                        <select name="district" value={formData.district} onChange={handleChange} required className={`${styles.inputField} ${styles.selectField}`}>
                                             <option value="">Select District</option>
                                             {masterData.districts
                                                 .filter(d => formData.state ? d.state_name === formData.state : true)
@@ -1244,8 +1321,9 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         )}
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>12 Mark Sheet Given Status <span className={styles.requiredAsterisk}>*</span></label>
-                                        <select name="twelfthMarkSheetStatus" value={formData.twelfthMarkSheetStatus} onChange={handleChange} required className={`${styles.inputField} ${styles.selectField}`}>
+                                        <label className={styles.inputLabel}>12 Mark Sheet Given Status</label>
+                                        <select name="twelfthMarkSheetStatus" value={formData.twelfthMarkSheetStatus} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
+                                            <option value="">Select</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
                                         </select>
@@ -1255,8 +1333,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                         <input type="number" name="twelfthYOP" value={formData.twelfthYOP} onChange={handleChange} className={styles.inputField} placeholder="Year of Passing" />
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>Group in 12th <span className={styles.requiredAsterisk}>*</span></label>
-                                        <select name="twelfthGroup" value={formData.twelfthGroup} onChange={handleChange} required className={`${styles.inputField} ${styles.selectField}`}>
+                                        <label className={styles.inputLabel}>Group in 12th</label>
+                                        <select name="twelfthGroup" value={formData.twelfthGroup} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
                                             <option value="">Select Group</option>
                                             {masterData.groups12th.map(g => <option key={g.id} value={g.group_name}>{g.group_name}</option>)}
                                         </select>
@@ -1331,8 +1409,12 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                 <div className={styles.cardSectionTitle}>UG Academic Information (For PG Admission)</div>
                                 <div className={styles.formGrid}>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>UG University</label>
-                                        <input type="text" name="ugUniversity" value={formData.ugUniversity} onChange={handleChange} className={styles.inputField} placeholder="e.g. Anna University / Bharathiar University" />
+                                        <label className={styles.inputLabel}>UG College Name</label>
+                                        <input type="text" name="ugCollege" value={formData.ugCollege} onChange={handleChange} className={styles.inputField} placeholder="e.g. Anna University / Bharathiar University" />
+                                    </div>
+                                    <div className={styles.inputGroup}>
+                                        <label className={styles.inputLabel}>Diploma College Name</label>
+                                        <input type="text" name="diplomaCollege" value={formData.diplomaCollege} onChange={handleChange} className={styles.inputField} placeholder="Diploma College Name" />
                                     </div>
                                 </div>
                             </div>

@@ -9,6 +9,7 @@ router.get('/staff-institutions', authMiddleware, admissionController.getStaffIn
 router.get('/staff-departments', authMiddleware, admissionController.getStaffDepartments);
 router.get('/staff-members', authMiddleware, admissionController.getStaffMembers);
 router.get('/consultancies', authMiddleware, admissionController.getConsultancies);
+router.get('/course-fee', authMiddleware, admissionController.getCourseFee);
 
 // Admission Process Actions
 router.post('/submit', authMiddleware, admissionController.submitAdmission);

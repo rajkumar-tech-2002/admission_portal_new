@@ -1,7 +1,7 @@
 const path = require('path');
 
 require('dotenv').config({
-    path: 'D:\\smartnandha\\testing_portal\\server\\.env'
+    path: path.resolve(__dirname, '.env')
 });
 
 const app = require('./app');
