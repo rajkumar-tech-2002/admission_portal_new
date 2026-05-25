@@ -44,12 +44,12 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
 
         // Apply Dates
         if (fromDate) {
-            result = result.filter(r => new Date(r.admission_date_time || r.created_at) >= new Date(fromDate));
+            result = result.filter(r => new Date(r.admission_date || r.created_at) >= new Date(fromDate));
         }
         if (toDate) {
             const nextDay = new Date(toDate);
             nextDay.setDate(nextDay.getDate() + 1);
-            result = result.filter(r => new Date(r.admission_date_time || r.created_at) < nextDay);
+            result = result.filter(r => new Date(r.admission_date || r.created_at) < nextDay);
         }
 
         setFilteredRecords(result);
@@ -304,7 +304,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                                         </td>
                                         <td>{record.reg_no_12th}</td>
                                         <td><strong>{record.application_no}</strong></td>
-                                        <td>{record.created_at ? record.created_at.substring(0, 10).split('-').reverse().join('-') : ''}</td>
+                                        <td>{record.admission_date ? record.admission_date.substring(0, 10).split('-').reverse().join('-') : ''}</td>
                                         <td>
                                             <span className={`${styles.statusBadge} ${styles['status-' + record.student_status]}`}>
                                                 {record.student_status}

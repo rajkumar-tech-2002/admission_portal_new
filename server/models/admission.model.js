@@ -276,7 +276,7 @@ class Admission {
     static async getCertificates() {
         const [rows] = await db.execute(`
             SELECT 
-                sam.id as student_id, sam.application_no, sam.student_name, sam.college, sam.department,
+                sam.id as student_id, sam.application_no, sam.student_name, sam.college, sam.programme, sam.department, sam.admission_year,
                 cgd.id as cert_id,
                 cgd.tenth_marksheet, cgd.eleventh_marksheet, cgd.twelfth_marksheet, cgd.twelfth_temp,
                 cgd.transfer_certificate, cgd.community_certificate, cgd.first_graduate_certificate,
@@ -336,7 +336,7 @@ class Admission {
         await db.execute('DELETE FROM certificate_given_details WHERE id = ?', [cert_id]);
     }
     static async getFeesStudents(college, department, year) {
-        let sql = `SELECT id, application_no, student_name, admission_date FROM student_admission_master WHERE 1=1`;
+        let sql = `SELECT id, application_no, student_name, dob, programme, department, admission_date FROM student_admission_master WHERE 1=1`;
         const params = [];
 
         if (college) {
@@ -369,16 +369,18 @@ class Admission {
         if (data.id) {
             const sql = `
                 UPDATE student_fees_details SET
-                    college = ?, department = ?, year_type = ?, student_application_no = ?, 
-                    student_name = ?, paid_date = ?, paid_amount = ?, student_quota = ?
+                    college = ?, department = ?, programme = ?, year_type = ?, student_application_no = ?, 
+                    student_name = ?, student_dob = ?, paid_date = ?, paid_amount = ?, student_quota = ?
                 WHERE id = ?
             `;
             const values = [
                 data.college || null,
                 data.department || null,
+                data.programme || null,
                 data.year_type || null,
                 data.student_application_no || null,
                 data.student_name || null,
+                data.student_dob || null,
                 data.paid_date || null,
                 data.paid_amount || null,
                 studentQuota,
@@ -389,15 +391,17 @@ class Admission {
         } else {
             const sql = `
                 INSERT INTO student_fees_details (
-                    college, department, year_type, student_application_no, student_name, paid_date, paid_amount, student_quota
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    college, department, programme, year_type, student_application_no, student_name, student_dob, paid_date, paid_amount, student_quota
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const values = [
                 data.college || null,
                 data.department || null,
+                data.programme || null,
                 data.year_type || null,
                 data.student_application_no || null,
                 data.student_name || null,
+                data.student_dob || null,
                 data.paid_date || null,
                 data.paid_amount || null,
                 studentQuota

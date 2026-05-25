@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Save, Trash2, RefreshCw, Award } from 'lucide-react';
+import { Search, Save, Trash2, RefreshCw, Award, Download } from 'lucide-react';
 import styles from '../../components/css/Dashboard.module.css';
 import reportStyles from '../../components/css/RecordReport.module.css';
 import toast from 'react-hot-toast';
@@ -13,17 +13,19 @@ const CertificateEntry = () => {
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(100);
-    
+
     // Filters
     const [search, setSearch] = useState('');
     const [collegeFilter, setCollegeFilter] = useState('');
     const [deptFilter, setDeptFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState('');
 
     const [filteredRecords, setFilteredRecords] = useState([]);
-    
-    // Colleges & Depts for dropdowns
+
+    // Colleges, Depts & Years for dropdowns
     const [colleges, setColleges] = useState([]);
     const [departments, setDepartments] = useState([]);
+    const [years, setYears] = useState([]);
 
     // Editing State (track changes locally before save)
     const [editedRows, setEditedRows] = useState({});
@@ -34,13 +36,15 @@ const CertificateEntry = () => {
             const res = await apiService.get('/admissions/certificates/list');
             if (res.data.success) {
                 setRecords(res.data.data);
-                
+
                 // Extract unique colleges and departments
                 const uniqueColleges = [...new Set(res.data.data.map(item => item.college).filter(Boolean))];
                 const uniqueDepts = [...new Set(res.data.data.map(item => item.department).filter(Boolean))];
-                
+                const uniqueYears = [...new Set(res.data.data.map(item => item.admission_year).filter(Boolean))].sort();
+
                 setColleges(uniqueColleges);
                 setDepartments(uniqueDepts);
+                setYears(uniqueYears);
             }
         } catch (error) {
             console.error('Failed to fetch certificates:', error);
@@ -57,34 +61,46 @@ const CertificateEntry = () => {
     useEffect(() => {
         let result = records;
 
-        // Apply Search
         if (search) {
             const lowerSearch = search.toLowerCase();
-            result = result.filter(r => 
+            result = result.filter(r =>
                 (r.application_no || '').toLowerCase().includes(lowerSearch) ||
                 (r.student_name || '').toLowerCase().includes(lowerSearch)
             );
         }
-
-        // Apply College
-        if (collegeFilter) {
-            result = result.filter(r => r.college === collegeFilter);
-        }
-
-        // Apply Department
-        if (deptFilter) {
-            result = result.filter(r => r.department === deptFilter);
-        }
+        if (collegeFilter) result = result.filter(r => r.college === collegeFilter);
+        if (deptFilter) result = result.filter(r => r.department === deptFilter);
+        if (yearFilter) result = result.filter(r => r.admission_year === yearFilter);
 
         setFilteredRecords(result);
         setCurrentPage(1);
-    }, [records, search, collegeFilter, deptFilter]);
+    }, [records, search, collegeFilter, deptFilter, yearFilter]);
 
     const handleResetFilters = () => {
         setSearch('');
         setCollegeFilter('');
         setDeptFilter('');
+        setYearFilter('');
         setCurrentPage(1);
+    };
+
+    // Excel Export
+    const handleExcelExport = () => {
+        if (filteredRecords.length === 0) { toast.error('No records to export'); return; }
+        const headers = ['S.No','App No','Name','College','Dept','Programme','Year','10th MC','11th MC','12th MC','12th Temp','TC','Comm','FGC','IC','NC','BC','JD','Remarks'];
+        const rows = filteredRecords.map((r, i) => [
+            i + 1, r.application_no, r.student_name, r.college, r.department, r.programme || '', r.admission_year || '',
+            r.tenth_marksheet || '', r.eleventh_marksheet || '', r.twelfth_marksheet || '', r.twelfth_temp || '',
+            r.transfer_certificate || '', r.community_certificate || '', r.first_graduate_certificate || '',
+            r.income_certificate || '', r.native_certificate || '', r.bonafide_certificate || '',
+            r.JD_certificate || '', r.remarks || ''
+        ]);
+        const csv = [headers, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'certificate_management.csv'; a.click();
+        URL.revokeObjectURL(url);
+        toast.success('Excel exported successfully!');
     };
 
     const handleInputChange = (student_id, field, value) => {
@@ -124,10 +140,10 @@ const CertificateEntry = () => {
             };
 
             const res = await apiService.post('/admissions/certificates/save', payload);
-            
+
             if (res.data.success) {
                 toast.success('Record updated successfully');
-                
+
                 // Clear dirty state and maybe set cert_id if newly inserted
                 setEditedRows(prev => {
                     const newRows = { ...prev };
@@ -139,9 +155,9 @@ const CertificateEntry = () => {
                     }
                     return newRows;
                 });
-                
+
                 // Update main records
-                setRecords(prev => prev.map(r => r.student_id === student_id ? {...r, ...rowData, cert_id: res.data.result?.id || rowData.cert_id } : r));
+                setRecords(prev => prev.map(r => r.student_id === student_id ? { ...r, ...rowData, cert_id: res.data.result?.id || rowData.cert_id } : r));
 
             }
         } catch (error) {
@@ -152,13 +168,13 @@ const CertificateEntry = () => {
 
     const handleDelete = (cert_id, student_id) => {
         if (!cert_id) return;
-        
+
         confirmAction("Are you sure you want to delete this certificate record?", async () => {
             try {
                 const res = await apiService.delete(`/admissions/certificates/${cert_id}`);
                 if (res.data.success) {
                     toast.success('Certificate record deleted successfully');
-                    
+
                     // Update state
                     const emptyCertData = {
                         cert_id: null,
@@ -167,9 +183,9 @@ const CertificateEntry = () => {
                         income_certificate: null, native_certificate: null, bonafide_certificate: null, JD_certificate: null, remarks: null,
                         isDirty: false
                     };
-                    
-                    setRecords(prev => prev.map(r => r.student_id === student_id ? {...r, ...emptyCertData} : r));
-                    
+
+                    setRecords(prev => prev.map(r => r.student_id === student_id ? { ...r, ...emptyCertData } : r));
+
                     setEditedRows(prev => {
                         const newRows = { ...prev };
                         delete newRows[student_id];
@@ -192,8 +208,8 @@ const CertificateEntry = () => {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     const SelectField = ({ value, onChange }) => (
-        <select 
-            value={value || ''} 
+        <select
+            value={value || ''}
             onChange={e => onChange(e.target.value)}
             style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '70px', background: '#fff' }}
         >
@@ -209,31 +225,36 @@ const CertificateEntry = () => {
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Award size={22} style={{ color: 'var(--primary-color)' }} />
-                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Certificate Management</h2>
+                        <h2 style={{ color: "var(--primary-color)", margin: 0 }}>Certificate Management</h2>
                     </div>
-                    <button onClick={fetchData} className={styles.exportBtn} style={{ background: 'var(--primary-color)', color: '#fff', border: 'none' }}>
-                        <RefreshCw size={18} /> Refresh
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button onClick={handleExcelExport} className={styles.exportBtn} style={{ background: '#10b981', color: '#fff', border: 'none' }}>
+                            <Download size={18} /> Export Excel
+                        </button>
+                        <button onClick={fetchData} className={styles.exportBtn} style={{ background: 'var(--primary-color)', color: '#fff', border: 'none' }}>
+                            <RefreshCw size={18} /> Refresh
+                        </button>
+                    </div>
                 </div>
 
                 <div className={styles.filters}>
                     <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>Global Search</label>
                         <div style={{ position: 'relative' }}>
-                            <input 
-                                type="text" 
-                                className={styles.searchInput} 
+                            <input
+                                type="text"
+                                className={styles.searchInput}
                                 placeholder="Search by name, app no..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
-                            <Search size={16} style={{ position: 'absolute', right: 10, top: 10, color: '#9ca3af' }}/>
+                            <Search size={16} style={{ position: 'absolute', right: 10, top: 10, color: '#9ca3af' }} />
                         </div>
                     </div>
 
                     <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>College</label>
-                        <select 
+                        <select
                             className={styles.selectInput}
                             value={collegeFilter}
                             onChange={(e) => setCollegeFilter(e.target.value)}
@@ -245,13 +266,25 @@ const CertificateEntry = () => {
 
                     <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>Department</label>
-                        <select 
+                        <select
                             className={styles.selectInput}
                             value={deptFilter}
                             onChange={(e) => setDeptFilter(e.target.value)}
                         >
                             <option value="">All Departments</option>
                             {departments.map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Year</label>
+                        <select
+                            className={styles.selectInput}
+                            value={yearFilter}
+                            onChange={(e) => setYearFilter(e.target.value)}
+                        >
+                            <option value="">All Years</option>
+                            {years.map(y => <option key={y} value={y}>{y}</option>)}
                         </select>
                     </div>
                 </div>
@@ -265,8 +298,8 @@ const CertificateEntry = () => {
                 <div className={styles.tableControls}>
                     <div className={styles.limitSelector}>
                         <label>Show</label>
-                        <select 
-                            value={recordsPerPage} 
+                        <select
+                            value={recordsPerPage}
                             onChange={(e) => {
                                 setRecordsPerPage(Number(e.target.value));
                                 setCurrentPage(1);
@@ -293,6 +326,8 @@ const CertificateEntry = () => {
                                     <th>Name</th>
                                     <th>Coll</th>
                                     <th>Dept</th>
+                                    <th>Programme</th>
+                                    <th>Year</th>
                                     <th>10th MC</th>
                                     <th>11th MC</th>
                                     <th>12th MC</th>
@@ -314,58 +349,61 @@ const CertificateEntry = () => {
                                         const rowData = editedRows[record.student_id] || record;
                                         const isDirty = rowData.isDirty;
                                         const certId = rowData.cert_id;
-                                        
+
                                         return (
-                                        <tr key={record.student_id} style={{ backgroundColor: isDirty ? '#fef9c3' : 'transparent', transition: 'background-color 0.3s' }}>
-                                            <td>{indexOfFirstRecord + index + 1}</td>
-                                            <td><strong>{record.application_no}</strong></td>
-                                            <td>{record.student_name}</td>
-                                            <td>{record.college}</td>
-                                            <td>{record.department}</td>
-                                            <td><SelectField value={rowData.tenth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'tenth_marksheet', val)} /></td>
-                                            <td><SelectField value={rowData.eleventh_marksheet} onChange={(val) => handleInputChange(record.student_id, 'eleventh_marksheet', val)} /></td>
-                                            <td><SelectField value={rowData.twelfth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'twelfth_marksheet', val)} /></td>
-                                            <td><SelectField value={rowData.twelfth_temp} onChange={(val) => handleInputChange(record.student_id, 'twelfth_temp', val)} /></td>
-                                            <td><SelectField value={rowData.transfer_certificate} onChange={(val) => handleInputChange(record.student_id, 'transfer_certificate', val)} /></td>
-                                            <td><SelectField value={rowData.community_certificate} onChange={(val) => handleInputChange(record.student_id, 'community_certificate', val)} /></td>
-                                            <td><SelectField value={rowData.first_graduate_certificate} onChange={(val) => handleInputChange(record.student_id, 'first_graduate_certificate', val)} /></td>
-                                            <td><SelectField value={rowData.income_certificate} onChange={(val) => handleInputChange(record.student_id, 'income_certificate', val)} /></td>
-                                            <td><SelectField value={rowData.native_certificate} onChange={(val) => handleInputChange(record.student_id, 'native_certificate', val)} /></td>
-                                            <td><SelectField value={rowData.bonafide_certificate} onChange={(val) => handleInputChange(record.student_id, 'bonafide_certificate', val)} /></td>
-                                            <td><SelectField value={rowData.JD_certificate} onChange={(val) => handleInputChange(record.student_id, 'JD_certificate', val)} /></td>
-                                            <td>
-                                                <input 
-                                                    type="text" 
-                                                    value={rowData.remarks || ''} 
-                                                    onChange={e => handleInputChange(record.student_id, 'remarks', e.target.value)}
-                                                    style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '150px' }}
-                                                    placeholder="Remarks..."
-                                                />
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: '5px' }}>
-                                                    <button 
-                                                        className={styles.editBtn}
-                                                        style={{ background: isDirty ? '#10b981' : '#3b82f6', opacity: isDirty ? 1 : 0.6, cursor: isDirty ? 'pointer' : 'default' }}
-                                                        onClick={() => handleSave(record.student_id)}
-                                                        title={certId && !isDirty ? 'Saved' : 'Update Record'}
-                                                        disabled={!isDirty}
-                                                    >
-                                                        <Save size={16} />
-                                                    </button>
-                                                    {certId && (
-                                                        <button 
-                                                            className={styles.deleteBtn}
-                                                            onClick={() => handleDelete(certId, record.student_id)}
-                                                            title="Delete Record"
+                                            <tr key={record.student_id} style={{ backgroundColor: isDirty ? '#fef9c3' : 'transparent', transition: 'background-color 0.3s' }}>
+                                                <td>{indexOfFirstRecord + index + 1}</td>
+                                                <td><strong>{record.application_no}</strong></td>
+                                                <td>{record.student_name}</td>
+                                                <td>{record.college}</td>
+                                                <td>{record.department}</td>
+                                                <td>{record.programme || '—'}</td>
+                                                <td>{record.admission_year}</td>
+                                                <td><SelectField value={rowData.tenth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'tenth_marksheet', val)} /></td>
+                                                <td><SelectField value={rowData.eleventh_marksheet} onChange={(val) => handleInputChange(record.student_id, 'eleventh_marksheet', val)} /></td>
+                                                <td><SelectField value={rowData.twelfth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'twelfth_marksheet', val)} /></td>
+                                                <td><SelectField value={rowData.twelfth_temp} onChange={(val) => handleInputChange(record.student_id, 'twelfth_temp', val)} /></td>
+                                                <td><SelectField value={rowData.transfer_certificate} onChange={(val) => handleInputChange(record.student_id, 'transfer_certificate', val)} /></td>
+                                                <td><SelectField value={rowData.community_certificate} onChange={(val) => handleInputChange(record.student_id, 'community_certificate', val)} /></td>
+                                                <td><SelectField value={rowData.first_graduate_certificate} onChange={(val) => handleInputChange(record.student_id, 'first_graduate_certificate', val)} /></td>
+                                                <td><SelectField value={rowData.income_certificate} onChange={(val) => handleInputChange(record.student_id, 'income_certificate', val)} /></td>
+                                                <td><SelectField value={rowData.native_certificate} onChange={(val) => handleInputChange(record.student_id, 'native_certificate', val)} /></td>
+                                                <td><SelectField value={rowData.bonafide_certificate} onChange={(val) => handleInputChange(record.student_id, 'bonafide_certificate', val)} /></td>
+                                                <td><SelectField value={rowData.JD_certificate} onChange={(val) => handleInputChange(record.student_id, 'JD_certificate', val)} /></td>
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        value={rowData.remarks || ''}
+                                                        onChange={e => handleInputChange(record.student_id, 'remarks', e.target.value)}
+                                                        style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '150px' }}
+                                                        placeholder="Remarks..."
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <div style={{ display: 'flex', gap: '5px' }}>
+                                                        <button
+                                                            className={styles.editBtn}
+                                                            style={{ background: isDirty ? '#10b981' : '#3b82f6', opacity: isDirty ? 1 : 0.6, cursor: isDirty ? 'pointer' : 'default' }}
+                                                            onClick={() => handleSave(record.student_id)}
+                                                            title={certId && !isDirty ? 'Saved' : 'Update Record'}
+                                                            disabled={!isDirty}
                                                         >
-                                                            <Trash2 size={16} />
+                                                            <Save size={16} />
                                                         </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )})
+                                                        {certId && (
+                                                            <button
+                                                                className={styles.deleteBtn}
+                                                                onClick={() => handleDelete(certId, record.student_id)}
+                                                                title="Delete Record"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })
                                 ) : (
                                     <tr>
                                         <td colSpan="18" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
@@ -382,8 +420,8 @@ const CertificateEntry = () => {
                             Showing {indexOfFirstRecord + 1} to {Math.min(indexOfLastRecord, filteredRecords.length)} of {filteredRecords.length} entries
                         </div>
                         <div className={styles.paginationControls}>
-                            <button 
-                                className={styles.pageBtn} 
+                            <button
+                                className={styles.pageBtn}
                                 onClick={() => paginate(currentPage - 1)}
                                 disabled={currentPage === 1}
                             >
@@ -393,7 +431,7 @@ const CertificateEntry = () => {
                                 .filter(number => number === 1 || number === totalPages || (number >= currentPage - 2 && number <= currentPage + 2))
                                 .map((number, index, array) => (
                                     <React.Fragment key={number}>
-                                        {index > 0 && array[index - 1] !== number - 1 && <span style={{margin: '0 5px'}}>...</span>}
+                                        {index > 0 && array[index - 1] !== number - 1 && <span style={{ margin: '0 5px' }}>...</span>}
                                         <button
                                             className={`${styles.pageBtn} ${currentPage === number ? styles.activePage : ''}`}
                                             onClick={() => paginate(number)}
@@ -401,9 +439,9 @@ const CertificateEntry = () => {
                                             {number}
                                         </button>
                                     </React.Fragment>
-                            ))}
-                            <button 
-                                className={styles.pageBtn} 
+                                ))}
+                            <button
+                                className={styles.pageBtn}
                                 onClick={() => paginate(currentPage + 1)}
                                 disabled={currentPage === totalPages}
                             >

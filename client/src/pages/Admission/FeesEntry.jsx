@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Search, Plus, ArrowLeft, FileCheck, Edit } from 'lucide-react';
+import { Save, Search, Plus, ArrowLeft, FileCheck, Edit, Download } from 'lucide-react';
 import styles from '../../components/css/Dashboard.module.css';
 import reportStyles from '../../components/css/RecordReport.module.css';
 import apiService from '../../services/api.service';
 import toast from 'react-hot-toast';
 import { confirmAction } from '../../components/layout/Toast';
-import { formatDateTime } from '../../utils/dateFormatter';
+import { formatDate, formatDateForInput } from '../../utils/dateFormatter';
 
 const FeesEntry = () => {
     const [isFormVisible, setIsFormVisible] = useState(false);
@@ -29,6 +29,7 @@ const FeesEntry = () => {
     const [listCollegeFilter, setListCollegeFilter] = useState('');
     const [listDeptFilter, setListDeptFilter] = useState('');
     const [listQuotaFilter, setListQuotaFilter] = useState('');
+    const [listYearFilter, setListYearFilter] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [filteredFeesRecords, setFilteredFeesRecords] = useState([]);
@@ -37,9 +38,11 @@ const FeesEntry = () => {
     const [formData, setFormData] = useState({
         college: '',
         department: '',
+        programme: '',
         year_type: '',
         student_name: '',
         student_application_no: '',
+        student_dob: '',
         paid_amount: '',
         paid_date: new Date().toISOString().split('T')[0]
     });
@@ -107,9 +110,8 @@ const FeesEntry = () => {
             result = result.filter(r => r.department === listDeptFilter);
         }
 
-        if (listQuotaFilter) {
-            result = result.filter(r => r.quota === listQuotaFilter);
-        }
+        if (listQuotaFilter) result = result.filter(r => r.quota === listQuotaFilter);
+        if (listYearFilter) result = result.filter(r => r.year_type === listYearFilter);
 
         if (fromDate) {
             result = result.filter(r => new Date(r.paid_date || r.created_at) >= new Date(fromDate));
@@ -122,16 +124,41 @@ const FeesEntry = () => {
 
         setFilteredFeesRecords(result);
         setCurrentPage(1);
-    }, [feesRecords, listSearch, listCollegeFilter, listDeptFilter, listQuotaFilter, fromDate, toDate]);
+        }, [feesRecords, listSearch, listCollegeFilter, listDeptFilter, listQuotaFilter, listYearFilter, fromDate, toDate]);
 
     const handleResetListFilters = () => {
         setListSearch('');
         setListCollegeFilter('');
         setListDeptFilter('');
         setListQuotaFilter('');
+        setListYearFilter('');
         setFromDate('');
         setToDate('');
         setCurrentPage(1);
+    };
+
+    // Excel Export for Payment List
+    const handleExcelExport = () => {
+        if (filteredFeesRecords.length === 0) { toast.error('No records to export'); return; }
+        const headers = ['S.No','App No','Student Name','College','Quota','Department','Programme','Year','Paid Amount','Paid Date'];
+        const rows = filteredFeesRecords.map((r, i) => [
+            i + 1,
+            r.student_application_no,
+            r.student_name,
+            r.college,
+            r.quota || '',
+            r.department,
+            r.programme || '',
+            r.year_type,
+            r.paid_amount,
+            r.paid_date ? r.paid_date.substring(0, 10).split('-').reverse().join('-') : ''
+        ]);
+        const csv = [headers, ...rows].map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'payment_list.csv'; a.click();
+        URL.revokeObjectURL(url);
+        toast.success('Excel exported successfully!');
     };
 
     // Table Pagination
@@ -144,15 +171,16 @@ const FeesEntry = () => {
     // Form Event Handlers
     const handleCollegeChange = (e) => {
         const college = e.target.value;
-        setFormData(prev => ({ ...prev, college, department: '', student_name: '', student_application_no: '' }));
+        setFormData(prev => ({ ...prev, college, department: '', programme: '', student_name: '', student_application_no: '' }));
         setStudentSearchTerm('');
-        
         const filteredDepts = allDepts.filter(d => d.institution === college);
-        setDepartments(filteredDepts.map(d => d.department).filter(Boolean));
+        setDepartments(filteredDepts); // Store full dept objects
     };
 
     const handleDepartmentChange = (e) => {
-        setFormData(prev => ({ ...prev, department: e.target.value, student_name: '', student_application_no: '' }));
+        const comboValue = e.target.value; // "ECE||B.E"
+        const [dept, prog] = comboValue.split('||');
+        setFormData(prev => ({ ...prev, department: dept || '', programme: prog || '', student_name: '', student_application_no: '' }));
         setStudentSearchTerm('');
     };
 
@@ -197,13 +225,16 @@ const FeesEntry = () => {
     }, [studentSearchTerm, formData.college, formData.department, formData.year_type, formData.student_application_no]);
 
     const handleSelectStudent = (student) => {
+        const dobStr = student.dob || '';
         setFormData(prev => ({
             ...prev,
             student_name: student.student_name,
-            student_application_no: student.application_no
+            student_application_no: student.application_no,
+            student_dob: dobStr,
+            programme: student.programme || ''
         }));
         
-        const dateStr = student.admission_date ? student.admission_date.substring(0, 10).split('-').reverse().join('-') : 'N/A';
+        const dateStr = dobStr ? formatDate(dobStr) : 'N/A';
         setStudentSearchTerm(`${student.student_name} _ ${student.application_no} _ ${dateStr}`);
         setShowSuggestions(false);
     };
@@ -230,9 +261,11 @@ const FeesEntry = () => {
                 setFormData({
                     college: '',
                     department: '',
+                    programme: '',
                     year_type: '',
                     student_name: '',
                     student_application_no: '',
+                    student_dob: '',
                     paid_amount: '',
                     paid_date: new Date().toISOString().split('T')[0]
                 });
@@ -247,21 +280,25 @@ const FeesEntry = () => {
     };
 
     const handleEditFee = (record) => {
+        const dob = record.student_dob || '';
         setFormData({
             id: record.id,
             college: record.college || '',
             department: record.department || '',
+            programme: record.programme || '',
             year_type: record.year_type || '',
             student_name: record.student_name || '',
             student_application_no: record.student_application_no || '',
+            student_dob: dob,
             paid_amount: record.paid_amount || '',
-            paid_date: record.paid_date ? record.paid_date.substring(0, 10) : new Date().toISOString().split('T')[0]
+            paid_date: record.paid_date ? formatDateForInput(record.paid_date) : new Date().toISOString().split('T')[0]
         });
         
-        setStudentSearchTerm(`${record.student_name} _ ${record.student_application_no}`);
+        const dobDisplay = dob ? ` _ ${formatDate(dob)}` : '';
+        setStudentSearchTerm(`${record.student_name} _ ${record.student_application_no}${dobDisplay}`);
         
         const filteredDepts = allDepts.filter(d => d.institution === record.college);
-        setDepartments(filteredDepts.map(d => d.department).filter(Boolean));
+        setDepartments(filteredDepts); // Store full dept objects for dropdown
         
         setIsFormVisible(true);
     };
@@ -360,6 +397,18 @@ const FeesEntry = () => {
                             </div>
 
                             <div className={styles.filterGroup}>
+                                <label className={styles.filterLabel}>Year</label>
+                                <select 
+                                    className={styles.selectInput}
+                                    value={listYearFilter}
+                                    onChange={(e) => setListYearFilter(e.target.value)}
+                                >
+                                    <option value="">All Years</option>
+                                    {years.map(y => <option key={y.id || y.admission_year_name} value={y.admission_year_name}>{y.admission_year_name}</option>)}
+                                </select>
+                            </div>
+
+                            <div className={styles.filterGroup}>
                                 <label className={styles.filterLabel}>From Date (Paid)</label>
                                 <input 
                                     type="date" 
@@ -380,9 +429,12 @@ const FeesEntry = () => {
                             </div>
                         </div>
 
-                        <div className={styles.resetRow} style={{ marginBottom: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                             <button onClick={handleResetListFilters} className={styles.resetFiltersBtn}>
                                 Reset All Filters
+                            </button>
+                            <button onClick={handleExcelExport} className={styles.exportBtn} style={{ background: '#10b981', color: '#fff', border: 'none' }}>
+                                <Download size={18} /> Export Excel
                             </button>
                         </div>
 
@@ -417,6 +469,7 @@ const FeesEntry = () => {
                                             <th>Student Name</th>
                                             <th>College</th>
                                             <th>Quota</th>
+                                            <th>Programme</th>
                                             <th>Department</th>
                                             <th>Year</th>
                                             <th>Paid Amount</th>
@@ -433,10 +486,11 @@ const FeesEntry = () => {
                                                     <td>{record.student_name}</td>
                                                     <td>{record.college}</td>
                                                     <td>{record.quota || '—'}</td>
+                                                    <td>{record.programme||'—'}</td>
                                                     <td>{record.department}</td>
                                                     <td>{record.year_type}</td>
                                                     <td style={{ fontWeight: 'bold', color: '#059669' }}>₹{parseFloat(record.paid_amount || 0).toLocaleString()}</td>
-                                                    <td>{record.paid_date ? record.paid_date.substring(0, 10).split('-').reverse().join('-') : ''}</td>
+                                                    <td>{record.paid_date ? formatDate(record.paid_date) : ''}</td>
                                                     <td>
                                                         
                                                         <button className={styles.exportBtn} style={{ padding: '0.35rem 0.6rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px' }} title="Edit Payment" onClick={() => handleEditFee(record)}>
@@ -447,7 +501,7 @@ const FeesEntry = () => {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="9" style={{ textAlign: 'center', padding: '2rem' }}>No payment records found</td>
+                                                <td colSpan="11" style={{ textAlign: 'center', padding: '2rem' }}>No payment records found</td>
                                             </tr>
                                         )}
                                     </tbody>
@@ -514,13 +568,18 @@ const FeesEntry = () => {
                                 <label className={styles.filterLabel}>Department <span style={{color: 'red'}}>*</span></label>
                                 <select 
                                     className={styles.selectInput} 
-                                    value={formData.department} 
+                                    value={`${formData.department}||${formData.programme}`}
                                     onChange={handleDepartmentChange}
                                     required
                                     disabled={!formData.college}
                                 >
-                                    <option value="">Select Department</option>
-                                    {departments.map(d => <option key={d} value={d}>{d}</option>)}
+                                    <option value="||">Select Department</option>
+                                    {departments.map(d => {
+                                        const prog = d.program || '';
+                                        const dept = d.department || '';
+                                        const label = prog ? `${prog} - ${dept}` : dept;
+                                        return <option key={`${dept}||${prog}`} value={`${dept}||${prog}`}>{label}</option>;
+                                    })}
                                 </select>
                             </div>
 
@@ -558,7 +617,7 @@ const FeesEntry = () => {
                                         maxHeight: '200px', overflowY: 'auto', marginTop: '0.25rem'
                                     }}>
                                         {studentsList.map(student => {
-                                            const dateStr = student.admission_date ? student.admission_date.substring(0, 10).split('-').reverse().join('-') : 'N/A';
+                                            const dateStr = student.dob ? formatDate(student.dob) : 'N/A';
                                             return (
                                             <div
                                                 key={student.id}

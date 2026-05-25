@@ -645,10 +645,20 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         e.preventDefault();
         toast.loading('Saving and Processing Admission Entry...', { id: 'submit-load' });
 
+        // Map display quota labels to DB-stored values
+        const quotaMap = {
+            'Government Quota': 'COUNSELLING',
+            'Management Quota': 'MANAGEMENT'
+        };
+        const submitData = {
+            ...formData,
+            quota: quotaMap[formData.quota] || formData.quota
+        };
+
         try {
             const res = editingId
-                ? await apiService.put(`/admissions/${editingId}`, formData)
-                : await apiService.post('/admissions/submit', formData);
+                ? await apiService.put(`/admissions/${editingId}`, submitData)
+                : await apiService.post('/admissions/submit', submitData);
             toast.dismiss('submit-load');
 
             if (res.data.success) {
