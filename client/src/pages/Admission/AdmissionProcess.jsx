@@ -577,7 +577,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             address1: record.address_1 || '',
             address2: record.address_2 || '',
             pincode: record.pincode || '',
-            country: record.country || 'India',
+            country: record.country || '',
             state: record.state || '',
             district: record.district || '',
             city: record.city || '',
@@ -587,28 +587,28 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             tenthSchool: record.school_10th_name || '',
             tenthMark: record.mark_10th || '',
             regNo10th: record.reg_no_10th || '',
-            totalMarks10th: record.total_marks_10th || '500',
+            totalMarks10th: record.total_marks_10th || '',
             percentage10th: record.percentage_10th || '',
             tenthYOP: record.yop_10th || '',
 
             twelfthSchoolDistrict: record.school_12th_district || '',
             twelfthSchoolCity: record.school_12th_city || '',
             twelfthSchool: record.school_12th_name || '',
-            twelfthMarkSheetStatus: record.mark_sheet_given_status || 'No',
+            twelfthMarkSheetStatus: record.mark_sheet_given_status || '',
             twelfthYOP: record.yop_12th || '',
             twelfthGroup: record.group_in_12th || '',
-            languageStudied: 'Tamil',
-            subject1Name: record.subject_1_name || 'Tamil / Sanskrit Option',
+            languageStudied: '',
+            subject1Name: record.subject_1_name || '',
             subject1Mark: record.subject_1_mark || '',
-            subject2Name: record.subject_2_name || 'English',
+            subject2Name: record.subject_2_name || '',
             englishMark: record.subject_2_mark || '',
-            subject3Name: record.subject_3_name || 'Physics/Theory I',
+            subject3Name: record.subject_3_name || '',
             subject2Mark: record.subject_3_mark || '',
-            subject4Name: record.subject_4_name || 'Chemistry / Practical I',
+            subject4Name: record.subject_4_name || '',
             subject3Mark: record.subject_4_mark || '',
-            subject5Name: record.subject_5_name || 'Biology / CS / Practical II',
+            subject5Name: record.subject_5_name || '',
             subject4Mark: record.subject_5_mark || '',
-            subject6Name: record.subject_6_name || 'Maths',
+            subject6Name: record.subject_6_name || '',
             subject5Mark: record.subject_6_mark || '',
             totalMarks12th: record.total_marks_12th || '',
             percentage12th: record.percentage_12th || '',
@@ -626,9 +626,9 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             consultancyMobile: record.consultancy_mobile || '',
 
             courseStudied: record.course_studied || '',
-            medium: record.studied_medium || 'English',
+            medium: record.studied_medium || '',
             boardUniversity: record.board_university || '',
-            nativity: record.nativity || 'Tamil Nadu'
+            nativity: record.nativity || ''
         });
         prevFeeDeps.current = {
             college: record.college || '',
@@ -657,7 +657,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                 setIsEntryFormVisible(false);
                 handleResetForm();
                 fetchAdmissionsList(); // Load real admissions
-                setActiveSection('staff'); // Navigate to Staff View
+                setActiveSection('entry'); // Navigate back to Admission List
             }
         } catch (err) {
             toast.dismiss('submit-load');
@@ -734,8 +734,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                 { id: 4, name: '10th Details' },
                                 { id: 5, name: '12th Details' },
                                 { id: 6, name: 'UG_Details' },
-                                { id: 7, name: 'Reference_Details' },
-                                { id: 8, name: 'Last Studied' }
+                                { id: 7, name: 'Reference_Details' }
+                                // { id: 8, name: 'Last Studied' }
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -1496,7 +1496,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                             </div>
                         )}
 
-                        {/* TAB 8: LAST STUDIED */}
+                        {/* TAB 8: LAST STUDIED (Commented out as requested) 
                         {activeFormTab === 8 && (
                             <div className={styles.formCard}>
                                 <div className={styles.cardSectionTitle}>Prior Schooling Information</div>
@@ -1523,6 +1523,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                 </div>
                             </div>
                         )}
+                        */}
 
                         {/* FORM ACTION CONTROL BUTTONS */}
                         <div className={styles.formActions}>
@@ -1544,7 +1545,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                 </button>
                             )}
 
-                            {activeFormTab < 8 ? (
+                            {activeFormTab < 7 ? (
                                 <button
                                     type="button"
                                     className={`${styles.btn} ${styles.btnPrimary}`}

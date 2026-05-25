@@ -83,8 +83,7 @@ exports.submitAdmission = async (req, res, next) => {
             status: 'Admission Status',
             studentMobile: 'Student Mobile Number',
             gender: 'Gender',
-            twelfthMarkSheetStatus: '12th Marksheet Given Status',
-            twelfthGroup: '12th Group'
+            twelfthMarkSheetStatus: '12th Marksheet Given Status'
         };
 
         const missingFields = [];
