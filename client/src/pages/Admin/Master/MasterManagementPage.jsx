@@ -317,8 +317,12 @@ const MasterManagementPage = ({ title, tableType, columns, fields }) => {
                                             <option value="">Select {field.label}</option>
                                             {(() => {
                                                 let options = field.options || [];
-                                                if (field.optionsKey === 'institutions' && allMasterData.departments) {
-                                                    options = [...new Set(allMasterData.departments.map(d => d.institution).filter(Boolean))];
+                                                if (field.optionsKey === 'institutions') {
+                                                    if (allMasterData.institutions) {
+                                                        options = allMasterData.institutions.map(i => i.institution_name);
+                                                    } else if (allMasterData.departments) {
+                                                        options = [...new Set(allMasterData.departments.map(d => d.institution).filter(Boolean))];
+                                                    }
                                                 } else if (field.optionsKey === 'departments' && allMasterData.departments) {
                                                     const depList = field.dependsOn 
                                                         ? allMasterData.departments.filter(d => d.institution === formData[field.dependsOn])

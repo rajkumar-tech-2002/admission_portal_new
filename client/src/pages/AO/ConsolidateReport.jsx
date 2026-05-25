@@ -5,12 +5,27 @@ import styles from '../../components/css/ConsolidateReport.module.css';
 
 const ConsolidateReport = () => {
     const [data, setData] = useState([]);
-    const [filters, setFilters] = useState({ institutions: [], departments: [], quotaTypes: [] });
+    const [filters, setFilters] = useState({ institutions: [], departments: [], quotaTypes: [], admissionYears: [], deptMapping: [] });
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [institution, setInstitution] = useState('');
-    const [department, setDepartment] = useState('');
-    const [quotaType, setQuotaType] = useState('');
+    const [selectedInstitutions, setSelectedInstitutions] = useState([]);
+    const [selectedDepartments, setSelectedDepartments] = useState([]);
+    const [selectedQuotaTypes, setSelectedQuotaTypes] = useState([]);
+    const [selectedAdmissionYears, setSelectedAdmissionYears] = useState([]);
+
+    // Filter departments based on selected institutions
+    const availableDepartments = useMemo(() => {
+        if (selectedInstitutions.length === 0 || !filters.deptMapping) {
+            return filters.departments || [];
+        }
+        const matchedDepts = new Set();
+        filters.deptMapping.forEach(mapping => {
+            if (selectedInstitutions.includes(mapping.institution)) {
+                matchedDepts.add(mapping.department);
+            }
+        });
+        return Array.from(matchedDepts).sort();
+    }, [selectedInstitutions, filters.departments, filters.deptMapping]);
 
     // Fetch filter options on mount
     useEffect(() => {
@@ -34,9 +49,10 @@ const ConsolidateReport = () => {
             try {
                 const params = {};
                 if (search) params.search = search;
-                if (institution) params.institution = institution;
-                if (department) params.department = department;
-                if (quotaType) params.quota_type = quotaType;
+                if (selectedInstitutions.length > 0) params.institution = selectedInstitutions.join(',');
+                if (selectedDepartments.length > 0) params.department = selectedDepartments.join(',');
+                if (selectedQuotaTypes.length > 0) params.quota_type = selectedQuotaTypes.join(',');
+                if (selectedAdmissionYears.length > 0) params.admission_year = selectedAdmissionYears.join(',');
 
                 const res = await apiService.get('/consolidate-report', { params });
                 if (res.data.success) {
@@ -51,7 +67,7 @@ const ConsolidateReport = () => {
 
         const timer = setTimeout(fetchData, 300);
         return () => clearTimeout(timer);
-    }, [search, institution, department, quotaType]);
+    }, [search, selectedInstitutions, selectedDepartments, selectedQuotaTypes, selectedAdmissionYears]);
 
     // Build grouped structure: institution → quota_type → rows
     const groupedData = useMemo(() => {
@@ -97,9 +113,10 @@ const ConsolidateReport = () => {
 
     const handleReset = () => {
         setSearch('');
-        setInstitution('');
-        setDepartment('');
-        setQuotaType('');
+        setSelectedInstitutions([]);
+        setSelectedDepartments([]);
+        setSelectedQuotaTypes([]);
+        setSelectedAdmissionYears([]);
     };
 
     // Compute subtotals for a quota group
@@ -214,8 +231,8 @@ const ConsolidateReport = () => {
 
                 {/* Filters */}
                 <div className={styles.filtersCard}>
-                    <div className={styles.filtersRow}>
-                        <div className={`${styles.filterGroup} ${styles.searchGroup}`}>
+                    <div className={styles.filtersRow} style={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
+                        <div className={`${styles.filterGroup} ${styles.searchGroup}`} style={{ flex: 1, maxWidth: '400px' }}>
                             <label className={styles.filterLabel}>Global Search</label>
                             <div className={styles.searchInputWrapper}>
                                 <Search size={16} className={styles.searchIcon} />
@@ -228,49 +245,97 @@ const ConsolidateReport = () => {
                                 />
                             </div>
                         </div>
-                        <div className={styles.filterGroup}>
-                            <label className={styles.filterLabel}>Institution</label>
-                            <select
-                                className={styles.selectInput}
-                                value={institution}
-                                onChange={(e) => setInstitution(e.target.value)}
-                            >
-                                <option value="">All Institutions</option>
-                                {filters.institutions.map(inst => (
-                                    <option key={inst} value={inst}>{inst}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className={styles.filterGroup}>
-                            <label className={styles.filterLabel}>Department</label>
-                            <select
-                                className={styles.selectInput}
-                                value={department}
-                                onChange={(e) => setDepartment(e.target.value)}
-                            >
-                                <option value="">All Departments</option>
-                                {filters.departments.map(dept => (
-                                    <option key={dept} value={dept}>{dept}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className={styles.filterGroup}>
-                            <label className={styles.filterLabel}>Quota Type</label>
-                            <select
-                                className={styles.selectInput}
-                                value={quotaType}
-                                onChange={(e) => setQuotaType(e.target.value)}
-                            >
-                                <option value="">All Quota Types</option>
-                                {filters.quotaTypes.map(qt => (
-                                    <option key={qt} value={qt}>{qt}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <button className={styles.resetBtn} onClick={handleReset}>
+                        <button className={styles.resetBtn} onClick={handleReset} style={{ alignSelf: 'flex-end' }}>
                             <RotateCcw size={14} />
                             Reset
                         </button>
+                    </div>
+
+                    {/* Checkbox Rows */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {/* Institutions */}
+                        <div style={{ padding: '10px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <label className={styles.filterLabel} style={{ marginBottom: '0.75rem', display: 'block', color: '#334155' }}>Institutions</label>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                                {filters.institutions.map(inst => (
+                                    <label key={inst} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.875rem', color: '#1e293b' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedInstitutions.includes(inst)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) setSelectedInstitutions(prev => [...prev, inst]);
+                                                else setSelectedInstitutions(prev => prev.filter(v => v !== inst));
+                                            }}
+                                            style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--primary-color)' }}
+                                        />
+                                        {inst}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Departments */}
+                        <div style={{ padding: '10px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <label className={styles.filterLabel} style={{ marginBottom: '0.75rem', display: 'block', color: '#334155' }}>Departments</label>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                                {availableDepartments.map(dept => (
+                                    <label key={dept} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.875rem', color: '#1e293b' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedDepartments.includes(dept)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) setSelectedDepartments(prev => [...prev, dept]);
+                                                else setSelectedDepartments(prev => prev.filter(v => v !== dept));
+                                            }}
+                                            style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--primary-color)' }}
+                                        />
+                                        {dept}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Quota Types */}
+                        <div style={{ padding: '10px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <label className={styles.filterLabel} style={{ marginBottom: '0.75rem', display: 'block', color: '#334155' }}>Quota Types</label>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                                {filters.quotaTypes.map(qt => (
+                                    <label key={qt} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.875rem', color: '#1e293b' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedQuotaTypes.includes(qt)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) setSelectedQuotaTypes(prev => [...prev, qt]);
+                                                else setSelectedQuotaTypes(prev => prev.filter(v => v !== qt));
+                                            }}
+                                            style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--primary-color)' }}
+                                        />
+                                        {qt}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Admission Years */}
+                        <div style={{ padding: '10px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <label className={styles.filterLabel} style={{ marginBottom: '0.75rem', display: 'block', color: '#334155' }}>Admission Year</label>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                                {filters.admissionYears?.map(yr => (
+                                    <label key={yr} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.875rem', color: '#1e293b' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedAdmissionYears.includes(yr)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) setSelectedAdmissionYears(prev => [...prev, yr]);
+                                                else setSelectedAdmissionYears(prev => prev.filter(v => v !== yr));
+                                            }}
+                                            style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--primary-color)' }}
+                                        />
+                                        {yr}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -370,6 +435,18 @@ const ConsolidateReport = () => {
                                         return [...dataRows, subtotalRow];
                                     });
                                 })}
+                                {/* GRAND TOTAL ROW */}
+                                <tr className={styles.subtotalRow} style={{ backgroundColor: '#e2e8f0' }}>
+                                    <td colSpan="4" className={styles.subtotalLabel} style={{ textAlign: 'right', paddingRight: '1rem', color: '#1e293b' }}>GRAND TOTAL</td>
+                                    <td className={styles.subtotalVal} style={{ color: '#0f172a' }}>SUM={summary.totalIntake}</td>
+                                    <td className={styles.subtotalVal} style={{ color: '#0f172a' }}>SUM={summary.totalAdmitted}</td>
+                                    <td className={styles.subtotalVal} style={{ color: '#0f172a' }}>SUM={summary.totalIntake - summary.totalAdmitted}</td>
+                                    <td className={styles.subtotalVal} style={{ color: '#0f172a' }}>SUM={summary.totalYesterday}</td>
+                                    <td className={styles.subtotalVal} style={{ color: '#0f172a' }}>SUM={data.reduce((sum, r) => sum + (Number(r.today_admitted_count) || 0), 0)}</td>
+                                    <td className={styles.subtotalVal} style={{ color: '#0f172a' }}>
+                                        {summary.totalIntake > 0 ? ((summary.totalAdmitted / summary.totalIntake) * 100).toFixed(2) + '%' : '0.00%'}
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

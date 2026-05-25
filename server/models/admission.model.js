@@ -278,9 +278,9 @@ class Admission {
             SELECT 
                 sam.id as student_id, sam.application_no, sam.student_name, sam.college, sam.department,
                 cgd.id as cert_id,
-                cgd.tenth_marksheet, cgd.eleventh_marksheet, cgd.twelfth_marksheet,
+                cgd.tenth_marksheet, cgd.eleventh_marksheet, cgd.twelfth_marksheet, cgd.twelfth_temp,
                 cgd.transfer_certificate, cgd.community_certificate, cgd.first_graduate_certificate,
-                cgd.income_certificate, cgd.native_certificate, cgd.bonafide_certificate, cgd.remarks
+                cgd.income_certificate, cgd.native_certificate, cgd.bonafide_certificate, cgd.JD_certificate, cgd.remarks
             FROM student_admission_master sam
             LEFT JOIN certificate_given_details cgd ON sam.id = cgd.student_id
             ORDER BY sam.created_at DESC
@@ -291,9 +291,9 @@ class Admission {
     static async saveCertificate(data) {
         const {
             student_id, student_application_no,
-            tenth_marksheet, eleventh_marksheet, twelfth_marksheet,
+            tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
             transfer_certificate, community_certificate, first_graduate_certificate,
-            income_certificate, native_certificate, bonafide_certificate, remarks
+            income_certificate, native_certificate, bonafide_certificate, JD_certificate, remarks
         } = data;
 
         const [existing] = await db.execute('SELECT id FROM certificate_given_details WHERE student_id = ?', [student_id]);
@@ -301,15 +301,15 @@ class Admission {
         if (existing.length > 0) {
             const sql = `
                 UPDATE certificate_given_details SET
-                    tenth_marksheet = ?, eleventh_marksheet = ?, twelfth_marksheet = ?,
+                    tenth_marksheet = ?, eleventh_marksheet = ?, twelfth_marksheet = ?, twelfth_temp = ?,
                     transfer_certificate = ?, community_certificate = ?, first_graduate_certificate = ?,
-                    income_certificate = ?, native_certificate = ?, bonafide_certificate = ?, remarks = ?
+                    income_certificate = ?, native_certificate = ?, bonafide_certificate = ?, JD_certificate = ?, remarks = ?
                 WHERE student_id = ?
             `;
             await db.execute(sql, [
-                tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null,
+                tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
-                income_certificate || null, native_certificate || null, bonafide_certificate || null, remarks || null,
+                income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null, remarks || null,
                 student_id
             ]);
             return { action: 'updated', id: existing[0].id };
@@ -317,16 +317,16 @@ class Admission {
             const sql = `
                 INSERT INTO certificate_given_details (
                     student_id, student_application_no,
-                    tenth_marksheet, eleventh_marksheet, twelfth_marksheet,
+                    tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
                     transfer_certificate, community_certificate, first_graduate_certificate,
-                    income_certificate, native_certificate, bonafide_certificate, remarks
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    income_certificate, native_certificate, bonafide_certificate, JD_certificate, remarks
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const [result] = await db.execute(sql, [
                 student_id, student_application_no,
-                tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null,
+                tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
-                income_certificate || null, native_certificate || null, bonafide_certificate || null, remarks || null
+                income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null, remarks || null
             ]);
             return { action: 'inserted', id: result.insertId };
         }
@@ -358,27 +358,58 @@ class Admission {
     }
 
     static async saveFee(data) {
-        const sql = `
-            INSERT INTO student_fees_details (
-                college, department, year_type, student_application_no, student_name, paid_date, paid_amount
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        `;
-        const values = [
-            data.college || null,
-            data.department || null,
-            data.year_type || null,
-            data.student_application_no || null,
-            data.student_name || null,
-            data.paid_date || null,
-            data.paid_amount || null
-        ];
-        
-        const [result] = await db.execute(sql, values);
-        return result.insertId;
+        let studentQuota = null;
+        if (data.student_application_no) {
+            const [quotaRows] = await db.execute('SELECT quota FROM student_admission_master WHERE application_no = ?', [data.student_application_no]);
+            if (quotaRows.length > 0) {
+                studentQuota = quotaRows[0].quota;
+            }
+        }
+
+        if (data.id) {
+            const sql = `
+                UPDATE student_fees_details SET
+                    college = ?, department = ?, year_type = ?, student_application_no = ?, 
+                    student_name = ?, paid_date = ?, paid_amount = ?, student_quota = ?
+                WHERE id = ?
+            `;
+            const values = [
+                data.college || null,
+                data.department || null,
+                data.year_type || null,
+                data.student_application_no || null,
+                data.student_name || null,
+                data.paid_date || null,
+                data.paid_amount || null,
+                studentQuota,
+                data.id
+            ];
+            await db.execute(sql, values);
+            return data.id;
+        } else {
+            const sql = `
+                INSERT INTO student_fees_details (
+                    college, department, year_type, student_application_no, student_name, paid_date, paid_amount, student_quota
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            const values = [
+                data.college || null,
+                data.department || null,
+                data.year_type || null,
+                data.student_application_no || null,
+                data.student_name || null,
+                data.paid_date || null,
+                data.paid_amount || null,
+                studentQuota
+            ];
+            
+            const [result] = await db.execute(sql, values);
+            return result.insertId;
+        }
     }
     static async getAllFees() {
         const [rows] = await db.execute(`
-            SELECT * FROM student_fees_details ORDER BY created_at DESC
+            SELECT *, student_quota AS quota FROM student_fees_details ORDER BY created_at DESC
         `);
         return rows;
     }

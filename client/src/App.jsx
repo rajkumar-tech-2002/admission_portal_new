@@ -6,6 +6,7 @@ import ChangePassword from './pages/Admin/ChangePassword';
 import EmailLogs from './pages/Admin/Master/EmailLogs';
 import MasterManagementPage from './pages/Admin/Master/MasterManagementPage';
 import UserMaster from './pages/Admin/Master/UserMaster';
+import CourseFeesFix from './pages/Admin/Master/CourseFeesFix';
 import AdminLayout from './components/layout/AdminLayout';
 import ToastProvider from './components/layout/ToastProvider';
 import ReportPrint from './pages/AO/ReportPrint';
@@ -135,11 +136,15 @@ function App() {
               <MasterManagementPage 
                 title="Department Master" 
                 tableType="departments"
-                columns={[{key: 'department', label: 'Department'}, {key: 'type', label: 'Type'}, {key: 'intake_count', label: 'Intake Count'}]}
+                columns={[
+                  {key: 'institution', label: 'Institution'},
+                  {key: 'department', label: 'Department'}, 
+                  {key: 'type', label: 'Type'}
+                ]}
                 fields={[
+                  {name: 'institution', label: 'Institution', type: 'select', optionsKey: 'institutions', required: true},
                   {name: 'department', label: 'Department Name', required: true},
-                  {name: 'type', label: 'Type', type: 'select', options: ['UG', 'PG', 'DIPLOMA'], required: true},
-                  {name: 'intake_count', label: 'Intake Count', type: 'number', defaultValue: 0}
+                  {name: 'type', label: 'Type', type: 'select', options: ['UG', 'PG', 'DIPLOMA'], required: true}
                 ]}
               />
             </RoleRoute>
@@ -380,6 +385,12 @@ function App() {
           <Route path="master/users" element={
             <RoleRoute allowedRoles={['admin']}>
               <UserMaster />
+            </RoleRoute>
+          } />
+
+          <Route path="master/course-fees" element={
+            <RoleRoute allowedRoles={['admin']}>
+              <CourseFeesFix />
             </RoleRoute>
           } />
 

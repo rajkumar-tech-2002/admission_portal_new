@@ -112,12 +112,14 @@ const CertificateEntry = () => {
                 tenth_marksheet: rowData.tenth_marksheet,
                 eleventh_marksheet: rowData.eleventh_marksheet,
                 twelfth_marksheet: rowData.twelfth_marksheet,
+                twelfth_temp: rowData.twelfth_temp,
                 transfer_certificate: rowData.transfer_certificate,
                 community_certificate: rowData.community_certificate,
                 first_graduate_certificate: rowData.first_graduate_certificate,
                 income_certificate: rowData.income_certificate,
                 native_certificate: rowData.native_certificate,
                 bonafide_certificate: rowData.bonafide_certificate,
+                JD_certificate: rowData.JD_certificate,
                 remarks: rowData.remarks
             };
 
@@ -160,9 +162,9 @@ const CertificateEntry = () => {
                     // Update state
                     const emptyCertData = {
                         cert_id: null,
-                        tenth_marksheet: null, eleventh_marksheet: null, twelfth_marksheet: null,
+                        tenth_marksheet: null, eleventh_marksheet: null, twelfth_marksheet: null, twelfth_temp: null,
                         transfer_certificate: null, community_certificate: null, first_graduate_certificate: null,
-                        income_certificate: null, native_certificate: null, bonafide_certificate: null, remarks: null,
+                        income_certificate: null, native_certificate: null, bonafide_certificate: null, JD_certificate: null, remarks: null,
                         isDirty: false
                     };
                     
@@ -288,18 +290,20 @@ const CertificateEntry = () => {
                                 <tr>
                                     <th>S.No</th>
                                     <th>App No</th>
-                                    <th>Student Name</th>
-                                    <th>College</th>
-                                    <th>Department</th>
-                                    <th>10th Marksheet</th>
-                                    <th>11th Marksheet</th>
-                                    <th>12th Marksheet</th>
-                                    <th>Transfer Cert</th>
-                                    <th>Community Cert</th>
-                                    <th>First Grad Cert</th>
-                                    <th>Income Cert</th>
-                                    <th>Native Cert</th>
-                                    <th>Bonafide Cert</th>
+                                    <th>Name</th>
+                                    <th>Coll</th>
+                                    <th>Dept</th>
+                                    <th>10th MC</th>
+                                    <th>11th MC</th>
+                                    <th>12th MC</th>
+                                    <th>12th Temp</th>
+                                    <th>TC</th>
+                                    <th>Comm</th>
+                                    <th>FGC</th>
+                                    <th>IC</th>
+                                    <th>NC</th>
+                                    <th>BC</th>
+                                    <th>JD</th>
                                     <th>Remarks</th>
                                     <th>Action</th>
                                 </tr>
@@ -321,12 +325,14 @@ const CertificateEntry = () => {
                                             <td><SelectField value={rowData.tenth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'tenth_marksheet', val)} /></td>
                                             <td><SelectField value={rowData.eleventh_marksheet} onChange={(val) => handleInputChange(record.student_id, 'eleventh_marksheet', val)} /></td>
                                             <td><SelectField value={rowData.twelfth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'twelfth_marksheet', val)} /></td>
+                                            <td><SelectField value={rowData.twelfth_temp} onChange={(val) => handleInputChange(record.student_id, 'twelfth_temp', val)} /></td>
                                             <td><SelectField value={rowData.transfer_certificate} onChange={(val) => handleInputChange(record.student_id, 'transfer_certificate', val)} /></td>
                                             <td><SelectField value={rowData.community_certificate} onChange={(val) => handleInputChange(record.student_id, 'community_certificate', val)} /></td>
                                             <td><SelectField value={rowData.first_graduate_certificate} onChange={(val) => handleInputChange(record.student_id, 'first_graduate_certificate', val)} /></td>
                                             <td><SelectField value={rowData.income_certificate} onChange={(val) => handleInputChange(record.student_id, 'income_certificate', val)} /></td>
                                             <td><SelectField value={rowData.native_certificate} onChange={(val) => handleInputChange(record.student_id, 'native_certificate', val)} /></td>
                                             <td><SelectField value={rowData.bonafide_certificate} onChange={(val) => handleInputChange(record.student_id, 'bonafide_certificate', val)} /></td>
+                                            <td><SelectField value={rowData.JD_certificate} onChange={(val) => handleInputChange(record.student_id, 'JD_certificate', val)} /></td>
                                             <td>
                                                 <input 
                                                     type="text" 
@@ -362,7 +368,7 @@ const CertificateEntry = () => {
                                     )})
                                 ) : (
                                     <tr>
-                                        <td colSpan="16" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
+                                        <td colSpan="18" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
                                     </tr>
                                 )}
                             </tbody>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Search, Plus, ArrowLeft, FileCheck, Trash2 } from 'lucide-react';
+import { Save, Search, Plus, ArrowLeft, FileCheck, Edit } from 'lucide-react';
 import styles from '../../components/css/Dashboard.module.css';
 import reportStyles from '../../components/css/RecordReport.module.css';
 import apiService from '../../services/api.service';
@@ -28,6 +28,7 @@ const FeesEntry = () => {
     const [listSearch, setListSearch] = useState('');
     const [listCollegeFilter, setListCollegeFilter] = useState('');
     const [listDeptFilter, setListDeptFilter] = useState('');
+    const [listQuotaFilter, setListQuotaFilter] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [filteredFeesRecords, setFilteredFeesRecords] = useState([]);
@@ -106,6 +107,10 @@ const FeesEntry = () => {
             result = result.filter(r => r.department === listDeptFilter);
         }
 
+        if (listQuotaFilter) {
+            result = result.filter(r => r.quota === listQuotaFilter);
+        }
+
         if (fromDate) {
             result = result.filter(r => new Date(r.paid_date || r.created_at) >= new Date(fromDate));
         }
@@ -117,12 +122,13 @@ const FeesEntry = () => {
 
         setFilteredFeesRecords(result);
         setCurrentPage(1);
-    }, [feesRecords, listSearch, listCollegeFilter, listDeptFilter, fromDate, toDate]);
+    }, [feesRecords, listSearch, listCollegeFilter, listDeptFilter, listQuotaFilter, fromDate, toDate]);
 
     const handleResetListFilters = () => {
         setListSearch('');
         setListCollegeFilter('');
         setListDeptFilter('');
+        setListQuotaFilter('');
         setFromDate('');
         setToDate('');
         setCurrentPage(1);
@@ -240,19 +246,24 @@ const FeesEntry = () => {
         }
     };
 
-    const handleDeleteFee = (id) => {
-        confirmAction('Are you sure you want to delete this payment record?', async () => {
-            try {
-                const response = await apiService.delete(`/admissions/fees/${id}`);
-                if (response.data.success) {
-                    toast.success('Payment record deleted successfully');
-                    fetchSavedFees();
-                }
-            } catch (error) {
-                console.error('Delete error:', error);
-                toast.error(error.response?.data?.message || 'Failed to delete fee record');
-            }
+    const handleEditFee = (record) => {
+        setFormData({
+            id: record.id,
+            college: record.college || '',
+            department: record.department || '',
+            year_type: record.year_type || '',
+            student_name: record.student_name || '',
+            student_application_no: record.student_application_no || '',
+            paid_amount: record.paid_amount || '',
+            paid_date: record.paid_date ? record.paid_date.substring(0, 10) : new Date().toISOString().split('T')[0]
         });
+        
+        setStudentSearchTerm(`${record.student_name} _ ${record.student_application_no}`);
+        
+        const filteredDepts = allDepts.filter(d => d.institution === record.college);
+        setDepartments(filteredDepts.map(d => d.department).filter(Boolean));
+        
+        setIsFormVisible(true);
     };
 
     return (
@@ -336,6 +347,19 @@ const FeesEntry = () => {
                             </div>
 
                             <div className={styles.filterGroup}>
+                                <label className={styles.filterLabel}>Quota</label>
+                                <select 
+                                    className={styles.selectInput}
+                                    value={listQuotaFilter}
+                                    onChange={(e) => setListQuotaFilter(e.target.value)}
+                                >
+                                    <option value="">All Quotas</option>
+                                    <option value="COUNSELLING">COUNSELLING</option>
+                                    <option value="MANAGEMENT">MANAGEMENT</option>
+                                </select>
+                            </div>
+
+                            <div className={styles.filterGroup}>
                                 <label className={styles.filterLabel}>From Date (Paid)</label>
                                 <input 
                                     type="date" 
@@ -392,6 +416,7 @@ const FeesEntry = () => {
                                             <th>App No</th>
                                             <th>Student Name</th>
                                             <th>College</th>
+                                            <th>Quota</th>
                                             <th>Department</th>
                                             <th>Year</th>
                                             <th>Paid Amount</th>
@@ -407,14 +432,15 @@ const FeesEntry = () => {
                                                     <td><strong>{record.student_application_no}</strong></td>
                                                     <td>{record.student_name}</td>
                                                     <td>{record.college}</td>
+                                                    <td>{record.quota || '—'}</td>
                                                     <td>{record.department}</td>
                                                     <td>{record.year_type}</td>
                                                     <td style={{ fontWeight: 'bold', color: '#059669' }}>₹{parseFloat(record.paid_amount || 0).toLocaleString()}</td>
                                                     <td>{record.paid_date ? record.paid_date.substring(0, 10).split('-').reverse().join('-') : ''}</td>
                                                     <td>
                                                         
-                                                        <button className={styles.deleteBtn} title="Delete Payment" onClick={() => handleDelete(record.id)}>
-                                                            <Trash2 size={16} />
+                                                        <button className={styles.exportBtn} style={{ padding: '0.35rem 0.6rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px' }} title="Edit Payment" onClick={() => handleEditFee(record)}>
+                                                            <Edit size={16} />
                                                         </button>
                                                     </td>
                                                 </tr>

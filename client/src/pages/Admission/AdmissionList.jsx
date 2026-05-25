@@ -88,7 +88,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
     };
 
     const importColumns = [
-        'application_no', 'reg_no_12th', 'student_name', 'dob', 'college', 'admission_date', 'department', 'admission_year', 'quota',
+        'application_no', 'reg_no_12th', 'student_name', 'dob', 'college', 'admission_date', 'department', 'programme', 'programme_type', 'admission_year', 'quota',
         'first_graduate', 'student_status', 'remark', 'aadhaar_no', 'school_type', 'fee', 'reference_remark',
         'reference_amount_1', 'reference_paid_amount', 'community', 'father_name', 'mother_name', 'father_mobile_no',
         'student_mobile_no', 'mother_mobile_no', 'father_occupation', 'father_annual_income', 'religion', 'caste_name',
@@ -98,7 +98,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
         'school_12th_name', 'mark_sheet_given_status', 'yop_12th', 'group_in_12th',
         'subject_1_name', 'subject_1_mark', 'subject_2_name', 'subject_2_mark', 'subject_3_name', 'subject_3_mark',
         'subject_4_name', 'subject_4_mark', 'subject_5_name', 'subject_5_mark', 'subject_6_name', 'subject_6_mark',
-        'total_marks_12th', 'percentage_12th', 'ug_university', 'reference_type', 'reference_college',
+        'total_marks_12th', 'percentage_12th', 'ug_college', 'diploma_college', 'reference_type', 'reference_college',
         'reference_department', 'reference_by_name', 'reference_by_mobile', 'consultancy_name',
         'consultancy_person_name', 'consultancy_mobile', 'course_studied', 'studied_medium', 'board_university', 'nativity'
     ];
@@ -263,43 +263,27 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                     <table className={styles.table}>
                         <thead>
                             <tr>
-                                <th>S.No</th>
-                                <th>App No</th>
-                                <th>Date & Time</th>
-                                <th>Name</th>
-                                <th>DOB</th>
-                                <th>Gender</th>
-                                <th>Mobile</th>
-                                <th>Aadhaar</th>
-                                <th>College</th>
-                                <th>Dept</th>
-                                <th>Quota</th>
-                                <th>District</th>
-                                <th>Status</th>
                                 <th>Action</th>
+                                <th>12 Reg.Number</th>
+                                <th>Application Number</th>
+                                <th>Application Date</th>
+                                <th>Status</th>
+                                <th>Student Name</th>
+                                <th>College</th>
+                                <th>Department</th>
+                                <th>Year</th>
+                                <th>Quota</th>
+                                <th>Communication</th>
+                                <th>DOB</th>
+                                <th>Father Mobile</th>
+                                <th>Student Mobile</th>
+                                <th>Fees</th>
                             </tr>
                         </thead>
                         <tbody>
                             {currentRecords.length > 0 ? (
                                 currentRecords.map((record, index) => (
                                     <tr key={record.id}>
-                                        <td>{indexOfFirstRecord + index + 1}</td>
-                                        <td><strong>{record.application_no}</strong></td>
-                                        <td>{formatDateTime(record.created_at)}</td>
-                                        <td>{record.student_name}</td>
-                                        <td>{record.dob ? record.dob.substring(0, 10).split('-').reverse().join('-') : ''}</td>
-                                        <td>{record.gender}</td>
-                                        <td>{record.student_mobile_no}</td>
-                                        <td>{record.aadhaar_no}</td>
-                                        <td>{record.college}</td>
-                                        <td>{record.department}</td>
-                                        <td>{record.quota}</td>
-                                        <td>{record.district}</td>
-                                        <td>
-                                            <span className={`${styles.statusBadge} ${styles['status-' + record.student_status]}`}>
-                                                {record.student_status}
-                                            </span>
-                                        </td>
                                         <td>
                                             <div style={{ display: 'flex', gap: '5px' }}>
                                                 <button 
@@ -318,11 +302,29 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                                                 </button>
                                             </div>
                                         </td>
+                                        <td>{record.reg_no_12th}</td>
+                                        <td><strong>{record.application_no}</strong></td>
+                                        <td>{record.created_at ? record.created_at.substring(0, 10).split('-').reverse().join('-') : ''}</td>
+                                        <td>
+                                            <span className={`${styles.statusBadge} ${styles['status-' + record.student_status]}`}>
+                                                {record.student_status}
+                                            </span>
+                                        </td>
+                                        <td>{record.student_name}</td>
+                                        <td>{record.college}</td>
+                                        <td>{record.department}</td>
+                                        <td>{record.admission_year}</td>
+                                        <td>{record.quota}</td>
+                                        <td>{record.city || record.district || ''}</td>
+                                        <td>{record.dob ? record.dob.substring(0, 10).split('-').reverse().join('-') : ''}</td>
+                                        <td>{record.father_mobile_no}</td>
+                                        <td>{record.student_mobile_no}</td>
+                                        <td>{record.fee}</td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="9" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
+                                     <td colSpan="15" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
                                 </tr>
                             )}
                         </tbody>

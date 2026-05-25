@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { 
     LayoutDashboard, LogOut, Menu, X, Archive, Settings, ChevronDown, ChevronRight,
     Building2, GraduationCap, Users2, FileCheck, UserPlus, Activity, Calendar, KeyRound, Mail,
-    Users, Award, BarChart3
+    Users, Award, BarChart3, IndianRupee
 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -221,6 +221,9 @@ const AdminLayout = ({ children }) => {
                                         </NavLink>
                                         <NavLink to="/admin/master/users" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <Users size={16} /> User Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/course-fees" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <IndianRupee size={16} /> Course Fees Fix
                                         </NavLink>
                                         <NavLink to="/admin/master/email-logs" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <Mail size={16} /> Email Logs

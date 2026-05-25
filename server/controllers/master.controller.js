@@ -20,6 +20,8 @@ exports.getAllMasterData = async (req, res, next) => {
         const admissionYears = await Master.getAllFromTable('admission_year_master');
         const groups12th = await Master.getAllFromTable('group_in_12th_master');
         const roles = await Master.getAllFromTable('role_master');
+        const courseFeeStructure = await Master.getAllFromTable('course_fee_structure');
+        const institutions = await Master.getAllFromTable('institution_master');
 
         res.status(200).json({
             success: true,
@@ -40,6 +42,8 @@ exports.getAllMasterData = async (req, res, next) => {
                 admissionYears,
                 groups12th,
                 roles,
+                courseFeeStructure,
+                institutions,
                 validDate: await Master.getValidDate()
             }
         });
