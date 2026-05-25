@@ -140,15 +140,15 @@ const FeesEntry = () => {
     // Excel Export for Payment List
     const handleExcelExport = () => {
         if (filteredFeesRecords.length === 0) { toast.error('No records to export'); return; }
-        const headers = ['S.No','App No','Student Name','College','Quota','Department','Programme','Year','Paid Amount','Paid Date'];
+        const headers = ['S.No','App No','Student Name','College','Quota','Programme','Department','Year','Paid Amount','Paid Date'];
         const rows = filteredFeesRecords.map((r, i) => [
             i + 1,
             r.student_application_no,
             r.student_name,
             r.college,
             r.quota || '',
-            r.department,
             r.programme || '',
+            r.department,
             r.year_type,
             r.paid_amount,
             r.paid_date ? r.paid_date.substring(0, 10).split('-').reverse().join('-') : ''

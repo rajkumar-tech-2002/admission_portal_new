@@ -87,9 +87,9 @@ const CertificateEntry = () => {
     // Excel Export
     const handleExcelExport = () => {
         if (filteredRecords.length === 0) { toast.error('No records to export'); return; }
-        const headers = ['S.No','App No','Name','College','Dept','Programme','Year','10th MC','11th MC','12th MC','12th Temp','TC','Comm','FGC','IC','NC','BC','JD','Remarks'];
+        const headers = ['S.No','App No','Name','College','Programme','Department','Year','10th MC','11th MC','12th MC','12th Temp','TC','Comm','FGC','IC','NC','BC','JD','Remarks'];
         const rows = filteredRecords.map((r, i) => [
-            i + 1, r.application_no, r.student_name, r.college, r.department, r.programme || '', r.admission_year || '',
+            i + 1, r.application_no, r.student_name, r.college, r.programme, r.department, r.admission_year || '',
             r.tenth_marksheet || '', r.eleventh_marksheet || '', r.twelfth_marksheet || '', r.twelfth_temp || '',
             r.transfer_certificate || '', r.community_certificate || '', r.first_graduate_certificate || '',
             r.income_certificate || '', r.native_certificate || '', r.bonafide_certificate || '',
