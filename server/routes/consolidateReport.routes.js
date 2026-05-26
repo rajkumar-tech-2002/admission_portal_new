@@ -9,4 +9,7 @@ router.get('/', authMiddleware, consolidateReportController.getConsolidateReport
 // Get distinct filter values (institutions & departments)
 router.get('/filters', authMiddleware, consolidateReportController.getConsolidateFilters);
 
+// Get department count report
+router.get('/department-count', authMiddleware, consolidateReportController.getDepartmentCount);
+
 module.exports = router;

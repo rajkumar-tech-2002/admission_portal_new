@@ -11,6 +11,7 @@ import AdmissionList from './AdmissionList';
 import StaffView from './StaffView';
 import CertificateEntry from './CertificateEntry';
 import FeesEntry from './FeesEntry';
+import AutoSuggestInput from '../../components/layout/AutoSuggestInput';
 
 const AdmissionProcess = ({ defaultSection = 'entry' }) => {
     // Left sub-sidebar tab selection: 'entry', 'staff', 'certificates', 'fees'
@@ -64,6 +65,9 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
 
     // Consultancy details
     const [consultancyList, setConsultancyList] = useState([]);
+
+    // Track selected department by unique id (to disambiguate same dept name with different programmes)
+    const [selectedDeptId, setSelectedDeptId] = useState('');
 
     // Form States
     const [formData, setFormData] = useState({
@@ -153,6 +157,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         referenceType: '',
         referenceCollege: '',
         referenceDepartment: '',
+        referenceProgramme: '',
+        referenceProgrammeType: '',
         referenceByName: '',
         referenceByMobile: '',
         consultancyName: '',
@@ -166,17 +172,6 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         nativity: 'Tamil Nadu'
     });
 
-    // Simulated Student List for "Staff View"
-    const [students, setStudents] = useState([
-        { id: 'ADM2026001', name: 'Arun Kumar K', regno: '26AD001', aadhar: '4321 8765 0912', email: 'arun.k@gmail.com', mobile: '9876543210', dept: 'Information Technology', type: 'Counseling', status: 'Admitted' },
-        { id: 'ADM2026002', name: 'Deepa Lakshmi R', regno: '26AD002', aadhar: '9012 3456 7890', email: 'deepa.r@gmail.com', mobile: '8765432109', dept: 'Computer Science', type: 'Management', status: 'Admitted' },
-        { id: 'ADM2026003', name: 'Naveen Prasath S', regno: '26AD003', aadhar: '5678 1234 9012', email: 'naveen.s@gmail.com', mobile: '7654321098', dept: 'Artificial Intelligence', type: 'Direct', status: 'Pending' },
-        { id: 'ADM2026004', name: 'Shreya Vardhini J', regno: '26AD004', aadhar: '1234 5678 9012', email: 'shreya.j@gmail.com', mobile: '6543210987', dept: 'Electrical Engineering', type: 'Counseling', status: 'Admitted' },
-        { id: 'ADM2026005', name: 'Vijay Anand M', regno: '26AD005', aadhar: '7890 1234 5678', email: 'vijay.m@gmail.com', mobile: '9012345678', dept: 'Mechanical Engineering', type: 'Management', status: 'Discontinued' }
-    ]);
-
-    const [searchTerm, setSearchTerm] = useState('');
-    const [deptFilter, setDeptFilter] = useState('');
 
     // Fetch Master Data & Admissions Autocomplete Lists on Mount
     useEffect(() => {
@@ -255,18 +250,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             const res = await apiService.get('/admissions/list');
             if (res.data.success) {
                 setRawAdmissions(res.data.data);
-                const dbStudents = res.data.data.map(adm => ({
-                    id: `ADM${String(adm.id).padStart(7, '0')}`,
-                    name: adm.student_name || 'N/A',
-                    regno: adm.reg_no_12th || 'N/A',
-                    aadhar: adm.aadhaar_no || 'N/A',
-                    email: adm.student_email || 'N/A',
-                    mobile: adm.student_mobile_no || 'N/A',
-                    dept: adm.department || 'N/A',
-                    type: adm.quota || 'N/A',
-                    status: adm.student_status || 'N/A'
-                }));
-                setStudents(dbStudents);
+
             }
         } catch (err) {
             console.error("Failed to fetch student admissions from DB:", err);
@@ -285,7 +269,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
     useEffect(() => {
         const fetchFee = async () => {
             const { college, department, year, quota } = formData;
-            
+
             // Only fetch if the user actually changed one of the dependencies
             if (
                 college !== prevFeeDeps.current.college ||
@@ -294,7 +278,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                 quota !== prevFeeDeps.current.quota
             ) {
                 prevFeeDeps.current = { college, department, year, quota };
-                
+
                 if (college && department && year && quota) {
                     try {
                         const res = await apiService.get(`/admissions/course-fee?college=${encodeURIComponent(college)}&department=${encodeURIComponent(department)}&year=${encodeURIComponent(year)}&quota=${encodeURIComponent(quota)}`);
@@ -335,19 +319,20 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                 programme: '',
                 programmeType: ''
             }));
+            setSelectedDeptId('');
             return;
         }
 
-        if (name === 'department') {
-            const selectedDept = masterData.departments.find(d => 
-                d.department === value && 
-                (formData.college ? (d.institution || '').trim() === formData.college : true)
-            );
+        // Department selected by unique id — prevents wrong auto-fill when same dept name exists with different programmes
+        if (name === 'deptId') {
+            const deptId = parseInt(value, 10);
+            const selectedDept = masterData.departments.find(d => d.id === deptId);
+            setSelectedDeptId(value);
             setFormData(prev => ({
                 ...prev,
-                department: value,
-                programme: selectedDept ? selectedDept.program || '' : '',
-                programmeType: selectedDept ? selectedDept.type || '' : ''
+                department: selectedDept ? selectedDept.department : '',
+                programme: selectedDept ? (selectedDept.program || '') : '',
+                programmeType: selectedDept ? (selectedDept.type || '') : ''
             }));
             return;
         }
@@ -410,12 +395,31 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             return;
         }
 
+        // 1.5. When referenceType changes, reset all cascading Staff reference fields
+        if (name === 'referenceType') {
+            setFormData(prev => ({
+                ...prev,
+                referenceType: value,
+                referenceCollege: '',
+                referenceDepartment: '',
+                referenceProgramme: '',
+                referenceProgrammeType: '',
+                referenceByName: '',
+                referenceByMobile: ''
+            }));
+            setStaffDepartments([]);
+            setStaffMembers([]);
+            return;
+        }
+
         // 2. Cascading handler for Reference College (Institution)
-        if (name === 'referenceCollege' && formData.referenceType === 'Staff') {
+        if (name === 'referenceCollege' && (formData.referenceType === 'Staff' || formData.referenceType === 'Our Staff')) {
             setFormData(prev => ({
                 ...prev,
                 referenceCollege: value,
                 referenceDepartment: '',
+                referenceProgramme: '',
+                referenceProgrammeType: '',
                 referenceByName: '',
                 referenceByMobile: ''
             }));
@@ -435,10 +439,14 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         }
 
         // 3. Cascading handler for Reference Department
-        if (name === 'referenceDepartment' && formData.referenceType === 'Staff') {
+        if (name === 'referenceDepartment' && (formData.referenceType === 'Staff' || formData.referenceType === 'Our Staff')) {
+            // Find the dept object to auto-fill programme and programme_type
+            const deptObj = staffDepartments.find(d => d.staff_department === value);
             setFormData(prev => ({
                 ...prev,
                 referenceDepartment: value,
+                referenceProgramme: deptObj ? (deptObj.staff_programme || '') : '',
+                referenceProgrammeType: deptObj ? (deptObj.staff_programme_type || '') : '',
                 referenceByName: '',
                 referenceByMobile: ''
             }));
@@ -457,7 +465,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         }
 
         // 4. Cascading handler for Reference By Name (Staff Name)
-        if (name === 'referenceByName' && formData.referenceType === 'Staff') {
+        if (name === 'referenceByName' && (formData.referenceType === 'Staff' || formData.referenceType === 'Our Staff')) {
             const selectedStaff = staffMembers.find(s => s.staff_name === value);
             setFormData(prev => ({
                 ...prev,
@@ -530,9 +538,10 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             subject6Name: 'Maths', subject5Mark: '', subject6Mark: '',
             totalMarks12th: '', percentage12th: '',
             ugCollege: '', diplomaCollege: '',
-            referenceType: '', referenceCollege: '', referenceDepartment: '', referenceByName: '', referenceByMobile: '', consultancyName: '', consultancyPersonName: '', consultancyMobile: '',
+            referenceType: '', referenceCollege: '', referenceDepartment: '', referenceProgramme: '', referenceProgrammeType: '', referenceByName: '', referenceByMobile: '', consultancyName: '', consultancyPersonName: '', consultancyMobile: '',
             courseStudied: '', medium: 'English', boardUniversity: '', nativity: 'Tamil Nadu'
         });
+        setSelectedDeptId('');
         prevFeeDeps.current = { college: '', department: '', year: '', quota: '' };
         setActiveFormTab(1);
         toast.success('Admission Form Reset Successfully!');
@@ -619,6 +628,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             referenceType: record.reference_type || '',
             referenceCollege: record.reference_college || '',
             referenceDepartment: record.reference_department || '',
+            referenceProgramme: record.reference_programme || '',
+            referenceProgrammeType: record.reference_programme_type || '',
             referenceByName: record.reference_by_name || '',
             referenceByMobile: record.reference_by_mobile || '',
             consultancyName: record.consultancy_name || '',
@@ -630,6 +641,13 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
             boardUniversity: record.board_university || '',
             nativity: record.nativity || ''
         });
+        // Restore selectedDeptId by matching college + department + programme uniquely
+        const matchedDept = masterData.departments.find(d =>
+            d.department === (record.department || '') &&
+            (record.programme ? (d.program || '') === record.programme : true) &&
+            (record.college ? (d.institution || '').trim() === record.college : true)
+        );
+        setSelectedDeptId(matchedDept ? String(matchedDept.id) : '');
         prevFeeDeps.current = {
             college: record.college || '',
             department: record.department || '',
@@ -692,16 +710,6 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         }
     };
 
-    // Filters for simulated student table
-    const filteredStudents = students.filter(s => {
-        const matchesSearch =
-            s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            s.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            s.regno.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            s.mobile.includes(searchTerm);
-        const matchesDept = deptFilter === '' || s.dept.toLowerCase().includes(deptFilter.toLowerCase());
-        return matchesSearch && matchesDept;
-    });
 
     return (
         <div className={styles.container}>
@@ -809,12 +817,12 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                                 programmeType: '', // You may fetch this or leave it to be updated if needed
                                                                 college: collegeName
                                                             }));
-                                                            
+
                                                             // We deliberately do not update prevFeeDeps here so the useEffect WILL trigger and fetch the fee
                                                             // for the auto-filled college and department.
 
                                                             // Handle cascading fetch for Staff reference details
-                                                            if (student.reference_type === 'Staff') {
+                                                            if (student.reference_type === 'Staff' || student.reference_type === 'Our Staff') {
                                                                 if (student.reference_institution) {
                                                                     try {
                                                                         const depRes = await apiService.get(`/admissions/staff-departments?institution=${encodeURIComponent(student.reference_institution)}`);
@@ -878,11 +886,16 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>department <span className={styles.requiredAsterisk}>*</span></label>
-                                        <select name="department" value={formData.department} onChange={handleChange} required className={`${styles.inputField} ${styles.selectField}`}>
+                                        <select name="deptId" value={selectedDeptId} onChange={handleChange} required className={`${styles.inputField} ${styles.selectField}`}>
                                             <option value="">Select Department</option>
                                             {masterData.departments
                                                 .filter(d => formData.college ? (d.institution ? d.institution.trim() : '') === formData.college : true)
-                                                .map(d => <option key={d.id} value={d.department}>{d.department}</option>)}
+                                                .map(d => {
+                                                    const label = d.program
+                                                        ? `${d.program} - ${d.department}`
+                                                        : d.department;
+                                                    return <option key={d.id} value={d.id}>{label}</option>;
+                                                })}
                                         </select>
                                     </div>
                                     <div className={styles.inputGroup}>
@@ -1056,11 +1069,25 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Address 2</label>
-                                        <input type="text" name="address2" value={formData.address2} onChange={handleChange} className={styles.inputField} placeholder="Area / Landmark" />
+                                        <AutoSuggestInput 
+                                            name="address2" 
+                                            value={formData.address2} 
+                                            onChange={handleChange} 
+                                            className={styles.inputField} 
+                                            placeholder="Area / Landmark"
+                                            suggestionField="address2"
+                                        />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Pincode</label>
-                                        <input type="text" name="pincode" value={formData.pincode} onChange={handleChange} className={styles.inputField} placeholder="638001" />
+                                        <AutoSuggestInput 
+                                            name="pincode" 
+                                            value={formData.pincode} 
+                                            onChange={handleChange} 
+                                            className={styles.inputField} 
+                                            placeholder="638001"
+                                            suggestionField="pincode"
+                                        />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Country</label>
@@ -1090,7 +1117,14 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>City</label>
-                                        <input type="text" name="city" value={formData.city} onChange={handleChange} className={styles.inputField} placeholder="City / Town" />
+                                        <AutoSuggestInput 
+                                            name="city" 
+                                            value={formData.city} 
+                                            onChange={handleChange} 
+                                            className={styles.inputField} 
+                                            placeholder="City / Town"
+                                            suggestionField="city"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -1110,7 +1144,14 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>10 School City</label>
-                                        <input type="text" name="tenthSchoolCity" value={formData.tenthSchoolCity} onChange={handleChange} className={styles.inputField} placeholder="School City" />
+                                        <AutoSuggestInput 
+                                            name="tenthSchoolCity" 
+                                            value={formData.tenthSchoolCity} 
+                                            onChange={handleChange} 
+                                            className={styles.inputField} 
+                                            placeholder="School City" 
+                                            suggestionField="tenth_school_city"
+                                        />
                                     </div>
                                     <div className={styles.inputGroup} style={{ position: 'relative' }}>
                                         <label className={styles.inputLabel}>10th School</label>
@@ -1239,7 +1280,14 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>12 school City</label>
-                                        <input type="text" name="twelfthSchoolCity" value={formData.twelfthSchoolCity} onChange={handleChange} className={styles.inputField} placeholder="School City" />
+                                        <AutoSuggestInput 
+                                            name="twelfthSchoolCity" 
+                                            value={formData.twelfthSchoolCity} 
+                                            onChange={handleChange} 
+                                            className={styles.inputField} 
+                                            placeholder="School City" 
+                                            suggestionField="twelfth_school_city"
+                                        />
                                     </div>
                                     <div className={styles.inputGroup} style={{ position: 'relative' }}>
                                         <label className={styles.inputLabel}>12th School</label>
@@ -1420,7 +1468,14 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                 <div className={styles.formGrid}>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>UG College Name</label>
-                                        <input type="text" name="ugCollege" value={formData.ugCollege} onChange={handleChange} className={styles.inputField} placeholder="e.g. Anna University / Bharathiar University" />
+                                        <AutoSuggestInput 
+                                            name="ugCollege" 
+                                            value={formData.ugCollege} 
+                                            onChange={handleChange} 
+                                            className={styles.inputField} 
+                                            placeholder="e.g. Anna University / Bharathiar University" 
+                                            suggestionField="ug_college_name"
+                                        />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Diploma College Name</label>
@@ -1444,7 +1499,8 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>reference college</label>
-                                        {formData.referenceType === 'Staff' ? (
+                                        {formData.referenceType === 'Staff' ||
+                                            formData.referenceType === 'Our Staff' ? (
                                             <select name="referenceCollege" value={formData.referenceCollege} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
                                                 <option value="">Select College</option>
                                                 {staffInstitutions.map((inst, idx) => (
@@ -1452,25 +1508,68 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                 ))}
                                             </select>
                                         ) : (
-                                            <input type="text" name="referenceCollege" value={formData.referenceCollege} onChange={handleChange} className={styles.inputField} placeholder="Referenced College Name" />
+                                            <AutoSuggestInput 
+                                                name="referenceCollege" 
+                                                value={formData.referenceCollege} 
+                                                onChange={handleChange} 
+                                                className={styles.inputField} 
+                                                placeholder="Referenced College Name" 
+                                                suggestionField="reference_institution"
+                                            />
                                         )}
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>reference department</label>
-                                        {formData.referenceType === 'Staff' ? (
+                                        {formData.referenceType === 'Staff' ||
+                                            formData.referenceType === 'Our Staff' ? (
                                             <select name="referenceDepartment" value={formData.referenceDepartment} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
                                                 <option value="">Select Department</option>
-                                                {staffDepartments.map((dept, idx) => (
-                                                    <option key={idx} value={dept}>{dept}</option>
-                                                ))}
+                                                {staffDepartments.map((dept, idx) => {
+                                                    const label = dept.staff_programme
+                                                        ? `${dept.staff_programme} - ${dept.staff_department}`
+                                                        : dept.staff_department;
+                                                    return <option key={idx} value={dept.staff_department}>{label}</option>;
+                                                })}
                                             </select>
                                         ) : (
-                                            <input type="text" name="referenceDepartment" value={formData.referenceDepartment} onChange={handleChange} className={styles.inputField} placeholder="Referenced Dept" />
+                                            <AutoSuggestInput 
+                                                name="referenceDepartment" 
+                                                value={formData.referenceDepartment} 
+                                                onChange={handleChange} 
+                                                className={styles.inputField} 
+                                                placeholder="Referenced Dept" 
+                                                suggestionField="reference_dept"
+                                            />
                                         )}
                                     </div>
                                     <div className={styles.inputGroup}>
+                                        <label className={styles.inputLabel}>Reference Programme</label>
+                                        <input
+                                            type="text"
+                                            name="referenceProgramme"
+                                            value={formData.referenceProgramme}
+                                            readOnly
+                                            className={styles.inputField}
+                                            style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed', color: '#666' }}
+                                            placeholder="Auto-filled from department"
+                                        />
+                                    </div>
+                                    <div className={styles.inputGroup}>
+                                        <label className={styles.inputLabel}>Reference Programme Type</label>
+                                        <input
+                                            type="text"
+                                            name="referenceProgrammeType"
+                                            value={formData.referenceProgrammeType}
+                                            readOnly
+                                            className={styles.inputField}
+                                            style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed', color: '#666' }}
+                                            placeholder="Auto-filled from department"
+                                        />
+                                    </div>
+                                    <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Reference By Name</label>
-                                        {formData.referenceType === 'Staff' ? (
+                                        {formData.referenceType === 'Staff' ||
+                                            formData.referenceType === 'Our Staff' ? (
                                             <select name="referenceByName" value={formData.referenceByName} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
                                                 <option value="">Select Staff Name</option>
                                                 {staffMembers.map((member, idx) => (
@@ -1478,12 +1577,45 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                 ))}
                                             </select>
                                         ) : (
-                                            <input type="text" name="referenceByName" value={formData.referenceByName} onChange={handleChange} className={styles.inputField} placeholder="Referrer Name" />
+                                            <AutoSuggestInput 
+                                                name="referenceByName" 
+                                                value={formData.referenceByName} 
+                                                onChange={handleChange} 
+                                                className={styles.inputField} 
+                                                placeholder="Referrer Name" 
+                                                suggestionField="reference_name"
+                                            />
                                         )}
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>Reference By Mobile</label>
-                                        <input type="tel" name="referenceByMobile" value={formData.referenceByMobile} onChange={handleChange} className={styles.inputField} placeholder="Referrer Mobile" maxLength={10} pattern="[0-9]*" />
+                                        <label className={styles.inputLabel}>
+                                            Reference By Mobile
+                                            {formData.referenceByMobile && (formData.referenceType === 'Staff' || formData.referenceType === 'Our Staff') && (
+                                                <span style={{ fontSize: '0.72rem', color: '#16a34a', marginLeft: '6px', fontWeight: 500 }}>✓ Auto-fetched</span>
+                                            )}
+                                            {!formData.referenceByMobile && formData.referenceByName && (formData.referenceType === 'Staff' || formData.referenceType === 'Our Staff') && (
+                                                <span style={{ fontSize: '0.72rem', color: '#d97706', marginLeft: '6px', fontWeight: 500 }}>Enter manually</span>
+                                            )}
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            name="referenceByMobile"
+                                            value={formData.referenceByMobile}
+                                            onChange={handleChange}
+                                            className={styles.inputField}
+                                            placeholder={
+                                                formData.referenceByName && (formData.referenceType === 'Staff' || formData.referenceType === 'Our Staff')
+                                                    ? "Phone not found — type mobile number"
+                                                    : "Referrer Mobile"
+                                            }
+                                            maxLength={10}
+                                            pattern="[0-9]*"
+                                            style={
+                                                !formData.referenceByMobile && formData.referenceByName && (formData.referenceType === 'Staff' || formData.referenceType === 'Our Staff')
+                                                    ? { borderColor: '#f59e0b', boxShadow: '0 0 0 2px rgba(245,158,11,0.15)' }
+                                                    : {}
+                                            }
+                                        />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Consultancy Name</label>

@@ -3,7 +3,7 @@ import { NavLink, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { 
     LayoutDashboard, LogOut, Menu, X, Archive, Settings, ChevronDown, ChevronRight,
     Building2, GraduationCap, Users2, FileCheck, UserPlus, Activity, Calendar, KeyRound, Mail,
-    Users, Award, BarChart3, IndianRupee
+    Users, Award, BarChart3, IndianRupee, FileText
 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -16,20 +16,22 @@ const AdminLayout = ({ children }) => {
     const location = useLocation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMasterOpen, setIsMasterOpen] = useState(false);
+    const [isReportsOpen, setIsReportsOpen] = useState(false);
+    const [isAOResportsOpen, setIsAOResportsOpen] = useState(false);
 
     const role = (sessionStorage.getItem('role') || 'admin').toLowerCase();
     const username = sessionStorage.getItem('username') || 'Admin User';
     const displayRole = role === 'admin' ? 'Administrator' : role.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
-    // Auto-close master submenu when navigating away from master module pages
+    // Auto-close master/reports submenu when navigating away
     useEffect(() => {
         const isMasterRoute = location.pathname.includes('/admin/master') || location.pathname.includes('/admin/change-password');
-        if (!isMasterRoute) {
-            setIsMasterOpen(false);
-        } else {
-            // Keep it open if we are on a master page
-            setIsMasterOpen(true);
-        }
+        const isReportsRoute = location.pathname.includes('/admin/reports');
+        const isAORoute = location.pathname.includes('/admin/consolidate-report') || location.pathname.includes('/admin/department-count');
+        
+        setIsMasterOpen(isMasterRoute);
+        setIsReportsOpen(isReportsRoute);
+        setIsAOResportsOpen(isAORoute);
     }, [location.pathname]);
 
     const handleLogout = () => {
@@ -139,19 +141,52 @@ const AdminLayout = ({ children }) => {
                                     <FileCheck size={20} />
                                     Fees Entry
                                 </NavLink>
+
+                                {/* Reports Module - For Admin and Admission */}
+                                <div className={styles.navGroup}>
+                                    <div 
+                                        className={`${styles.navItem} ${isReportsOpen ? styles.groupActive : ''}`} 
+                                        onClick={() => setIsReportsOpen(!isReportsOpen)}
+                                    >
+                                        <FileText size={20} />
+                                        <span style={{ flex: 1 }}>Reports</span>
+                                        {isReportsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                    </div>
+                                    
+                                    {isReportsOpen && (
+                                        <div className={styles.subMenu}>
+                                            <NavLink to="/admin/reports/to-office" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <FileText size={16} /> To Office
+                                            </NavLink>
+                                        </div>
+                                    )}
+                                </div>
                             </>
                         )}
 
-                        {/* Consolidate Report - Only for AO */}
+                        {/* Reports Module - Only for AO */}
                         {(role === 'ao' || role === 'AO') && (
-                            <NavLink 
-                                to="/admin/consolidate-report" 
-                                className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
-                                onClick={closeSidebar}
-                            >
-                                <BarChart3 size={20} />
-                                Consolidate Report
-                            </NavLink>
+                            <div className={styles.navGroup}>
+                                <div 
+                                    className={`${styles.navItem} ${isAOResportsOpen ? styles.groupActive : ''}`} 
+                                    onClick={() => setIsAOResportsOpen(!isAOResportsOpen)}
+                                >
+                                    <BarChart3 size={20} />
+                                    <span style={{ flex: 1 }}>Reports</span>
+                                    {isAOResportsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                </div>
+                                
+                                {isAOResportsOpen && (
+                                    <div className={styles.subMenu}>
+                                        <NavLink to="/admin/consolidate-report" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <BarChart3 size={16} /> Consolidate
+                                        </NavLink>
+                                        <NavLink to="/admin/department-count" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <FileText size={16} /> Department Count
+                                        </NavLink>
+                                    </div>
+                                )}
+                            </div>
                         )}
 
                         {/* Master Module - ONLY for Admin */}

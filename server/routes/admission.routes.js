@@ -10,6 +10,7 @@ router.get('/staff-departments', authMiddleware, admissionController.getStaffDep
 router.get('/staff-members', authMiddleware, admissionController.getStaffMembers);
 router.get('/consultancies', authMiddleware, admissionController.getConsultancies);
 router.get('/course-fee', authMiddleware, admissionController.getCourseFee);
+router.get('/suggestions', authMiddleware, admissionController.getSuggestions);
 
 // Admission Process Actions
 router.post('/submit', authMiddleware, admissionController.submitAdmission);

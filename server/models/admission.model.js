@@ -26,7 +26,7 @@ class Admission {
 
     static async getStaffDepartments(institution) {
         const [rows] = await db.execute(`
-            SELECT DISTINCT staff_department 
+            SELECT DISTINCT staff_department, staff_programme, staff_programme_type
             FROM staff_master 
             WHERE staff_institution = ? AND staff_department IS NOT NULL AND staff_department != ''
             ORDER BY staff_department ASC
@@ -68,6 +68,24 @@ class Admission {
         return rows.length > 0 ? rows[0].fees : null;
     }
 
+    static async getSuggestions(field, query) {
+        const allowedFields = ['city', 'address2', 'taluk', 'district', 'state', 'pincode', 'tenth_school_name', 'twelfth_school_name', 'tenth_school_city', 'twelfth_school_city', 'ug_college_name', 'reference_name', 'reference_institution', 'reference_dept'];
+        if (!allowedFields.includes(field)) {
+            throw new Error('Invalid field for suggestions');
+        }
+
+        const searchTerm = `%${query}%`;
+        const sql = `
+            SELECT DISTINCT ?? as value
+            FROM student_admission_master
+            WHERE ?? LIKE ? AND ?? IS NOT NULL AND ?? != ''
+            ORDER BY ?? ASC
+            LIMIT 15
+        `;
+        const [rows] = await db.query(sql, [field, field, searchTerm, field, field, field]);
+        return rows.map(r => r.value);
+    }
+
     static async createAdmission(data) {
         const toNull = (val) => (val === undefined || val === null || val === '') ? null : val;
 
@@ -105,7 +123,7 @@ class Admission {
                 subject_1_name, subject_1_mark, subject_2_name, subject_2_mark, subject_3_name, subject_3_mark,
                 subject_4_name, subject_4_mark, subject_5_name, subject_5_mark, subject_6_name, subject_6_mark,
                 total_marks_12th, percentage_12th, ug_college, diploma_college, reference_type, reference_college,
-                reference_department, reference_by_name, reference_by_mobile, consultancy_name,
+                reference_department, reference_programme, reference_programme_type, reference_by_name, reference_by_mobile, consultancy_name,
                 consultancy_person_name, consultancy_mobile, course_studied, studied_medium, board_university, nativity
             ) VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
@@ -119,7 +137,7 @@ class Admission {
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?
             )
         `;
@@ -199,6 +217,8 @@ class Admission {
             toNull(data.referenceType),
             toNull(data.referenceCollege),
             toNull(data.referenceDepartment),
+            toNull(data.referenceProgramme),
+            toNull(data.referenceProgrammeType),
             toNull(data.referenceByName),
             toNull(data.referenceByMobile),
             toNull(data.consultancyName),
@@ -237,7 +257,7 @@ class Admission {
                 subject_1_name=?, subject_1_mark=?, subject_2_name=?, subject_2_mark=?, subject_3_name=?, subject_3_mark=?,
                 subject_4_name=?, subject_4_mark=?, subject_5_name=?, subject_5_mark=?, subject_6_name=?, subject_6_mark=?,
                 total_marks_12th=?, percentage_12th=?, ug_college=?, diploma_college=?, reference_type=?, reference_college=?,
-                reference_department=?, reference_by_name=?, reference_by_mobile=?, consultancy_name=?,
+                reference_department=?, reference_programme=?, reference_programme_type=?, reference_by_name=?, reference_by_mobile=?, consultancy_name=?,
                 consultancy_person_name=?, consultancy_mobile=?, course_studied=?, studied_medium=?, board_university=?, nativity=?
             WHERE id=?
         `;
@@ -254,7 +274,7 @@ class Admission {
             toNull(data.subject1Name), toNull(data.subject1Mark), toNull(data.subject2Name), toNull(data.englishMark), toNull(data.subject3Name), toNull(data.subject2Mark),
             toNull(data.subject4Name), toNull(data.subject3Mark), toNull(data.subject5Name), toNull(data.subject4Mark), toNull(data.subject6Name), toNull(data.subject5Mark),
             toNull(data.totalMarks12th), toNull(data.percentage12th), toNull(data.ugCollege), toNull(data.diplomaCollege), toNull(data.referenceType), toNull(data.referenceCollege),
-            toNull(data.referenceDepartment), toNull(data.referenceByName), toNull(data.referenceByMobile), toNull(data.consultancyName),
+            toNull(data.referenceDepartment), toNull(data.referenceProgramme), toNull(data.referenceProgrammeType), toNull(data.referenceByName), toNull(data.referenceByMobile), toNull(data.consultancyName),
             toNull(data.consultancyPersonName), toNull(data.consultancyMobile), toNull(data.courseStudied), toNull(data.medium), toNull(data.boardUniversity), toNull(data.nativity),
             id
         ];

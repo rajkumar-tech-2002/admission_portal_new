@@ -97,7 +97,41 @@ const MasterManagementPage = ({ title, tableType, columns, fields }) => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        const updatedData = { ...formData, [name]: value };
+
+        // If institution changes, reset any dependent department fields and their auto-fills
+        const dependentDeptFields = fields.filter(f => f.dependsOn === name && f.optionsKey === 'departments');
+        if (dependentDeptFields.length > 0) {
+            dependentDeptFields.forEach(deptField => {
+                updatedData[deptField.name] = '';
+                // Also clear auto-fills that depend on this department field
+                const autoFillFields = fields.filter(f => f.autoFillFrom === deptField.name);
+                autoFillFields.forEach(f => { updatedData[f.name] = ''; });
+            });
+        }
+
+        // If the changed field is a department selector, auto-fill dependent fields
+        const autoFillFields = fields.filter(f => f.autoFillFrom === name);
+        if (autoFillFields.length > 0 && allMasterData.departments) {
+            // Find the matching department record (respecting institution filter if set)
+            const institutionField = fields.find(f => f.optionsKey === 'departments')?.dependsOn;
+            const selectedInstitution = updatedData[institutionField];
+            const deptRecord = allMasterData.departments.find(d =>
+                d.department === value &&
+                (!selectedInstitution || d.institution === selectedInstitution)
+            );
+            if (deptRecord) {
+                autoFillFields.forEach(f => {
+                    // Store null for null programme (not empty string) to match DB
+                    const rawVal = deptRecord[f.autoFillSource];
+                    updatedData[f.name] = (rawVal === null || rawVal === undefined) ? '' : rawVal;
+                });
+            } else {
+                autoFillFields.forEach(f => { updatedData[f.name] = ''; });
+            }
+        }
+
+        setFormData(updatedData);
     };
 
     const handleCheckboxChange = (fieldName, option, checked) => {
@@ -120,8 +154,12 @@ const MasterManagementPage = ({ title, tableType, columns, fields }) => {
             if (Array.isArray(value)) {
                 value = value.join(',');
             }
-            submissionData[field.name] = value;
+            // For auto-filled fields, use the value directly from formData (may be null/empty)
+            // Convert undefined to null for clean DB storage
+            submissionData[field.name] = (value === undefined || value === '') ? null : value;
         });
+        // Debug log to confirm auto-filled values are included
+        console.log('Submitting staff data:', submissionData);
 
         try {
             if (editingItem) {
@@ -306,7 +344,17 @@ const MasterManagementPage = ({ title, tableType, columns, fields }) => {
                             {fields.map(field => (
                                 <div className={styles.formGroup} key={field.name}>
                                     <label className={styles.label}>{field.label}</label>
-                                    {field.type === 'select' ? (
+                                    {field.type === 'auto-filled' ? (
+                                        <input
+                                            type="text"
+                                            name={field.name}
+                                            value={formData[field.name] || ''}
+                                            readOnly
+                                            className={styles.input}
+                                            style={{ backgroundColor: 'var(--bg-secondary, #f5f5f5)', cursor: 'not-allowed', color: 'var(--text-secondary, #666)' }}
+                                            placeholder={`Auto-filled from department`}
+                                        />
+                                    ) : field.type === 'select' ? (
                                         <select 
                                             name={field.name} 
                                             value={formData[field.name] || ''} 
@@ -323,11 +371,18 @@ const MasterManagementPage = ({ title, tableType, columns, fields }) => {
                                                     } else if (allMasterData.departments) {
                                                         options = [...new Set(allMasterData.departments.map(d => d.institution).filter(Boolean))];
                                                     }
+                                                    return options.map(opt => <option key={opt} value={opt}>{opt}</option>);
                                                 } else if (field.optionsKey === 'departments' && allMasterData.departments) {
                                                     const depList = field.dependsOn 
                                                         ? allMasterData.departments.filter(d => d.institution === formData[field.dependsOn])
                                                         : allMasterData.departments;
-                                                    options = [...new Set(depList.map(d => d.department).filter(Boolean))];
+                                                    // Show programme - department label when programme exists
+                                                    return depList
+                                                        .filter(d => d.department)
+                                                        .map(d => {
+                                                            const label = d.program ? `${d.program} - ${d.department}` : d.department;
+                                                            return <option key={`${d.institution}-${d.program}-${d.department}`} value={d.department}>{label}</option>;
+                                                        });
                                                 }
                                                 return options.map(opt => <option key={opt} value={opt}>{opt}</option>);
                                             })()}

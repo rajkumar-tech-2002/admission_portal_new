@@ -1,31 +1,70 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Edit2, Trash2, UserPlus, Download, Upload } from 'lucide-react';
+import { Search, Download, FileText } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import styles from '../../components/css/Dashboard.module.css';
-import reportStyles from '../../components/css/RecordReport.module.css';
-import { formatDate, formatDateTime } from '../../utils/dateFormatter';
-import toast from 'react-hot-toast';
-import { confirmAction } from '../../components/layout/Toast';
 import apiService from '../../services/api.service';
+import toast from 'react-hot-toast';
 
-const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
-    const fileInputRef = useRef(null);
+const ToOfficeReport = () => {
+    const [admissions, setAdmissions] = useState([]);
+    const [filteredRecords, setFilteredRecords] = useState([]);
+    const [masterData, setMasterData] = useState({
+        colleges: [],
+        departments: [],
+        years: [],
+        quotas: []
+    });
+
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(100);
     
     // Filters
     const [search, setSearch] = useState('');
-    const [status, setStatus] = useState('');
+    const [college, setCollege] = useState('');
+    const [year, setYear] = useState('');
+    const [course, setCourse] = useState(''); // Department
+    const [quota, setQuota] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
 
-    const [filteredRecords, setFilteredRecords] = useState([]);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [admRes, masterRes] = await Promise.all([
+                    apiService.get('/admissions/list'),
+                    apiService.get('/master')
+                ]);
+
+                if (admRes.data.success) {
+                    setAdmissions(admRes.data.data);
+                }
+
+                if (masterRes.data.success) {
+                    const md = masterRes.data.data;
+                    
+                    // Extract unique colleges
+                    const uniqueColleges = [...new Set(md.departments.map(d => d.institution).filter(Boolean))];
+                    
+                    setMasterData({
+                        colleges: uniqueColleges,
+                        departments: md.departments,
+                        years: md.admissionYears,
+                        quotas: md.admissionTypes
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch data:", err);
+                toast.error("Failed to load report data");
+            }
+        };
+        fetchData();
+    }, []);
 
     useEffect(() => {
         let result = admissions;
 
-        // Apply Search
+        // Global Search
         if (search) {
             const lowerSearch = search.toLowerCase();
             result = result.filter(r => 
@@ -37,12 +76,27 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
             );
         }
 
-        // Apply Status
-        if (status) {
-            result = result.filter(r => r.student_status === status);
+        // College Filter
+        if (college) {
+            result = result.filter(r => (r.college || '').trim() === college);
         }
 
-        // Apply Dates
+        // Year Filter
+        if (year) {
+            result = result.filter(r => (r.admission_year || '') === year);
+        }
+
+        // Course/Department Filter
+        if (course) {
+            result = result.filter(r => (r.department || '') === course);
+        }
+
+        // Quota Filter
+        if (quota) {
+            result = result.filter(r => (r.quota || '') === quota);
+        }
+
+        // Date Filters
         if (fromDate) {
             result = result.filter(r => new Date(r.admission_date || r.created_at) >= new Date(fromDate));
         }
@@ -54,7 +108,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
 
         setFilteredRecords(result);
         setCurrentPage(1);
-    }, [admissions, search, status, fromDate, toDate]);
+    }, [admissions, search, college, year, course, quota, fromDate, toDate]);
 
     // Pagination Logic
     const indexOfLastRecord = currentPage * recordsPerPage;
@@ -66,82 +120,38 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
 
     const handleResetFilters = () => {
         setSearch('');
-        setStatus('');
+        setCollege('');
+        setYear('');
+        setCourse('');
+        setQuota('');
         setFromDate('');
         setToDate('');
         setCurrentPage(1);
     };
 
-
-    const importColumns = [
-        'application_no', 'reg_no_12th', 'student_name', 'dob', 'college', 'admission_date', 'department', 'programme', 'programme_type', 'admission_year', 'quota',
-        'first_graduate', 'student_status', 'remark', 'aadhaar_no', 'school_type', 'fee', 'reference_remark',
-        'reference_amount_1', 'reference_paid_amount', 'community', 'father_name', 'mother_name', 'father_mobile_no',
-        'student_mobile_no', 'mother_mobile_no', 'father_occupation', 'father_annual_income', 'religion', 'caste_name',
-        'gender', 'student_email', 'address_1', 'address_2', 'pincode', 'country', 'state', 'district', 'city',
-        'is_10th', 'school_10th_district', 'school_10th_city', 'school_10th_name', 'mark_10th', 'reg_no_10th',
-        'total_marks_10th', 'percentage_10th', 'yop_10th', 'is_12th', 'school_12th_district', 'school_12th_city',
-        'school_12th_name', 'mark_sheet_given_status', 'yop_12th', 'group_in_12th',
-        'subject_1_name', 'subject_1_mark', 'subject_2_name', 'subject_2_mark', 'subject_3_name', 'subject_3_mark',
-        'subject_4_name', 'subject_4_mark', 'subject_5_name', 'subject_5_mark', 'subject_6_name', 'subject_6_mark',
-        'total_marks_12th', 'percentage_12th', 'ug_college', 'diploma_college', 'reference_type', 'reference_college',
-        'reference_department', 'reference_by_name', 'reference_by_mobile', 'consultancy_name',
-        'consultancy_person_name', 'consultancy_mobile', 'course_studied', 'studied_medium', 'board_university', 'nativity'
-    ];
-
-    const handleExportTemplate = () => {
-        const ws = XLSX.utils.aoa_to_sheet([importColumns]);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Template");
-        XLSX.writeFile(wb, "Admission_Import_Template.xlsx");
-    };
-
     const handleExportRecords = () => {
         if (filteredRecords.length === 0) return toast.error("No records to export");
-        const exportData = filteredRecords.map(r => {
-            const row = {};
-            importColumns.forEach(col => {
-                row[col] = r[col] || '';
-            });
-            return row;
-        });
+        
+        // Define columns to export for the report
+        const exportData = filteredRecords.map((r, i) => ({
+            'S.No': i + 1,
+            'Application Number': r.application_no,
+            'College': r.college,
+            'Department': r.programme ? `${r.programme} - ${r.department}` : r.department,
+            'Quota': r.quota,
+            'Year': r.admission_year,
+            'Admission Date': r.admission_date ? r.admission_date.substring(0, 10).split('-').reverse().join('-') : '',
+            'Student Name': r.student_name,
+            'Community': r.community,
+            'DOB': r.dob ? r.dob.substring(0, 10).split('-').reverse().join('-') : '',
+            'Original Certificate': '',
+            'OS Sign': ''
+        }));
+
         const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Admissions");
-        XLSX.writeFile(wb, `Admissions_Export_${new Date().getTime()}.xlsx`);
-    };
-
-    const handleImport = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = async (evt) => {
-            try {
-                const bstr = evt.target.result;
-                const wb = XLSX.read(bstr, { type: 'binary' });
-                const wsname = wb.SheetNames[0];
-                const ws = wb.Sheets[wsname];
-                const data = XLSX.utils.sheet_to_json(ws, { raw: false, dateNF: 'yyyy-mm-dd', defval: null });
-                
-                if (data.length === 0) return toast.error("Empty file");
-
-                const loadingToast = toast.loading('Importing records...');
-                const response = await apiService.post('/admissions/import', { records: data });
-                
-                if (response.data.success) {
-                    toast.success(`Successfully imported ${response.data.result?.imported || 0} records`, { id: loadingToast });
-                    if (onRefresh) onRefresh();
-                } else {
-                    toast.error(response.data.message || 'Import failed', { id: loadingToast });
-                }
-            } catch (err) {
-                console.error(err);
-                toast.error('Error importing file');
-            }
-            if (fileInputRef.current) fileInputRef.current.value = '';
-        };
-        reader.readAsBinaryString(file);
+        XLSX.utils.book_append_sheet(wb, ws, "To_Office_Report");
+        XLSX.writeFile(wb, `To_Office_Report_${new Date().getTime()}.xlsx`);
     };
 
     return (
@@ -149,34 +159,24 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
             <div className={styles.mainCard}>
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <UserPlus size={22} style={{ color: 'var(--primary-color)' }} />
-                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Admission Records</h2>
+                        <FileText size={22} style={{ color: 'var(--primary-color)' }} />
+                        <h2 style={{color:"var(--primary-color)", margin: 0}}>To Office Report</h2>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <input type="file" ref={fileInputRef} onChange={handleImport} accept=".xlsx, .xls" style={{ display: 'none' }} />
-                        <button onClick={() => fileInputRef.current.click()} className={styles.exportBtn} style={{ background: '#10b981', color: '#fff', border: 'none' }}>
-                            <Upload size={18} /> Import Excel
-                        </button>
-                        <button onClick={handleExportTemplate} className={styles.exportBtn}>
-                            <Download size={18} /> Template
-                        </button>
                         <button onClick={handleExportRecords} className={styles.exportBtn}>
-                            <Download size={18} /> Export
-                        </button>
-                        <button onClick={onAdd} className={styles.exportBtn} style={{ background: 'var(--primary-color)', color: '#fff', border: 'none' }}>
-                            <Plus size={18} /> Add Application
+                            <Download size={18} /> Export Excel
                         </button>
                     </div>
                 </div>
 
-                <div className={styles.filters}>
+                <div className={styles.filters} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
                     <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>Global Search</label>
                         <div style={{ position: 'relative' }}>
                             <input 
                                 type="text" 
                                 className={styles.searchInput} 
-                                placeholder="Search name, app no, regno, aadhaar, mobile..."
+                                placeholder="Search..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
@@ -185,16 +185,61 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                     </div>
 
                     <div className={styles.filterGroup}>
-                        <label className={styles.filterLabel}>Status</label>
+                        <label className={styles.filterLabel}>College</label>
                         <select 
                             className={styles.selectInput}
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
+                            value={college}
+                            onChange={(e) => setCollege(e.target.value)}
                         >
-                            <option value="">All Statuses</option>
-                            <option value="ADMITTED">ADMITTED</option>
-                            <option value="ENQUIRY">ENQUIRY</option>
-                            <option value="DISCONTINUE">DISCONTINUE</option>
+                            <option value="">All Colleges</option>
+                            {masterData.colleges.map((c, i) => (
+                                <option key={i} value={c}>{c}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Year</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                        >
+                            <option value="">All Years</option>
+                            {masterData.years.map((y) => (
+                                <option key={y.id} value={y.admission_year_name}>{y.admission_year_name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Course (Department)</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={course}
+                            onChange={(e) => setCourse(e.target.value)}
+                        >
+                            <option value="">All Courses</option>
+                            {masterData.departments
+                                .filter(d => college ? d.institution === college : true)
+                                .map(d => {
+                                    const label = d.program ? `${d.program} - ${d.department}` : d.department;
+                                    return <option key={d.id} value={d.department}>{label}</option>;
+                                })}
+                        </select>
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Quota</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={quota}
+                            onChange={(e) => setQuota(e.target.value)}
+                        >
+                            <option value="">All Quotas</option>
+                            {masterData.quotas.map(q => (
+                                <option key={q.id} value={q.type_name}>{q.type_name}</option>
+                            ))}
                         </select>
                     </div>
 
@@ -249,61 +294,37 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                     <table className={styles.table}>
                         <thead>
                             <tr>
-                                <th>Action</th>
-                                <th>12 Reg.Number</th>
+                                <th>S.No</th>
                                 <th>Application Number</th>
-                                <th>Application Date</th>
-                                <th>Status</th>
-                                <th>Student Name</th>
                                 <th>College</th>
                                 <th>Department</th>
-                                <th>Year</th>
                                 <th>Quota</th>
-                                <th>Communication</th>
+                                <th>Year</th>
+                                <th>Admission Date</th>
+                                <th>Student Name</th>
+                                <th>Community</th>
                                 <th>DOB</th>
-                                <th>Father Mobile</th>
-                                <th>Student Mobile</th>
-                                <th>Fees</th>
                             </tr>
                         </thead>
                         <tbody>
                             {currentRecords.length > 0 ? (
                                 currentRecords.map((record, index) => (
                                     <tr key={record.id}>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: '5px' }}>
-                                                <button 
-                                                    className={styles.editBtn}
-                                                    onClick={() => onEdit(record)}
-                                                    title="Edit Record"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td>{record.reg_no_12th}</td>
+                                        <td>{indexOfFirstRecord + index + 1}</td>
                                         <td><strong>{record.application_no}</strong></td>
-                                        <td>{record.admission_date ? record.admission_date.substring(0, 10).split('-').reverse().join('-') : ''}</td>
-                                        <td>
-                                            <span className={`${styles.statusBadge} ${styles['status-' + record.student_status]}`}>
-                                                {record.student_status}
-                                            </span>
-                                        </td>
-                                        <td>{record.student_name}</td>
                                         <td>{record.college}</td>
-                                        <td>{record.department}</td>
-                                        <td>{record.admission_year}</td>
+                                        <td>{record.programme ? `${record.programme} - ${record.department}` : record.department}</td>
                                         <td>{record.quota}</td>
-                                        <td>{record.city || record.district || ''}</td>
+                                        <td>{record.admission_year}</td>
+                                        <td>{record.admission_date ? record.admission_date.substring(0, 10).split('-').reverse().join('-') : ''}</td>
+                                        <td>{record.student_name}</td>
+                                        <td>{record.community}</td>
                                         <td>{record.dob ? record.dob.substring(0, 10).split('-').reverse().join('-') : ''}</td>
-                                        <td>{record.father_mobile_no}</td>
-                                        <td>{record.student_mobile_no}</td>
-                                        <td>{record.fee}</td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                     <td colSpan="15" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
+                                     <td colSpan="10" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
                                 </tr>
                             )}
                         </tbody>
@@ -347,4 +368,4 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
     );
 };
 
-export default AdmissionList;
+export default ToOfficeReport;

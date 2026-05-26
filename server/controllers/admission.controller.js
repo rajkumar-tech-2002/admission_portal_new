@@ -25,8 +25,25 @@ exports.getStaffDepartments = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Institution query param is required' });
         }
         const departments = await Admission.getStaffDepartments(institution);
-        res.status(200).json({ success: true, data: departments.map(d => d.staff_department) });
+        // Return full objects so frontend can auto-fill programme and programme_type
+        res.status(200).json({ success: true, data: departments });
     } catch (error) {
+        next(error);
+    }
+};
+
+exports.getSuggestions = async (req, res, next) => {
+    try {
+        const { field, q } = req.query;
+        if (!field || !q || q.length < 1) {
+            return res.status(200).json({ success: true, data: [] });
+        }
+        const suggestions = await Admission.getSuggestions(field, q);
+        res.status(200).json({ success: true, data: suggestions });
+    } catch (error) {
+        if (error.message === 'Invalid field for suggestions') {
+            return res.status(400).json({ success: false, message: error.message });
+        }
         next(error);
     }
 };

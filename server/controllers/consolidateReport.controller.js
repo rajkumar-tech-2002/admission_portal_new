@@ -82,3 +82,32 @@ exports.getConsolidateFilters = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getDepartmentCount = async (req, res, next) => {
+    try {
+        const { search, college, department } = req.query;
+        let query = 'SELECT * FROM admission_count_department WHERE 1=1';
+        const params = [];
+
+        if (college) {
+            query += ' AND college = ?';
+            params.push(college);
+        }
+        if (department) {
+            query += ' AND department = ?';
+            params.push(department);
+        }
+        if (search) {
+            query += ' AND (college LIKE ? OR department LIKE ?)';
+            const searchTerm = `%${search}%`;
+            params.push(searchTerm, searchTerm);
+        }
+
+        query += ' ORDER BY college ASC, department ASC';
+
+        const [rows] = await pool.query(query, params);
+        res.status(200).json({ success: true, data: rows });
+    } catch (error) {
+        next(error);
+    }
+};

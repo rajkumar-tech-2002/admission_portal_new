@@ -15,9 +15,10 @@ import ReportPrint from './pages/AO/ReportPrint';
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminArchivedList from './pages/Admin/ArchivedList';
 import ConsolidateReport from './pages/AO/ConsolidateReport';
+import AODepartmentCount from './pages/AO/AODepartmentCount';
 
 import AdmissionProcess from './pages/Admission/AdmissionProcess';
-
+import ToOfficeReport from './pages/Reports/ToOfficeReport';
 import EnquiryDashboard from './pages/Enquiry/Dashboard';
 import EnquiryArchivedList from './pages/Enquiry/ArchivedList';
 
@@ -101,10 +102,15 @@ function App() {
           } />
           <Route path="change-password" element={<ChangePassword />} />
 
-          {/* Consolidate Report - For AO */}
+          {/* Consolidate Report & Department Count - For AO */}
           <Route path="consolidate-report" element={
             <RoleRoute allowedRoles={['ao']}>
               <ConsolidateReport />
+            </RoleRoute>
+          } />
+          <Route path="department-count" element={
+            <RoleRoute allowedRoles={['ao']}>
+              <AODepartmentCount />
             </RoleRoute>
           } />
           
@@ -127,6 +133,13 @@ function App() {
           <Route path="fees-entry" element={
             <RoleRoute allowedRoles={['admin', 'admission_team']}>
               <AdmissionProcess defaultSection="fees" />
+            </RoleRoute>
+          } />
+
+          {/* Reports Module Routes */}
+          <Route path="reports/to-office" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <ToOfficeReport />
             </RoleRoute>
           } />
 
@@ -297,6 +310,8 @@ function App() {
                   {key: 'staff_name', label: 'Staff Name'},
                   {key: 'staff_institution', label: 'Institution'},
                   {key: 'staff_department', label: 'Department'},
+                  {key: 'staff_programme', label: 'Programme'},
+                  {key: 'staff_programme_type', label: 'Programme Type'},
                   {key: 'staff_type', label: 'Type'},
                   {key: 'staff_phone', label: 'Phone'}
                 ]}
@@ -305,6 +320,8 @@ function App() {
                   {name: 'staff_name', label: 'Staff Name', required: true},
                   {name: 'staff_institution', label: 'Institution', type: 'select', optionsKey: 'institutions'},
                   {name: 'staff_department', label: 'Department', type: 'select', optionsKey: 'departments', dependsOn: 'staff_institution'},
+                  {name: 'staff_programme', label: 'Programme', type: 'auto-filled', autoFillFrom: 'staff_department', autoFillSource: 'program'},
+                  {name: 'staff_programme_type', label: 'Programme Type', type: 'auto-filled', autoFillFrom: 'staff_department', autoFillSource: 'type'},
                   {name: 'staff_type', label: 'Type'},
                   {name: 'staff_email', label: 'Email'},
                   {name: 'staff_phone', label: 'Phone'},
