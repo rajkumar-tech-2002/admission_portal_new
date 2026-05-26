@@ -296,9 +296,9 @@ class Admission {
     static async getCertificates() {
         const [rows] = await db.execute(`
             SELECT 
-                sam.id as student_id, sam.application_no, sam.student_name, sam.college, sam.programme, sam.department, sam.admission_year,
+                sam.id as student_id, sam.application_no, sam.student_name, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota,
                 cgd.id as cert_id,
-                cgd.tenth_marksheet, cgd.eleventh_marksheet, cgd.twelfth_marksheet, cgd.twelfth_temp,
+                cgd.tenth_marksheet, cgd.tenth_temp, cgd.eleventh_marksheet, cgd.twelfth_marksheet, cgd.twelfth_temp,
                 cgd.transfer_certificate, cgd.community_certificate, cgd.first_graduate_certificate,
                 cgd.income_certificate, cgd.native_certificate, cgd.bonafide_certificate, cgd.JD_certificate, cgd.remarks
             FROM student_admission_master sam
@@ -311,7 +311,7 @@ class Admission {
     static async saveCertificate(data) {
         const {
             student_id, student_application_no,
-            tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
+            tenth_marksheet, tenth_temp, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
             transfer_certificate, community_certificate, first_graduate_certificate,
             income_certificate, native_certificate, bonafide_certificate, JD_certificate, remarks
         } = data;
@@ -321,13 +321,13 @@ class Admission {
         if (existing.length > 0) {
             const sql = `
                 UPDATE certificate_given_details SET
-                    tenth_marksheet = ?, eleventh_marksheet = ?, twelfth_marksheet = ?, twelfth_temp = ?,
+                    tenth_marksheet = ?, tenth_temp = ?, eleventh_marksheet = ?, twelfth_marksheet = ?, twelfth_temp = ?,
                     transfer_certificate = ?, community_certificate = ?, first_graduate_certificate = ?,
                     income_certificate = ?, native_certificate = ?, bonafide_certificate = ?, JD_certificate = ?, remarks = ?
                 WHERE student_id = ?
             `;
             await db.execute(sql, [
-                tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
+                tenth_marksheet || null, tenth_temp || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
                 income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null, remarks || null,
                 student_id
@@ -337,14 +337,14 @@ class Admission {
             const sql = `
                 INSERT INTO certificate_given_details (
                     student_id, student_application_no,
-                    tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
+                    tenth_marksheet, tenth_temp, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
                     transfer_certificate, community_certificate, first_graduate_certificate,
                     income_certificate, native_certificate, bonafide_certificate, JD_certificate, remarks
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const [result] = await db.execute(sql, [
                 student_id, student_application_no,
-                tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
+                tenth_marksheet || null, tenth_temp || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
                 income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null, remarks || null
             ]);
@@ -396,7 +396,7 @@ class Admission {
             const values = [
                 data.college || null,
                 data.department || null,
-                data.programme || null,
+                data.programme || '',
                 data.year_type || null,
                 data.student_application_no || null,
                 data.student_name || null,
@@ -417,7 +417,7 @@ class Admission {
             const values = [
                 data.college || null,
                 data.department || null,
-                data.programme || null,
+                data.programme || '',
                 data.year_type || null,
                 data.student_application_no || null,
                 data.student_name || null,

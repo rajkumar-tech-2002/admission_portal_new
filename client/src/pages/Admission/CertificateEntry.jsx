@@ -19,6 +19,7 @@ const CertificateEntry = () => {
     const [collegeFilter, setCollegeFilter] = useState('');
     const [deptFilter, setDeptFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
+    const [quotaFilter, setQuotaFilter] = useState('');
 
     const [filteredRecords, setFilteredRecords] = useState([]);
 
@@ -26,6 +27,7 @@ const CertificateEntry = () => {
     const [colleges, setColleges] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [years, setYears] = useState([]);
+    const [quotas, setQuotas] = useState([]);
 
     // Editing State (track changes locally before save)
     const [editedRows, setEditedRows] = useState({});
@@ -41,10 +43,12 @@ const CertificateEntry = () => {
                 const uniqueColleges = [...new Set(res.data.data.map(item => item.college).filter(Boolean))];
                 const uniqueDepts = [...new Set(res.data.data.map(item => item.department).filter(Boolean))];
                 const uniqueYears = [...new Set(res.data.data.map(item => item.admission_year).filter(Boolean))].sort();
+                const uniqueQuotas = [...new Set(res.data.data.map(item => item.quota).filter(Boolean))].sort();
 
                 setColleges(uniqueColleges);
                 setDepartments(uniqueDepts);
                 setYears(uniqueYears);
+                setQuotas(uniqueQuotas);
             }
         } catch (error) {
             console.error('Failed to fetch certificates:', error);
@@ -71,26 +75,28 @@ const CertificateEntry = () => {
         if (collegeFilter) result = result.filter(r => r.college === collegeFilter);
         if (deptFilter) result = result.filter(r => r.department === deptFilter);
         if (yearFilter) result = result.filter(r => r.admission_year === yearFilter);
+        if (quotaFilter) result = result.filter(r => r.quota === quotaFilter);
 
         setFilteredRecords(result);
         setCurrentPage(1);
-    }, [records, search, collegeFilter, deptFilter, yearFilter]);
+    }, [records, search, collegeFilter, deptFilter, yearFilter, quotaFilter]);
 
     const handleResetFilters = () => {
         setSearch('');
         setCollegeFilter('');
         setDeptFilter('');
         setYearFilter('');
+        setQuotaFilter('');
         setCurrentPage(1);
     };
 
     // Excel Export
     const handleExcelExport = () => {
         if (filteredRecords.length === 0) { toast.error('No records to export'); return; }
-        const headers = ['S.No','App No','Name','College','Programme','Department','Year','10th MC','11th MC','12th MC','12th Temp','TC','Comm','FGC','IC','NC','BC','JD','Remarks'];
+        const headers = ['S.No','App No','Name','College','Programme','Department','Year','Quota','10th MC','10th Temp','11th MC','12th MC','12th Temp','TC','Comm','FGC','IC','NC','BC','JD','Remarks'];
         const rows = filteredRecords.map((r, i) => [
-            i + 1, r.application_no, r.student_name, r.college, r.programme, r.department, r.admission_year || '',
-            r.tenth_marksheet || '', r.eleventh_marksheet || '', r.twelfth_marksheet || '', r.twelfth_temp || '',
+            i + 1, r.application_no, r.student_name, r.college, r.programme, r.department, r.admission_year || '', r.quota || '',
+            r.tenth_marksheet || '', r.tenth_temp || '', r.eleventh_marksheet || '', r.twelfth_marksheet || '', r.twelfth_temp || '',
             r.transfer_certificate || '', r.community_certificate || '', r.first_graduate_certificate || '',
             r.income_certificate || '', r.native_certificate || '', r.bonafide_certificate || '',
             r.JD_certificate || '', r.remarks || ''
@@ -126,6 +132,7 @@ const CertificateEntry = () => {
                 student_id: rowData.student_id,
                 student_application_no: rowData.application_no,
                 tenth_marksheet: rowData.tenth_marksheet,
+                tenth_temp: rowData.tenth_temp,
                 eleventh_marksheet: rowData.eleventh_marksheet,
                 twelfth_marksheet: rowData.twelfth_marksheet,
                 twelfth_temp: rowData.twelfth_temp,
@@ -178,7 +185,7 @@ const CertificateEntry = () => {
                     // Update state
                     const emptyCertData = {
                         cert_id: null,
-                        tenth_marksheet: null, eleventh_marksheet: null, twelfth_marksheet: null, twelfth_temp: null,
+                        tenth_marksheet: null, tenth_temp: null, eleventh_marksheet: null, twelfth_marksheet: null, twelfth_temp: null,
                         transfer_certificate: null, community_certificate: null, first_graduate_certificate: null,
                         income_certificate: null, native_certificate: null, bonafide_certificate: null, JD_certificate: null, remarks: null,
                         isDirty: false
@@ -287,6 +294,18 @@ const CertificateEntry = () => {
                             {years.map(y => <option key={y} value={y}>{y}</option>)}
                         </select>
                     </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Quota</label>
+                        <select
+                            className={styles.selectInput}
+                            value={quotaFilter}
+                            onChange={(e) => setQuotaFilter(e.target.value)}
+                        >
+                            <option value="">All Quotas</option>
+                            {quotas.map(q => <option key={q} value={q}>{q}</option>)}
+                        </select>
+                    </div>
                 </div>
 
                 <div className={styles.resetRow} style={{ marginBottom: '1rem' }}>
@@ -328,7 +347,9 @@ const CertificateEntry = () => {
                                     <th>Dept</th>
                                     <th>Programme</th>
                                     <th>Year</th>
+                                    <th>Quota</th>
                                     <th>10th MC</th>
+                                    <th>10th Temp</th>
                                     <th>11th MC</th>
                                     <th>12th MC</th>
                                     <th>12th Temp</th>
@@ -359,7 +380,9 @@ const CertificateEntry = () => {
                                                 <td>{record.department}</td>
                                                 <td>{record.programme || '—'}</td>
                                                 <td>{record.admission_year}</td>
+                                                <td>{record.quota}</td>
                                                 <td><SelectField value={rowData.tenth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'tenth_marksheet', val)} /></td>
+                                                <td><SelectField value={rowData.tenth_temp} onChange={(val) => handleInputChange(record.student_id, 'tenth_temp', val)} /></td>
                                                 <td><SelectField value={rowData.eleventh_marksheet} onChange={(val) => handleInputChange(record.student_id, 'eleventh_marksheet', val)} /></td>
                                                 <td><SelectField value={rowData.twelfth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'twelfth_marksheet', val)} /></td>
                                                 <td><SelectField value={rowData.twelfth_temp} onChange={(val) => handleInputChange(record.student_id, 'twelfth_temp', val)} /></td>
