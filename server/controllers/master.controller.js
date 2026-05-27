@@ -22,6 +22,7 @@ exports.getAllMasterData = async (req, res, next) => {
         const roles = await Master.getAllFromTable('role_master');
         const courseFeeStructure = await Master.getAllFromTable('course_fee_structure');
         const institutions = await Master.getAllFromTable('institution_master');
+        const concessions = await Master.getAllFromTable('concession_master');
 
         res.status(200).json({
             success: true,
@@ -44,6 +45,7 @@ exports.getAllMasterData = async (req, res, next) => {
                 roles,
                 courseFeeStructure,
                 institutions,
+                concessions,
                 validDate: await Master.getValidDate()
             }
         });

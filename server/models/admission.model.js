@@ -54,19 +54,49 @@ class Admission {
         return rows;
     }
 
-    static async getCourseFee(college, department, year, quota) {
-        let mappedQuota = quota;
-        if (quota === 'Government Quota') mappedQuota = 'COUNSELLING';
-        else if (quota === 'Management Quota') mappedQuota = 'MANAGEMENT';
+   static async getCourseFee(college, department, programme, year, quota) {
 
-        const [rows] = await db.execute(`
-            SELECT fees 
-            FROM course_fee_structure 
-            WHERE institution = ? AND department = ? AND year = ? AND quota = ?
-            LIMIT 1
-        `, [college, department, year, mappedQuota]);
-        return rows.length > 0 ? rows[0].fees : null;
+    let mappedQuota = quota;
+
+    if (quota === 'Government Quota') {
+        mappedQuota = 'COUNSELLING';
+    } else if (quota === 'Management Quota') {
+        mappedQuota = 'MANAGEMENT';
     }
+if (!programme || !programme.trim()) {
+    console.log("Programme missing");
+    return null;
+}
+
+throw new Error("NEW MODEL FILE RUNNING");
+
+const sql = `
+    SELECT fees
+    FROM course_fee_structure
+    WHERE TRIM(institution) = TRIM(?)
+    AND TRIM(programme) = TRIM(?)
+    AND TRIM(department) = TRIM(?)
+    AND TRIM(year) = TRIM(?)
+    AND TRIM(quota) = TRIM(?)
+    LIMIT 1
+`;
+
+    const params = [
+        college.trim(),
+        programme.trim(),
+        department.trim(),
+        year.trim(),
+        mappedQuota.trim()
+    ];
+
+    console.log("FEE PARAMS =>", params);
+
+    const [rows] = await db.execute(sql, params);
+
+    console.log("FEE RESULT =>", rows);
+
+    return rows.length > 0 ? rows[0].fees : null;
+}
 
     static async getSuggestions(field, query) {
         const allowedFields = ['city', 'address2', 'taluk', 'district', 'state', 'pincode', 'tenth_school_name', 'twelfth_school_name', 'tenth_school_city', 'twelfth_school_city', 'ug_college_name', 'reference_name', 'reference_institution', 'reference_dept'];
@@ -74,15 +104,35 @@ class Admission {
             throw new Error('Invalid field for suggestions');
         }
 
+        // Map UI field names to actual database column names
+        const fieldMap = {
+            'address2': 'address_2',
+            'tenth_school_name': 'school_10th_name',
+            'twelfth_school_name': 'school_12th_name',
+            'tenth_school_city': 'school_10th_city',
+            'twelfth_school_city': 'school_12th_city',
+            'ug_college_name': 'ug_college',
+            'reference_name': 'reference_by_name',
+            'reference_institution': 'reference_college',
+            'reference_dept': 'reference_department'
+        };
+
+        const dbField = fieldMap[field] || field;
+
         const searchTerm = `%${query}%`;
+
         const sql = `
-            SELECT DISTINCT ?? as value
-            FROM student_admission_master
-            WHERE ?? LIKE ? AND ?? IS NOT NULL AND ?? != ''
-            ORDER BY ?? ASC
-            LIMIT 15
-        `;
-        const [rows] = await db.query(sql, [field, field, searchTerm, field, field, field]);
+    SELECT DISTINCT ${dbField} as value
+    FROM student_admission_master
+    WHERE ${dbField} LIKE ?
+      AND ${dbField} IS NOT NULL
+      AND ${dbField} != ''
+    ORDER BY ${dbField} ASC
+    LIMIT 15
+`;
+
+        const [rows] = await db.execute(sql, [searchTerm]);
+
         return rows.map(r => r.value);
     }
 
@@ -95,7 +145,7 @@ class Admission {
             FROM student_admission_master 
             WHERE application_no REGEXP '^[0-9]+$'
         `);
-        
+
         let nextAppNo = 14375; // default fallback if no numeric application numbers exist
         if (maxRow[0].max_val !== null) {
             nextAppNo = maxRow[0].max_val + 1;
@@ -234,10 +284,10 @@ class Admission {
         return { insertId: result.insertId, applicationNo };
     }
 
-    
+
     static async updateAdmission(id, data) {
         const toNull = (val) => (val === undefined || val === null || val === '') ? null : val;
-        
+
         const has10th = data.tenthSchool || data.tenthMark || data.regNo10th;
         const is10th = has10th ? 'Yes' : 'No';
 
@@ -317,7 +367,7 @@ class Admission {
         } = data;
 
         const [existing] = await db.execute('SELECT id FROM certificate_given_details WHERE student_id = ?', [student_id]);
-        
+
         if (existing.length > 0) {
             const sql = `
                 UPDATE certificate_given_details SET
@@ -367,11 +417,15 @@ class Admission {
             sql += ` AND department = ?`;
             params.push(department);
         }
+        if (programme) {
+            sql += ` AND programme = ?`;
+            params.push(programme);
+        }
         if (year) {
             sql += ` AND admission_year = ?`;
             params.push(year);
         }
-        
+
         sql += ` ORDER BY student_name ASC`;
         const [rows] = await db.execute(sql, params);
         return rows;
@@ -426,7 +480,7 @@ class Admission {
                 data.paid_amount || null,
                 studentQuota
             ];
-            
+
             const [result] = await db.execute(sql, values);
             return result.insertId;
         }
@@ -442,9 +496,76 @@ class Admission {
         return result.affectedRows > 0;
     }
 
+    static async saveConcession(data) {
+        let studentQuota = null;
+        if (data.student_application_no) {
+            const [quotaRows] = await db.execute('SELECT quota FROM student_admission_master WHERE application_no = ?', [data.student_application_no]);
+            if (quotaRows.length > 0) {
+                studentQuota = quotaRows[0].quota;
+            }
+        }
+
+        if (data.id) {
+            const sql = `
+                UPDATE student_concession_details SET
+                    college = ?, department = ?, programme = ?, year = ?, student_application_no = ?, 
+                    student_name = ?, student_dob = ?, concession_type = ?, concession_amount = ?, student_quota = ?
+                WHERE id = ?
+            `;
+            const values = [
+                data.college || null,
+                data.department || null,
+                data.programme || '',
+                data.year || null,
+                data.student_application_no || null,
+                data.student_name || null,
+                data.student_dob || null,
+                data.concession_type || null,
+                data.concession_amount || null,
+                studentQuota,
+                data.id
+            ];
+            await db.execute(sql, values);
+            return data.id;
+        } else {
+            const sql = `
+                INSERT INTO student_concession_details (
+                    college, department, programme, year, student_application_no, student_name, student_dob, concession_type, concession_amount, student_quota
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            const values = [
+                data.college || null,
+                data.department || null,
+                data.programme || '',
+                data.year || null,
+                data.student_application_no || null,
+                data.student_name || null,
+                data.student_dob || null,
+                data.concession_type || null,
+                data.concession_amount || null,
+                studentQuota
+            ];
+
+            const [result] = await db.execute(sql, values);
+            return result.insertId;
+        }
+    }
+
+    static async getAllConcessions() {
+        const [rows] = await db.execute(`
+            SELECT *, student_quota AS quota FROM student_concession_details ORDER BY created_at DESC
+        `);
+        return rows;
+    }
+
+    static async deleteConcession(id) {
+        const [result] = await db.execute('DELETE FROM student_concession_details WHERE id = ?', [id]);
+        return result.affectedRows > 0;
+    }
+
     static async importAdmissions(records) {
         if (!records || records.length === 0) return { imported: 0 };
-        
+
         let imported = 0;
         const columns = [
             'application_no', 'reg_no_12th', 'student_name', 'dob', 'college', 'admission_date', 'department', 'programme', 'programme_type', 'admission_year', 'quota',

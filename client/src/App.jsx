@@ -135,6 +135,11 @@ function App() {
               <AdmissionProcess defaultSection="fees" />
             </RoleRoute>
           } />
+          <Route path="concession-entry" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <AdmissionProcess defaultSection="concession" />
+            </RoleRoute>
+          } />
 
           {/* Reports Module Routes */}
           <Route path="reports/to-office" element={
@@ -395,6 +400,17 @@ function App() {
                 tableType="roles"
                 columns={[{key: 'role_name', label: 'Role Name'}]}
                 fields={[{name: 'role_name', label: 'Role Name', required: true}]}
+              />
+            </RoleRoute>
+          } />
+
+          <Route path="master/concessions" element={
+            <RoleRoute allowedRoles={['admin']}>
+              <MasterManagementPage 
+                title="Concession Master" 
+                tableType="concessions"
+                columns={[{key: 'concession_type', label: 'Concession Type'}]}
+                fields={[{name: 'concession_type', label: 'Concession Type', required: true}]}
               />
             </RoleRoute>
           } />

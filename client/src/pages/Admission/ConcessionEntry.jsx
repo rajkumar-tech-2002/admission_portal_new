@@ -1,25 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Search, Plus, ArrowLeft, FileCheck, Edit, Download } from 'lucide-react';
 import styles from '../../components/css/Dashboard.module.css';
-import reportStyles from '../../components/css/RecordReport.module.css';
 import apiService from '../../services/api.service';
 import toast from 'react-hot-toast';
-import { confirmAction } from '../../components/layout/Toast';
-import { formatDate, formatDateForInput } from '../../utils/dateFormatter';
+import { formatDate } from '../../utils/dateFormatter';
 
-const FeesEntry = () => {
+const ConcessionEntry = () => {
     const [isFormVisible, setIsFormVisible] = useState(false);
     
     // Dropdown Data
     const [colleges, setColleges] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [years, setYears] = useState([]);
+    const [concessionTypes, setConcessionTypes] = useState([]);
     
     // Master data cache
     const [allDepts, setAllDepts] = useState([]);
 
-    // Fees List Table State
-    const [feesRecords, setFeesRecords] = useState([]);
+    // Concession List Table State
+    const [concessionRecords, setConcessionRecords] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [recordsPerPage, setRecordsPerPage] = useState(100);
@@ -30,21 +29,19 @@ const FeesEntry = () => {
     const [listDeptFilter, setListDeptFilter] = useState('');
     const [listQuotaFilter, setListQuotaFilter] = useState('');
     const [listYearFilter, setListYearFilter] = useState('');
-    const [fromDate, setFromDate] = useState('');
-    const [toDate, setToDate] = useState('');
-    const [filteredFeesRecords, setFilteredFeesRecords] = useState([]);
+    const [filteredConcessionRecords, setFilteredConcessionRecords] = useState([]);
 
     // Form State
     const [formData, setFormData] = useState({
         college: '',
         department: '',
         programme: '',
-        year_type: '',
+        year: '',
         student_name: '',
         student_application_no: '',
         student_dob: '',
-        paid_amount: '',
-        paid_date: new Date().toISOString().split('T')[0]
+        concession_type: '',
+        concession_amount: ''
     });
 
     // Autocomplete State
@@ -54,7 +51,7 @@ const FeesEntry = () => {
 
     useEffect(() => {
         fetchMasterData();
-        fetchFeesRecords();
+        fetchConcessionRecords();
     }, []);
 
     const fetchMasterData = async () => {
@@ -68,6 +65,7 @@ const FeesEntry = () => {
                 const uniqueColleges = [...new Set(fetchedDepts.map(d => d.institution).filter(Boolean))];
                 setColleges(uniqueColleges);
                 setYears(data.admissionYears || []);
+                setConcessionTypes(data.concessions || []);
             }
         } catch (error) {
             console.error('Error fetching master data:', error);
@@ -75,16 +73,16 @@ const FeesEntry = () => {
         }
     };
 
-    const fetchFeesRecords = async () => {
+    const fetchConcessionRecords = async () => {
         setLoading(true);
         try {
-            const res = await apiService.get('/admissions/fees/list');
+            const res = await apiService.get('/admissions/concessions/list');
             if (res.data.success) {
-                setFeesRecords(res.data.data);
+                setConcessionRecords(res.data.data);
             }
         } catch (error) {
-            console.error('Error fetching fees list:', error);
-            toast.error('Failed to load fees list');
+            console.error('Error fetching concession list:', error);
+            toast.error('Failed to load concession list');
         } finally {
             setLoading(false);
         }
@@ -92,7 +90,7 @@ const FeesEntry = () => {
 
     // Filter Logic for Table
     useEffect(() => {
-        let result = feesRecords;
+        let result = concessionRecords;
 
         if (listSearch) {
             const lowerSearch = listSearch.toLowerCase();
@@ -114,20 +112,11 @@ const FeesEntry = () => {
         }
 
         if (listQuotaFilter) result = result.filter(r => r.quota === listQuotaFilter);
-        if (listYearFilter) result = result.filter(r => r.year_type === listYearFilter);
+        if (listYearFilter) result = result.filter(r => r.year === listYearFilter);
 
-        if (fromDate) {
-            result = result.filter(r => new Date(r.paid_date || r.created_at) >= new Date(fromDate));
-        }
-        if (toDate) {
-            const nextDay = new Date(toDate);
-            nextDay.setDate(nextDay.getDate() + 1);
-            result = result.filter(r => new Date(r.paid_date || r.created_at) < nextDay);
-        }
-
-        setFilteredFeesRecords(result);
+        setFilteredConcessionRecords(result);
         setCurrentPage(1);
-        }, [feesRecords, listSearch, listCollegeFilter, listDeptFilter, listQuotaFilter, listYearFilter, fromDate, toDate]);
+    }, [concessionRecords, listSearch, listCollegeFilter, listDeptFilter, listQuotaFilter, listYearFilter]);
 
     const handleResetListFilters = () => {
         setListSearch('');
@@ -135,16 +124,14 @@ const FeesEntry = () => {
         setListDeptFilter('');
         setListQuotaFilter('');
         setListYearFilter('');
-        setFromDate('');
-        setToDate('');
         setCurrentPage(1);
     };
 
-    // Excel Export for Payment List
+    // Excel Export for Concession List
     const handleExcelExport = () => {
-        if (filteredFeesRecords.length === 0) { toast.error('No records to export'); return; }
-        const headers = ['S.No','App No','Student Name','College','Quota','Programme','Department','Year','Paid Amount','Paid Date'];
-        const rows = filteredFeesRecords.map((r, i) => [
+        if (filteredConcessionRecords.length === 0) { toast.error('No records to export'); return; }
+        const headers = ['S.No','App No','Student Name','College','Quota','Programme','Department','Year','Concession Type','Concession Amount'];
+        const rows = filteredConcessionRecords.map((r, i) => [
             i + 1,
             r.student_application_no,
             r.student_name,
@@ -152,14 +139,14 @@ const FeesEntry = () => {
             r.quota || '',
             r.programme || '',
             r.department,
-            r.year_type,
-            r.paid_amount,
-            r.paid_date ? r.paid_date.substring(0, 10).split('-').reverse().join('-') : ''
+            r.year,
+            r.concession_type,
+            r.concession_amount
         ]);
         const csv = [headers, ...rows].map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = 'payment_list.csv'; a.click();
+        const a = document.createElement('a'); a.href = url; a.download = 'concession_list.csv'; a.click();
         URL.revokeObjectURL(url);
         toast.success('Excel exported successfully!');
     };
@@ -167,8 +154,8 @@ const FeesEntry = () => {
     // Table Pagination
     const indexOfLastRecord = currentPage * recordsPerPage;
     const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-    const currentRecords = filteredFeesRecords.slice(indexOfFirstRecord, indexOfLastRecord);
-    const totalPages = Math.ceil(filteredFeesRecords.length / recordsPerPage);
+    const currentRecords = filteredConcessionRecords.slice(indexOfFirstRecord, indexOfLastRecord);
+    const totalPages = Math.ceil(filteredConcessionRecords.length / recordsPerPage);
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     // Form Event Handlers
@@ -177,18 +164,18 @@ const FeesEntry = () => {
         setFormData(prev => ({ ...prev, college, department: '', programme: '', student_name: '', student_application_no: '' }));
         setStudentSearchTerm('');
         const filteredDepts = allDepts.filter(d => d.institution === college);
-        setDepartments(filteredDepts); // Store full dept objects
+        setDepartments(filteredDepts);
     };
 
     const handleDepartmentChange = (e) => {
-        const comboValue = e.target.value; // "ECE||B.E"
+        const comboValue = e.target.value;
         const [dept, prog] = comboValue.split('||');
         setFormData(prev => ({ ...prev, department: dept || '', programme: prog || '', student_name: '', student_application_no: '' }));
         setStudentSearchTerm('');
     };
 
     const handleYearChange = (e) => {
-        setFormData(prev => ({ ...prev, year_type: e.target.value, student_name: '', student_application_no: '' }));
+        setFormData(prev => ({ ...prev, year: e.target.value, student_name: '', student_application_no: '' }));
         setStudentSearchTerm('');
     };
 
@@ -200,7 +187,7 @@ const FeesEntry = () => {
                     const params = new URLSearchParams();
                     if (formData.college) params.append('college', formData.college);
                     if (formData.department) params.append('department', formData.department);
-                    if (formData.year_type) params.append('year', formData.year_type);
+                    if (formData.year) params.append('year', formData.year);
 
                     const res = await apiService.get(`/admissions/fees-students?${params.toString()}`);
                     if (res.data.success) {
@@ -225,7 +212,7 @@ const FeesEntry = () => {
         }, 300);
 
         return () => clearTimeout(timerId);
-    }, [studentSearchTerm, formData.college, formData.department, formData.year_type, formData.student_application_no]);
+    }, [studentSearchTerm, formData.college, formData.department, formData.year, formData.student_application_no]);
 
     const handleSelectStudent = (student) => {
         const dobStr = student.dob || '';
@@ -258,27 +245,27 @@ const FeesEntry = () => {
         }
 
         try {
-            const res = await apiService.post('/admissions/fees/save', formData);
+            const res = await apiService.post('/admissions/concessions/save', formData);
             if (res.data.success) {
-                toast.success('Fees record saved successfully!');
+                toast.success('Concession record saved successfully!');
                 setFormData({
                     college: '',
                     department: '',
                     programme: '',
-                    year_type: '',
+                    year: '',
                     student_name: '',
                     student_application_no: '',
                     student_dob: '',
-                    paid_amount: '',
-                    paid_date: new Date().toISOString().split('T')[0]
+                    concession_type: '',
+                    concession_amount: ''
                 });
                 setStudentSearchTerm('');
                 setIsFormVisible(false);
-                fetchFeesRecords(); // Refresh table
+                fetchConcessionRecords();
             }
         } catch (error) {
             console.error('Save error:', error);
-            toast.error(error.response?.data?.message || 'Failed to save fees record');
+            toast.error(error.response?.data?.message || 'Failed to save concession record');
         }
     };
 
@@ -289,19 +276,19 @@ const FeesEntry = () => {
             college: record.college || '',
             department: record.department || '',
             programme: record.programme || '',
-            year_type: record.year_type || '',
+            year: record.year || '',
             student_name: record.student_name || '',
             student_application_no: record.student_application_no || '',
             student_dob: dob,
-            paid_amount: record.paid_amount || '',
-            paid_date: record.paid_date ? formatDateForInput(record.paid_date) : new Date().toISOString().split('T')[0]
+            concession_type: record.concession_type || '',
+            concession_amount: record.concession_amount || ''
         });
         
         const dobDisplay = dob ? ` _ ${formatDate(dob)}` : '';
         setStudentSearchTerm(`${record.student_name} _ ${record.student_application_no}${dobDisplay}`);
         
         const filteredDepts = allDepts.filter(d => d.institution === record.college);
-        setDepartments(filteredDepts); // Store full dept objects for dropdown
+        setDepartments(filteredDepts);
         
         setIsFormVisible(true);
     };
@@ -315,7 +302,7 @@ const FeesEntry = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <FileCheck size={22} style={{ color: 'var(--primary-color)' }} />
                         <h2 style={{color:"var(--primary-color)", margin: 0}}>
-                            {isFormVisible ? "Payment Entry" : "Payment List"}
+                            {isFormVisible ? "Concession Entry" : "Concession List"}
                         </h2>
                     </div>
                     {isFormVisible ? (
@@ -332,7 +319,7 @@ const FeesEntry = () => {
                             className={styles.exportBtn} 
                             style={{ background: 'var(--primary-color)', color: '#fff', border: 'none' }}
                         >
-                            <Plus size={18} /> New Payment
+                            <Plus size={18} /> New Concession
                         </button>
                     )}
                 </div>
@@ -378,7 +365,7 @@ const FeesEntry = () => {
                                     onChange={(e) => setListDeptFilter(e.target.value)}
                                 >
                                     <option value="">All Departments</option>
-                                    {feesRecords
+                                    {concessionRecords
                                         .filter(r => !listCollegeFilter || r.college === listCollegeFilter)
                                         .map(r => (r.programme && r.programme.trim()) ? `${r.programme} - ${r.department}` : (r.department || ''))
                                         .filter(Boolean)
@@ -411,26 +398,6 @@ const FeesEntry = () => {
                                     <option value="">All Years</option>
                                     {years.map(y => <option key={y.id || y.admission_year_name} value={y.admission_year_name}>{y.admission_year_name}</option>)}
                                 </select>
-                            </div>
-
-                            <div className={styles.filterGroup}>
-                                <label className={styles.filterLabel}>From Date (Paid)</label>
-                                <input 
-                                    type="date" 
-                                    className={styles.dateInput}
-                                    value={fromDate}
-                                    onChange={(e) => setFromDate(e.target.value)}
-                                />
-                            </div>
-
-                            <div className={styles.filterGroup}>
-                                <label className={styles.filterLabel}>To Date (Paid)</label>
-                                <input 
-                                    type="date" 
-                                    className={styles.dateInput}
-                                    value={toDate}
-                                    onChange={(e) => setToDate(e.target.value)}
-                                />
                             </div>
                         </div>
 
@@ -476,8 +443,8 @@ const FeesEntry = () => {
                                             <th>Quota</th>
                                             <th>Department</th>
                                             <th>Year</th>
-                                            <th>Paid Amount</th>
-                                            <th>Paid Date</th>
+                                            <th>Concession Type</th>
+                                            <th>Concession Amount</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -491,12 +458,11 @@ const FeesEntry = () => {
                                                     <td>{record.college}</td>
                                                     <td>{record.quota || '—'}</td>
                                                     <td>{(record.programme && record.programme.trim()) ? `${record.programme} - ${record.department}` : record.department}</td>
-                                                    <td>{record.year_type}</td>
-                                                    <td style={{ fontWeight: 'bold', color: '#059669' }}>₹{parseFloat(record.paid_amount || 0).toLocaleString()}</td>
-                                                    <td>{record.paid_date ? formatDate(record.paid_date) : ''}</td>
+                                                    <td>{record.year}</td>
+                                                    <td>{record.concession_type}</td>
+                                                    <td style={{ fontWeight: 'bold', color: '#059669' }}>₹{parseFloat(record.concession_amount || 0).toLocaleString()}</td>
                                                     <td>
-                                                        
-                                                        <button className={styles.exportBtn} style={{ padding: '0.35rem 0.6rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px' }} title="Edit Payment" onClick={() => handleEditFee(record)}>
+                                                        <button className={styles.exportBtn} style={{ padding: '0.35rem 0.6rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px' }} title="Edit Concession" onClick={() => handleEditFee(record)}>
                                                             <Edit size={16} />
                                                         </button>
                                                     </td>
@@ -504,7 +470,7 @@ const FeesEntry = () => {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="11" style={{ textAlign: 'center', padding: '2rem' }}>No payment records found</td>
+                                                <td colSpan="11" style={{ textAlign: 'center', padding: '2rem' }}>No concession records found</td>
                                             </tr>
                                         )}
                                     </tbody>
@@ -512,10 +478,10 @@ const FeesEntry = () => {
                             )}
                         </div>
 
-                        {filteredFeesRecords.length > 0 && !loading && (
+                        {filteredConcessionRecords.length > 0 && !loading && (
                             <div className={styles.pagination}>
                                 <div className={styles.paginationInfo}>
-                                    Showing {indexOfFirstRecord + 1} to {Math.min(indexOfLastRecord, filteredFeesRecords.length)} of {filteredFeesRecords.length} entries
+                                    Showing {indexOfFirstRecord + 1} to {Math.min(indexOfLastRecord, filteredConcessionRecords.length)} of {filteredConcessionRecords.length} entries
                                 </div>
                                 <div className={styles.paginationControls}>
                                     <button 
@@ -590,7 +556,7 @@ const FeesEntry = () => {
                                 <label className={styles.filterLabel}>Admission Year <span style={{color: 'red'}}>*</span></label>
                                 <select 
                                     className={styles.selectInput} 
-                                    value={formData.year_type} 
+                                    value={formData.year} 
                                     onChange={handleYearChange}
                                     required
                                 >
@@ -646,27 +612,29 @@ const FeesEntry = () => {
                             </div>
 
                             <div className={styles.filterGroup}>
-                                <label className={styles.filterLabel}>Payment Amount <span style={{color: 'red'}}>*</span></label>
+                                <label className={styles.filterLabel}>Concession Type <span style={{color: 'red'}}>*</span></label>
+                                <select 
+                                    className={styles.selectInput} 
+                                    value={formData.concession_type}
+                                    onChange={(e) => setFormData(prev => ({...prev, concession_type: e.target.value}))}
+                                    required
+                                >
+                                    <option value="">Select Concession Type</option>
+                                    {concessionTypes.map(c => <option key={c.id || c.concession_type} value={c.concession_type}>{c.concession_type}</option>)}
+                                </select>
+                            </div>
+
+                            <div className={styles.filterGroup}>
+                                <label className={styles.filterLabel}>Concession Amount <span style={{color: 'red'}}>*</span></label>
                                 <input 
                                     type="number" 
                                     className={styles.searchInput} 
                                     placeholder="Enter Amount"
-                                    value={formData.paid_amount}
-                                    onChange={(e) => setFormData(prev => ({...prev, paid_amount: e.target.value}))}
+                                    value={formData.concession_amount}
+                                    onChange={(e) => setFormData(prev => ({...prev, concession_amount: e.target.value}))}
                                     required
                                     min="0"
                                     step="0.01"
-                                />
-                            </div>
-
-                            <div className={styles.filterGroup}>
-                                <label className={styles.filterLabel}>Payment Date <span style={{color: 'red'}}>*</span></label>
-                                <input 
-                                    type="date" 
-                                    className={styles.searchInput} 
-                                    value={formData.paid_date}
-                                    onChange={(e) => setFormData(prev => ({...prev, paid_date: e.target.value}))}
-                                    required
                                 />
                             </div>
                         </div>
@@ -677,7 +645,7 @@ const FeesEntry = () => {
                                 className={styles.exportBtn} 
                                 style={{ background: '#10b981', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', fontSize: '1rem', cursor: 'pointer' }}
                             >
-                                <Save size={18} style={{ marginRight: '8px' }} /> Save Fees Details
+                                <Save size={18} style={{ marginRight: '8px' }} /> Save Concession
                             </button>
                         </div>
                     </form>
@@ -687,4 +655,4 @@ const FeesEntry = () => {
     );
 };
 
-export default FeesEntry;
+export default ConcessionEntry;

@@ -30,4 +30,9 @@ router.post('/fees/save', authMiddleware, admissionController.saveFee);
 router.get('/fees/list', authMiddleware, admissionController.getAllFees);
 router.delete('/fees/:id', authMiddleware, admissionController.deleteFee);
 
+// Concession Actions
+router.post('/concessions/save', authMiddleware, admissionController.saveConcession);
+router.get('/concessions/list', authMiddleware, admissionController.getAllConcessions);
+router.delete('/concessions/:id', authMiddleware, admissionController.deleteConcession);
+
 module.exports = router;

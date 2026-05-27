@@ -11,6 +11,7 @@ import AdmissionList from './AdmissionList';
 import StaffView from './StaffView';
 import CertificateEntry from './CertificateEntry';
 import FeesEntry from './FeesEntry';
+import ConcessionEntry from './ConcessionEntry';
 import AutoSuggestInput from '../../components/layout/AutoSuggestInput';
 
 const AdmissionProcess = ({ defaultSection = 'entry' }) => {
@@ -83,7 +84,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         year: '',
         quota: '',
         firstGraduate: '',
-        status: '',
+        status: 'Admitted',
         remark: '',
         aadharNo: '',
         schoolType: '',
@@ -130,7 +131,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         twelfthSchoolCity: '',
         twelfthSchool: '',
         twelfthMarkSheetStatus: 'No',
-        twelfthYOP: '',
+        twelfthYOP: '2026',
         twelfthGroup: '',
         languageStudied: '',
         subject1Name: '',
@@ -263,31 +264,57 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         }
     }, [activeSection]);
 
-    const prevFeeDeps = React.useRef({ college: '', department: '', year: '', quota: '' });
+    const prevFeeDeps = React.useRef({ college: '', department: '', programme: '', year: '', quota: '' });
 
     // Auto-fetch fee based on college, department, year, quota
     useEffect(() => {
         const fetchFee = async () => {
-            const { college, department, year, quota } = formData;
+            const { college, department, programme, year, quota } = formData;
 
             // Only fetch if the user actually changed one of the dependencies
             if (
                 college !== prevFeeDeps.current.college ||
                 department !== prevFeeDeps.current.department ||
+                programme !== prevFeeDeps.current.programme ||
                 year !== prevFeeDeps.current.year ||
                 quota !== prevFeeDeps.current.quota
             ) {
-                prevFeeDeps.current = { college, department, year, quota };
+                prevFeeDeps.current = { college, department, programme, year, quota };
 
-                if (college && department && year && quota) {
+                if (college && department && programme && year && quota) {
                     try {
-                        const res = await apiService.get(`/admissions/course-fee?college=${encodeURIComponent(college)}&department=${encodeURIComponent(department)}&year=${encodeURIComponent(year)}&quota=${encodeURIComponent(quota)}`);
+
+                        const res = await apiService.get(
+                            `/admissions/course-fee?college=${encodeURIComponent(college)}&department=${encodeURIComponent(department)}&programme=${encodeURIComponent(programme)}&year=${encodeURIComponent(year)}&quota=${encodeURIComponent(quota)}`
+                        );
+
+                        console.log("FEE API RESPONSE:", res.data);
+
+                        console.log({
+                            college,
+                            department,
+                            programme,
+                            year,
+                            quota
+                        });
+
+                        console.log("SETTING FEE:", res.data.data);
+
                         if (res.data.success && res.data.data !== null) {
-                            setFormData(prev => ({ ...prev, fee: res.data.data }));
-                            toast.success(`Fee auto-fetched for ${college} - ${department} (${quota})`);
+
+                            setFormData(prev => ({
+                                ...prev,
+                                fee: res.data.data
+                            }));
+
+                            toast.success(
+                                `Fee auto-fetched for ${college} - ${programme}_${department} (${quota})`
+                            );
+
                         } else {
                             setFormData(prev => ({ ...prev, fee: '' }));
                         }
+
                     } catch (err) {
                         console.error("Failed to fetch course fee:", err);
                     }
@@ -296,11 +323,38 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         };
 
         fetchFee();
-    }, [formData.college, formData.department, formData.year, formData.quota]);
+
+    }, [
+        formData.college,
+        formData.department,
+        formData.programme,
+        formData.year,
+        formData.quota
+    ]);
 
     // Helper: Handle input changes
     const handleChange = async (e) => {
         const { name, value } = e.target;
+
+        if (name === 'tenthSchoolDistrict') {
+            setFormData(prev => ({
+                ...prev,
+                tenthSchoolDistrict: value,
+                tenthSchoolCity: '',
+                tenthSchool: ''
+            }));
+            return;
+        }
+
+        if (name === 'twelfthSchoolDistrict') {
+            setFormData(prev => ({
+                ...prev,
+                twelfthSchoolDistrict: value,
+                twelfthSchoolCity: '',
+                twelfthSchool: ''
+            }));
+            return;
+        }
 
         if (name === 'state') {
             setFormData(prev => ({
@@ -523,13 +577,13 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
     const handleResetForm = () => {
         setFormData({
             twelfthRegNo: '', studentName: '', dob: '', college: '', admissionDate: '', department: '', programme: '', programmeType: '', year: '', quota: '',
-            firstGraduate: '', status: '', remark: '', aadharNo: '', schoolType: '', fee: '',
+            firstGraduate: '', status: 'Admitted', remark: '', aadharNo: '', schoolType: '', fee: '',
             // rRemark: '', referenceAmount1: '', rPaidAmount: '',
             community: '', fatherName: '', motherName: '', fatherMobile: '', studentMobile: '',
             motherMobile: '', fatherOccupation: '', fatherAnnualIncome: '', religion: '', casteName: '', gender: '',
             studentEmail: '', address1: '', address2: '', pincode: '', country: 'India', state: '', district: '', city: '',
             tenthSchoolDistrict: '', tenthSchoolCity: '', tenthSchool: '', tenthMark: '', regNo10th: '', totalMarks10th: '500', percentage10th: '', tenthYOP: '',
-            twelfthSchoolDistrict: '', twelfthSchoolCity: '', twelfthSchool: '', twelfthMarkSheetStatus: 'No', twelfthYOP: '', twelfthGroup: '', languageStudied: 'Tamil',
+            twelfthSchoolDistrict: '', twelfthSchoolCity: '', twelfthSchool: '', twelfthMarkSheetStatus: 'No', twelfthYOP: '2026', twelfthGroup: '', languageStudied: 'Tamil',
             subject1Name: 'Tamil / Sanskrit Option', subject1Mark: '',
             subject2Name: 'English', englishMark: '',
             subject3Name: 'Physics/Theory I', subject2Mark: '',
@@ -710,6 +764,26 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
         }
     };
 
+
+    const getTenthSchoolCities = () => {
+        const district = formData.tenthSchoolDistrict;
+        let filteredSchools = masterData.schools || [];
+        if (district) {
+            filteredSchools = filteredSchools.filter(s => (s.district_name || '').toLowerCase() === district.toLowerCase());
+        }
+        const cities = filteredSchools.map(s => s.city ? s.city.trim() : '').filter(Boolean);
+        return Array.from(new Set(cities)).sort();
+    };
+
+    const getTwelfthSchoolCities = () => {
+        const district = formData.twelfthSchoolDistrict;
+        let filteredSchools = masterData.schools || [];
+        if (district) {
+            filteredSchools = filteredSchools.filter(s => (s.district_name || '').toLowerCase() === district.toLowerCase());
+        }
+        const cities = filteredSchools.map(s => s.city ? s.city.trim() : '').filter(Boolean);
+        return Array.from(new Set(cities)).sort();
+    };
 
     return (
         <div className={styles.container}>
@@ -1069,22 +1143,22 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Address 2</label>
-                                        <AutoSuggestInput 
-                                            name="address2" 
-                                            value={formData.address2} 
-                                            onChange={handleChange} 
-                                            className={styles.inputField} 
+                                        <AutoSuggestInput
+                                            name="address2"
+                                            value={formData.address2}
+                                            onChange={handleChange}
+                                            className={styles.inputField}
                                             placeholder="Area / Landmark"
                                             suggestionField="address2"
                                         />
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>Pincode</label>
-                                        <AutoSuggestInput 
-                                            name="pincode" 
-                                            value={formData.pincode} 
-                                            onChange={handleChange} 
-                                            className={styles.inputField} 
+                                        <AutoSuggestInput
+                                            name="pincode"
+                                            value={formData.pincode}
+                                            onChange={handleChange}
+                                            className={styles.inputField}
                                             placeholder="638001"
                                             suggestionField="pincode"
                                         />
@@ -1117,11 +1191,11 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>City</label>
-                                        <AutoSuggestInput 
-                                            name="city" 
-                                            value={formData.city} 
-                                            onChange={handleChange} 
-                                            className={styles.inputField} 
+                                        <AutoSuggestInput
+                                            name="city"
+                                            value={formData.city}
+                                            onChange={handleChange}
+                                            className={styles.inputField}
                                             placeholder="City / Town"
                                             suggestionField="city"
                                         />
@@ -1144,14 +1218,17 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>10 School City</label>
-                                        <AutoSuggestInput 
-                                            name="tenthSchoolCity" 
-                                            value={formData.tenthSchoolCity} 
-                                            onChange={handleChange} 
-                                            className={styles.inputField} 
-                                            placeholder="School City" 
-                                            suggestionField="tenth_school_city"
-                                        />
+                                        <select
+                                            name="tenthSchoolCity"
+                                            value={formData.tenthSchoolCity}
+                                            onChange={handleChange}
+                                            className={`${styles.inputField} ${styles.selectField}`}
+                                        >
+                                            <option value="">Select School City</option>
+                                            {getTenthSchoolCities().map(city => (
+                                                <option key={city} value={city}>{city}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className={styles.inputGroup} style={{ position: 'relative' }}>
                                         <label className={styles.inputLabel}>10th School</label>
@@ -1280,14 +1357,17 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                     </div>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>12 school City</label>
-                                        <AutoSuggestInput 
-                                            name="twelfthSchoolCity" 
-                                            value={formData.twelfthSchoolCity} 
-                                            onChange={handleChange} 
-                                            className={styles.inputField} 
-                                            placeholder="School City" 
-                                            suggestionField="twelfth_school_city"
-                                        />
+                                        <select
+                                            name="twelfthSchoolCity"
+                                            value={formData.twelfthSchoolCity}
+                                            onChange={handleChange}
+                                            className={`${styles.inputField} ${styles.selectField}`}
+                                        >
+                                            <option value="">Select School City</option>
+                                            {getTwelfthSchoolCities().map(city => (
+                                                <option key={city} value={city}>{city}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div className={styles.inputGroup} style={{ position: 'relative' }}>
                                         <label className={styles.inputLabel}>12th School</label>
@@ -1468,12 +1548,12 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                 <div className={styles.formGrid}>
                                     <div className={styles.inputGroup}>
                                         <label className={styles.inputLabel}>UG College Name</label>
-                                        <AutoSuggestInput 
-                                            name="ugCollege" 
-                                            value={formData.ugCollege} 
-                                            onChange={handleChange} 
-                                            className={styles.inputField} 
-                                            placeholder="e.g. Anna University / Bharathiar University" 
+                                        <AutoSuggestInput
+                                            name="ugCollege"
+                                            value={formData.ugCollege}
+                                            onChange={handleChange}
+                                            className={styles.inputField}
+                                            placeholder="e.g. Anna University / Bharathiar University"
                                             suggestionField="ug_college_name"
                                         />
                                     </div>
@@ -1508,12 +1588,12 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                 ))}
                                             </select>
                                         ) : (
-                                            <AutoSuggestInput 
-                                                name="referenceCollege" 
-                                                value={formData.referenceCollege} 
-                                                onChange={handleChange} 
-                                                className={styles.inputField} 
-                                                placeholder="Referenced College Name" 
+                                            <AutoSuggestInput
+                                                name="referenceCollege"
+                                                value={formData.referenceCollege}
+                                                onChange={handleChange}
+                                                className={styles.inputField}
+                                                placeholder="Referenced College Name"
                                                 suggestionField="reference_institution"
                                             />
                                         )}
@@ -1532,12 +1612,12 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                 })}
                                             </select>
                                         ) : (
-                                            <AutoSuggestInput 
-                                                name="referenceDepartment" 
-                                                value={formData.referenceDepartment} 
-                                                onChange={handleChange} 
-                                                className={styles.inputField} 
-                                                placeholder="Referenced Dept" 
+                                            <AutoSuggestInput
+                                                name="referenceDepartment"
+                                                value={formData.referenceDepartment}
+                                                onChange={handleChange}
+                                                className={styles.inputField}
+                                                placeholder="Referenced Dept"
                                                 suggestionField="reference_dept"
                                             />
                                         )}
@@ -1577,12 +1657,12 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                                                 ))}
                                             </select>
                                         ) : (
-                                            <AutoSuggestInput 
-                                                name="referenceByName" 
-                                                value={formData.referenceByName} 
-                                                onChange={handleChange} 
-                                                className={styles.inputField} 
-                                                placeholder="Referrer Name" 
+                                            <AutoSuggestInput
+                                                name="referenceByName"
+                                                value={formData.referenceByName}
+                                                onChange={handleChange}
+                                                className={styles.inputField}
+                                                placeholder="Referrer Name"
                                                 suggestionField="reference_name"
                                             />
                                         )}
@@ -1720,6 +1800,11 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                 {/* 4. FEES ENTRY PORTAL */}
                 {activeSection === 'fees' && (
                     <FeesEntry />
+                )}
+
+                {/* 5. CONCESSION ENTRY PORTAL */}
+                {activeSection === 'concession' && (
+                    <ConcessionEntry />
                 )}
 
             </main>

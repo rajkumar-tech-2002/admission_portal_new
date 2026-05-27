@@ -72,11 +72,12 @@ exports.getConsultancies = async (req, res, next) => {
 
 exports.getCourseFee = async (req, res, next) => {
     try {
-        const { college, department, year, quota } = req.query;
+        console.log('FEE FETCH QUERY:', req.query);
+        const { college, department, programme, year, quota } = req.query;
         if (!college || !department || !year || !quota) {
             return res.status(400).json({ success: false, message: 'Missing parameters for fee fetch' });
         }
-        const fee = await Admission.getCourseFee(college, department, year, quota);
+        const fee = await Admission.getCourseFee(college, department, programme, year, quota);
         res.status(200).json({ success: true, data: fee });
     } catch (error) {
         next(error);
@@ -247,6 +248,42 @@ exports.importAdmissions = async (req, res, next) => {
         }
         const result = await Admission.importAdmissions(records);
         res.status(200).json({ success: true, message: 'Records imported successfully', result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.saveConcession = async (req, res, next) => {
+    try {
+        const data = req.body;
+        if (!data.student_application_no || !data.concession_type || !data.concession_amount) {
+            return res.status(400).json({ success: false, message: 'Required fields missing' });
+        }
+        const insertId = await Admission.saveConcession(data);
+        res.status(200).json({ success: true, message: 'Concession record saved successfully', id: insertId });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getAllConcessions = async (req, res, next) => {
+    try {
+        const concessions = await Admission.getAllConcessions();
+        res.status(200).json({ success: true, data: concessions });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteConcession = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const success = await Admission.deleteConcession(id);
+        if (success) {
+            res.status(200).json({ success: true, message: 'Concession deleted successfully' });
+        } else {
+            res.status(404).json({ success: false, message: 'Concession not found' });
+        }
     } catch (error) {
         next(error);
     }

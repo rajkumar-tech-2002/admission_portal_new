@@ -142,6 +142,15 @@ const AdminLayout = ({ children }) => {
                                     Fees Entry
                                 </NavLink>
 
+                                <NavLink 
+                                    to="/admin/concession-entry" 
+                                    className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+                                    onClick={closeSidebar}
+                                >
+                                    <Award size={20} />
+                                    Concession Entry
+                                </NavLink>
+
                                 {/* Reports Module - For Admin and Admission */}
                                 <div className={styles.navGroup}>
                                     <div 
@@ -253,6 +262,9 @@ const AdminLayout = ({ children }) => {
                                         </NavLink>
                                         <NavLink to="/admin/master/roles" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <UserPlus size={16} /> Role Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/concessions" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Award size={16} /> Concession Master
                                         </NavLink>
                                         <NavLink to="/admin/master/users" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <Users size={16} /> User Master

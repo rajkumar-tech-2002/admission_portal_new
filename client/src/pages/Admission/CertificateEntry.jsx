@@ -41,7 +41,9 @@ const CertificateEntry = () => {
 
                 // Extract unique colleges and departments
                 const uniqueColleges = [...new Set(res.data.data.map(item => item.college).filter(Boolean))];
-                const uniqueDepts = [...new Set(res.data.data.map(item => item.department).filter(Boolean))];
+                const uniqueDepts = [...new Set(res.data.data.map(item => {
+                    return (item.programme && item.programme.trim()) ? `${item.programme} - ${item.department}` : (item.department || '');
+                }).filter(Boolean))].sort();
                 const uniqueYears = [...new Set(res.data.data.map(item => item.admission_year).filter(Boolean))].sort();
                 const uniqueQuotas = [...new Set(res.data.data.map(item => item.quota).filter(Boolean))].sort();
 
@@ -73,7 +75,12 @@ const CertificateEntry = () => {
             );
         }
         if (collegeFilter) result = result.filter(r => r.college === collegeFilter);
-        if (deptFilter) result = result.filter(r => r.department === deptFilter);
+        if (deptFilter) {
+            result = result.filter(r => {
+                const deptDisplay = (r.programme && r.programme.trim()) ? `${r.programme} - ${r.department}` : (r.department || '');
+                return deptDisplay === deptFilter;
+            });
+        }
         if (yearFilter) result = result.filter(r => r.admission_year === yearFilter);
         if (quotaFilter) result = result.filter(r => r.quota === quotaFilter);
 
@@ -279,7 +286,13 @@ const CertificateEntry = () => {
                             onChange={(e) => setDeptFilter(e.target.value)}
                         >
                             <option value="">All Departments</option>
-                            {departments.map(d => <option key={d} value={d}>{d}</option>)}
+                            {records
+                                .filter(r => !collegeFilter || r.college === collegeFilter)
+                                .map(r => (r.programme && r.programme.trim()) ? `${r.programme} - ${r.department}` : (r.department || ''))
+                                .filter(Boolean)
+                                .filter((v, i, a) => a.indexOf(v) === i)
+                                .sort()
+                                .map(d => <option key={d} value={d}>{d}</option>)}
                         </select>
                     </div>
 
@@ -345,7 +358,6 @@ const CertificateEntry = () => {
                                     <th>Name</th>
                                     <th>Coll</th>
                                     <th>Dept</th>
-                                    <th>Programme</th>
                                     <th>Year</th>
                                     <th>Quota</th>
                                     <th>10th MC</th>
@@ -377,8 +389,7 @@ const CertificateEntry = () => {
                                                 <td><strong>{record.application_no}</strong></td>
                                                 <td>{record.student_name}</td>
                                                 <td>{record.college}</td>
-                                                <td>{record.department}</td>
-                                                <td>{record.programme || '—'}</td>
+                                                <td>{(record.programme && record.programme.trim()) ? `${record.programme} - ${record.department}` : record.department}</td>
                                                 <td>{record.admission_year}</td>
                                                 <td>{record.quota}</td>
                                                 <td><SelectField value={rowData.tenth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'tenth_marksheet', val)} /></td>

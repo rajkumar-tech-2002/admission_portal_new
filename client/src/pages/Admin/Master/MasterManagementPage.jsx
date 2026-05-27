@@ -46,7 +46,8 @@ const MasterManagementPage = ({ title, tableType, columns, fields }) => {
                     'school-types': 'schoolTypes',
                     'admission-years': 'admissionYears',
                     'groups-12th': 'groups12th',
-                    'roles': 'roles'
+                    'roles': 'roles',
+                    'concessions': 'concessions'
                 };
                 
                 const masterKey = keyMapping[tableType];

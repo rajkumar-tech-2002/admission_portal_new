@@ -65,7 +65,8 @@ class Master {
             'school-types': 'school_type_master',
             'admission-years': 'admission_year_master',
             'groups-12th': 'group_in_12th_master',
-            'roles': 'role_master'
+            'roles': 'role_master',
+            'concessions': 'concession_master'
         };
         return mapping[type];
     }

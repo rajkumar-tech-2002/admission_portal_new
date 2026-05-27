@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Plus, Edit2, Trash2, UserPlus, Download, Upload } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import styles from '../../components/css/Dashboard.module.css';
@@ -19,6 +19,52 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
     const [status, setStatus] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
+    const [quotaFilter, setQuotaFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState('');
+    const [collegeFilter, setCollegeFilter] = useState('');
+    const [deptFilter, setDeptFilter] = useState('');
+
+    // Helper: build display department (programme - department or just department)
+    const getDisplayDept = (record) => {
+        const prog = (record.programme || '').trim();
+        const dept = (record.department || '').trim();
+        if (prog) return `${prog} - ${dept}`;
+        return dept;
+    };
+
+    // Compute distinct filter options from ALL admissions data
+    const distinctStatuses = useMemo(() => {
+        const set = new Set();
+        admissions.forEach(r => { if (r.student_status) set.add(r.student_status); });
+        return [...set].sort();
+    }, [admissions]);
+
+    const distinctQuotas = useMemo(() => {
+        const set = new Set();
+        admissions.forEach(r => { if (r.quota) set.add(r.quota); });
+        return [...set].sort();
+    }, [admissions]);
+
+    const distinctYears = useMemo(() => {
+        const set = new Set();
+        admissions.forEach(r => { if (r.admission_year) set.add(r.admission_year); });
+        return [...set].sort();
+    }, [admissions]);
+
+    const distinctColleges = useMemo(() => {
+        const set = new Set();
+        admissions.forEach(r => { if (r.college) set.add(r.college); });
+        return [...set].sort();
+    }, [admissions]);
+
+    const distinctDepts = useMemo(() => {
+        const set = new Set();
+        admissions.forEach(r => {
+            const display = getDisplayDept(r);
+            if (display) set.add(display);
+        });
+        return [...set].sort();
+    }, [admissions]);
 
     const [filteredRecords, setFilteredRecords] = useState([]);
 
@@ -42,6 +88,26 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
             result = result.filter(r => r.student_status === status);
         }
 
+        // Apply Quota
+        if (quotaFilter) {
+            result = result.filter(r => r.quota === quotaFilter);
+        }
+
+        // Apply Year
+        if (yearFilter) {
+            result = result.filter(r => String(r.admission_year) === String(yearFilter));
+        }
+
+        // Apply College
+        if (collegeFilter) {
+            result = result.filter(r => r.college === collegeFilter);
+        }
+
+        // Apply Department (combined display)
+        if (deptFilter) {
+            result = result.filter(r => getDisplayDept(r) === deptFilter);
+        }
+
         // Apply Dates
         if (fromDate) {
             result = result.filter(r => new Date(r.admission_date || r.created_at) >= new Date(fromDate));
@@ -54,7 +120,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
 
         setFilteredRecords(result);
         setCurrentPage(1);
-    }, [admissions, search, status, fromDate, toDate]);
+    }, [admissions, search, status, fromDate, toDate, quotaFilter, yearFilter, collegeFilter, deptFilter]);
 
     // Pagination Logic
     const indexOfLastRecord = currentPage * recordsPerPage;
@@ -69,6 +135,10 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
         setStatus('');
         setFromDate('');
         setToDate('');
+        setQuotaFilter('');
+        setYearFilter('');
+        setCollegeFilter('');
+        setDeptFilter('');
         setCurrentPage(1);
     };
 
@@ -185,20 +255,6 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                     </div>
 
                     <div className={styles.filterGroup}>
-                        <label className={styles.filterLabel}>Status</label>
-                        <select 
-                            className={styles.selectInput}
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                        >
-                            <option value="">All Statuses</option>
-                            <option value="ADMITTED">ADMITTED</option>
-                            <option value="ENQUIRY">ENQUIRY</option>
-                            <option value="DISCONTINUE">DISCONTINUE</option>
-                        </select>
-                    </div>
-
-                    <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>From Date</label>
                         <input 
                             type="date" 
@@ -216,6 +272,86 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                             value={toDate}
                             onChange={(e) => setToDate(e.target.value)}
                         />
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>College</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={collegeFilter}
+                            onChange={(e) => {
+                                setCollegeFilter(e.target.value);
+                                setDeptFilter(''); // Reset dept when college changes
+                            }}
+                        >
+                            <option value="">All Colleges</option>
+                            {distinctColleges.map(c => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Department</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={deptFilter}
+                            onChange={(e) => setDeptFilter(e.target.value)}
+                        >
+                            <option value="">All Departments</option>
+                            {distinctDepts
+                                .filter(d => {
+                                    if (!collegeFilter) return true;
+                                    // If college is selected, only show depts for that college
+                                    // This requires looking back at admissions data
+                                    return admissions.some(r => r.college === collegeFilter && getDisplayDept(r) === d);
+                                })
+                                .map(d => (
+                                <option key={d} value={d}>{d}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Status</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                        >
+                            <option value="">All Statuses</option>
+                            {distinctStatuses.map(s => (
+                                <option key={s} value={s}>{s}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Quota</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={quotaFilter}
+                            onChange={(e) => setQuotaFilter(e.target.value)}
+                        >
+                            <option value="">All Quotas</option>
+                            {distinctQuotas.map(q => (
+                                <option key={q} value={q}>{q}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Year</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={yearFilter}
+                            onChange={(e) => setYearFilter(e.target.value)}
+                        >
+                            <option value="">All Years</option>
+                            {distinctYears.map(y => (
+                                <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
 
@@ -291,7 +427,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                                         </td>
                                         <td>{record.student_name}</td>
                                         <td>{record.college}</td>
-                                        <td>{record.department}</td>
+                                        <td>{getDisplayDept(record)}</td>
                                         <td>{record.admission_year}</td>
                                         <td>{record.quota}</td>
                                         <td>{record.city || record.district || ''}</td>

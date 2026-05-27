@@ -25,6 +25,7 @@ const ToOfficeReport = () => {
     const [year, setYear] = useState('');
     const [course, setCourse] = useState(''); // Department
     const [quota, setQuota] = useState('');
+    const [status, setStatus] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
 
@@ -46,11 +47,15 @@ const ToOfficeReport = () => {
                     // Extract unique colleges
                     const uniqueColleges = [...new Set(md.departments.map(d => d.institution).filter(Boolean))];
                     
+                    // Extract unique quotas from admissions
+                    const admissionData = admRes.data?.data || [];
+                    const uniqueQuotas = [...new Set(admissionData.map(a => a.quota).filter(Boolean))];
+                    
                     setMasterData({
                         colleges: uniqueColleges,
                         departments: md.departments,
                         years: md.admissionYears,
-                        quotas: md.admissionTypes
+                        quotas: uniqueQuotas
                     });
                 }
             } catch (err) {
@@ -96,6 +101,11 @@ const ToOfficeReport = () => {
             result = result.filter(r => (r.quota || '') === quota);
         }
 
+        // Status Filter
+        if (status) {
+            result = result.filter(r => (r.student_status || '').toUpperCase() === status.toUpperCase());
+        }
+
         // Date Filters
         if (fromDate) {
             result = result.filter(r => new Date(r.admission_date || r.created_at) >= new Date(fromDate));
@@ -108,7 +118,7 @@ const ToOfficeReport = () => {
 
         setFilteredRecords(result);
         setCurrentPage(1);
-    }, [admissions, search, college, year, course, quota, fromDate, toDate]);
+    }, [admissions, search, college, year, course, quota, status, fromDate, toDate]);
 
     // Pagination Logic
     const indexOfLastRecord = currentPage * recordsPerPage;
@@ -124,6 +134,7 @@ const ToOfficeReport = () => {
         setYear('');
         setCourse('');
         setQuota('');
+        setStatus('');
         setFromDate('');
         setToDate('');
         setCurrentPage(1);
@@ -141,6 +152,7 @@ const ToOfficeReport = () => {
             'Quota': r.quota,
             'Year': r.admission_year,
             'Admission Date': r.admission_date ? r.admission_date.substring(0, 10).split('-').reverse().join('-') : '',
+            'Admission Status': r.student_status,
             'Student Name': r.student_name,
             'Community': r.community,
             'DOB': r.dob ? r.dob.substring(0, 10).split('-').reverse().join('-') : '',
@@ -237,9 +249,22 @@ const ToOfficeReport = () => {
                             onChange={(e) => setQuota(e.target.value)}
                         >
                             <option value="">All Quotas</option>
-                            {masterData.quotas.map(q => (
-                                <option key={q.id} value={q.type_name}>{q.type_name}</option>
+                            {masterData.quotas.map((q, index) => (
+                                <option key={index} value={q}>{q}</option>
                             ))}
+                        </select>
+                    </div>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Status</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                        >
+                            <option value="">All Status</option>
+                            <option value="ADMITTED">Admitted</option>
+                            <option value="DISCONTINUE">Discontinue</option>
                         </select>
                     </div>
 
@@ -301,6 +326,7 @@ const ToOfficeReport = () => {
                                 <th>Quota</th>
                                 <th>Year</th>
                                 <th>Admission Date</th>
+                                <th>Admission Status</th>
                                 <th>Student Name</th>
                                 <th>Community</th>
                                 <th>DOB</th>
@@ -317,6 +343,7 @@ const ToOfficeReport = () => {
                                         <td>{record.quota}</td>
                                         <td>{record.admission_year}</td>
                                         <td>{record.admission_date ? record.admission_date.substring(0, 10).split('-').reverse().join('-') : ''}</td>
+                                        <td style={{ color: (record.student_status || '').toUpperCase() === 'ADMITTED' ? 'green' : 'red', fontWeight: '500' }}>{record.student_status}</td>
                                         <td>{record.student_name}</td>
                                         <td>{record.community}</td>
                                         <td>{record.dob ? record.dob.substring(0, 10).split('-').reverse().join('-') : ''}</td>
@@ -324,7 +351,7 @@ const ToOfficeReport = () => {
                                 ))
                             ) : (
                                 <tr>
-                                     <td colSpan="10" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
+                                     <td colSpan="11" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
                                 </tr>
                             )}
                         </tbody>
