@@ -127,6 +127,7 @@ const ArchivedList = () => {
         const exportData = records.map((r, index) => ({
             'S.No': index + 1,
             'Reg ID': r.reg_id,
+            '12th Reg Number': r.reg_no_12th,
             'Name': r.std_name,
             'Mobile': r.std_mobile_no,
             'City': r.city,

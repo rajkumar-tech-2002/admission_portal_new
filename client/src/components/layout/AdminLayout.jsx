@@ -167,6 +167,9 @@ const AdminLayout = ({ children }) => {
                                             <NavLink to="/admin/reports/to-office" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                                 <FileText size={16} /> To Office
                                             </NavLink>
+                                            <NavLink to="/admin/reports/to-gate-note" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <FileText size={16} /> To Gate Note
+                                            </NavLink>
                                         </div>
                                     )}
                                 </div>

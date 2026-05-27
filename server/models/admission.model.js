@@ -68,8 +68,6 @@ if (!programme || !programme.trim()) {
     return null;
 }
 
-throw new Error("NEW MODEL FILE RUNNING");
-
 const sql = `
     SELECT fees
     FROM course_fee_structure
