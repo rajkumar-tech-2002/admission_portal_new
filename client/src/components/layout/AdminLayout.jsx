@@ -178,27 +178,37 @@ const AdminLayout = ({ children }) => {
 
                         {/* Reports Module - Only for AO */}
                         {(role === 'ao' || role === 'AO') && (
-                            <div className={styles.navGroup}>
-                                <div 
-                                    className={`${styles.navItem} ${isAOResportsOpen ? styles.groupActive : ''}`} 
-                                    onClick={() => setIsAOResportsOpen(!isAOResportsOpen)}
+                            <>
+                                <NavLink 
+                                    to="/admin/admission-records" 
+                                    className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+                                    onClick={closeSidebar}
                                 >
-                                    <BarChart3 size={20} />
-                                    <span style={{ flex: 1 }}>Reports</span>
-                                    {isAOResportsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                                </div>
-                                
-                                {isAOResportsOpen && (
-                                    <div className={styles.subMenu}>
-                                        <NavLink to="/admin/consolidate-report" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <BarChart3 size={16} /> Consolidate
-                                        </NavLink>
-                                        <NavLink to="/admin/department-count" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <FileText size={16} /> Department Count
-                                        </NavLink>
+                                    <UserPlus size={20} />
+                                    Admission Records
+                                </NavLink>
+                                <div className={styles.navGroup}>
+                                    <div 
+                                        className={`${styles.navItem} ${isAOResportsOpen ? styles.groupActive : ''}`} 
+                                        onClick={() => setIsAOResportsOpen(!isAOResportsOpen)}
+                                    >
+                                        <BarChart3 size={20} />
+                                        <span style={{ flex: 1 }}>Reports</span>
+                                        {isAOResportsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                                     </div>
-                                )}
-                            </div>
+                                    
+                                    {isAOResportsOpen && (
+                                        <div className={styles.subMenu}>
+                                            <NavLink to="/admin/consolidate-report" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <BarChart3 size={16} /> Consolidate
+                                            </NavLink>
+                                            <NavLink to="/admin/department-count" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <FileText size={16} /> Department Count
+                                            </NavLink>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
                         )}
 
                         {/* Master Module - ONLY for Admin */}

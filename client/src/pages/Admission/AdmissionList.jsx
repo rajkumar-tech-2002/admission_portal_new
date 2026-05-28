@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { confirmAction } from '../../components/layout/Toast';
 import apiService from '../../services/api.service';
 
-const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
+const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh, viewOnly }) => {
     const fileInputRef = useRef(null);
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -223,19 +223,25 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                         <h2 style={{color:"var(--primary-color)", margin: 0}}>Admission Records</h2>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <input type="file" ref={fileInputRef} onChange={handleImport} accept=".xlsx, .xls" style={{ display: 'none' }} />
-                        <button onClick={() => fileInputRef.current.click()} className={styles.exportBtn} style={{ background: '#10b981', color: '#fff', border: 'none' }}>
-                            <Upload size={18} /> Import Excel
-                        </button>
-                        <button onClick={handleExportTemplate} className={styles.exportBtn}>
-                            <Download size={18} /> Template
-                        </button>
+                        {!viewOnly && (
+                            <>
+                                <input type="file" ref={fileInputRef} onChange={handleImport} accept=".xlsx, .xls" style={{ display: 'none' }} />
+                                <button onClick={() => fileInputRef.current.click()} className={styles.exportBtn} style={{ background: '#10b981', color: '#fff', border: 'none' }}>
+                                    <Upload size={18} /> Import Excel
+                                </button>
+                                <button onClick={handleExportTemplate} className={styles.exportBtn}>
+                                    <Download size={18} /> Template
+                                </button>
+                            </>
+                        )}
                         <button onClick={handleExportRecords} className={styles.exportBtn}>
                             <Download size={18} /> Export
                         </button>
-                        <button onClick={onAdd} className={styles.exportBtn} style={{ background: 'var(--primary-color)', color: '#fff', border: 'none' }}>
-                            <Plus size={18} /> Add Application
-                        </button>
+                        {!viewOnly && (
+                            <button onClick={onAdd} className={styles.exportBtn} style={{ background: 'var(--primary-color)', color: '#fff', border: 'none' }}>
+                                <Plus size={18} /> Add Application
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -385,7 +391,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                     <table className={styles.table}>
                         <thead>
                             <tr>
-                                <th>Action</th>
+                                {!viewOnly && <th>Action</th>}
                                 <th>12 Reg.Number</th>
                                 <th>Application Number</th>
                                 <th>Application Date</th>
@@ -406,6 +412,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                             {currentRecords.length > 0 ? (
                                 currentRecords.map((record, index) => (
                                     <tr key={record.id}>
+                                        {!viewOnly && (
                                         <td>
                                             <div style={{ display: 'flex', gap: '5px' }}>
                                                 <button 
@@ -417,6 +424,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh }) => {
                                                 </button>
                                             </div>
                                         </td>
+                                        )}
                                         <td>{record.reg_no_12th}</td>
                                         <td><strong>{record.application_no}</strong></td>
                                         <td>{record.admission_date ? record.admission_date.substring(0, 10).split('-').reverse().join('-') : ''}</td>

@@ -14,7 +14,7 @@ import FeesEntry from './FeesEntry';
 import ConcessionEntry from './ConcessionEntry';
 import AutoSuggestInput from '../../components/layout/AutoSuggestInput';
 
-const AdmissionProcess = ({ defaultSection = 'entry' }) => {
+const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
     // Left sub-sidebar tab selection: 'entry', 'staff', 'certificates', 'fees'
     const [activeSection, setActiveSection] = useState(defaultSection);
     const [isEntryFormVisible, setIsEntryFormVisible] = useState(false);
@@ -794,6 +794,7 @@ const AdmissionProcess = ({ defaultSection = 'entry' }) => {
                 {activeSection === 'entry' && !isEntryFormVisible && (
                     <AdmissionList
                         admissions={rawAdmissions}
+                        viewOnly={viewOnly}
                         onAdd={() => {
                             handleResetForm();
                             setEditingId(null);

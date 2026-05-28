@@ -403,7 +403,7 @@ const sql = `
     static async deleteCertificate(cert_id) {
         await db.execute('DELETE FROM certificate_given_details WHERE id = ?', [cert_id]);
     }
-    static async getFeesStudents(college, department, year) {
+    static async getFeesStudents(college, department, programme, year) {
         let sql = `SELECT id, application_no, student_name, dob, programme, department, admission_date FROM student_admission_master WHERE 1=1`;
         const params = [];
 

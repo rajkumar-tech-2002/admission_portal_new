@@ -196,8 +196,8 @@ exports.deleteCertificate = async (req, res, next) => {
 
 exports.getFeesStudents = async (req, res, next) => {
     try {
-        const { college, department, year } = req.query;
-        const students = await Admission.getFeesStudents(college, department, year);
+        const { college, department, programme, year } = req.query;
+        const students = await Admission.getFeesStudents(college, department, programme, year);
         res.status(200).json({ success: true, data: students });
     } catch (error) {
         next(error);

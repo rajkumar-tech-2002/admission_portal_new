@@ -103,7 +103,13 @@ function App() {
           } />
           <Route path="change-password" element={<ChangePassword />} />
 
-          {/* Consolidate Report & Department Count - For AO */}
+          {/* Modules - Only for AO */}
+          <Route path="admission-records" element={
+            <RoleRoute allowedRoles={['ao']}>
+              <AdmissionProcess defaultSection="entry" viewOnly={true} />
+            </RoleRoute>
+          } />
+          
           <Route path="consolidate-report" element={
             <RoleRoute allowedRoles={['ao']}>
               <ConsolidateReport />
