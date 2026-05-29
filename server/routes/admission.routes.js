@@ -16,6 +16,8 @@ router.get('/suggestions', authMiddleware, admissionController.getSuggestions);
 router.post('/submit', authMiddleware, admissionController.submitAdmission);
 router.post('/import', authMiddleware, admissionController.importAdmissions);
 router.get('/list', authMiddleware, admissionController.getAdmissions);
+router.get('/reports/fees-originals', authMiddleware, admissionController.getFeesOriginalsReport);
+router.get('/reports/certificate-count', authMiddleware, admissionController.getCertificateCountReport);
 router.put('/:id', authMiddleware, admissionController.updateAdmission);
 router.delete('/:id', authMiddleware, admissionController.deleteAdmission);
 

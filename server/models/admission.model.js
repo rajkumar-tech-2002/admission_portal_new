@@ -172,7 +172,8 @@ const sql = `
                 subject_4_name, subject_4_mark, subject_5_name, subject_5_mark, subject_6_name, subject_6_mark,
                 total_marks_12th, percentage_12th, ug_college, diploma_college, reference_type, reference_college,
                 reference_department, reference_programme, reference_programme_type, reference_by_name, reference_by_mobile, consultancy_name,
-                consultancy_person_name, consultancy_mobile, course_studied, studied_medium, board_university, nativity
+                consultancy_person_name, consultancy_mobile, course_studied, studied_medium, board_university, nativity,
+                consortium_number, consortium_batch, consortium_rank, counselling_number, counselling_round
             ) VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?, ?,
@@ -186,7 +187,8 @@ const sql = `
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         `;
 
@@ -275,7 +277,12 @@ const sql = `
             toNull(data.courseStudied),
             toNull(data.medium),
             toNull(data.boardUniversity),
-            toNull(data.nativity)
+            toNull(data.nativity),
+            toNull(data.consortiumNumber),
+            toNull(data.consortiumBatch),
+            toNull(data.consortiumRank),
+            toNull(data.counsellingNumber),
+            toNull(data.counsellingRound)
         ];
 
         const [result] = await db.execute(sql, values);
@@ -306,7 +313,8 @@ const sql = `
                 subject_4_name=?, subject_4_mark=?, subject_5_name=?, subject_5_mark=?, subject_6_name=?, subject_6_mark=?,
                 total_marks_12th=?, percentage_12th=?, ug_college=?, diploma_college=?, reference_type=?, reference_college=?,
                 reference_department=?, reference_programme=?, reference_programme_type=?, reference_by_name=?, reference_by_mobile=?, consultancy_name=?,
-                consultancy_person_name=?, consultancy_mobile=?, course_studied=?, studied_medium=?, board_university=?, nativity=?
+                consultancy_person_name=?, consultancy_mobile=?, course_studied=?, studied_medium=?, board_university=?, nativity=?,
+                consortium_number=?, consortium_batch=?, consortium_rank=?, counselling_number=?, counselling_round=?
             WHERE id=?
         `;
 
@@ -324,6 +332,7 @@ const sql = `
             toNull(data.totalMarks12th), toNull(data.percentage12th), toNull(data.ugCollege), toNull(data.diplomaCollege), toNull(data.referenceType), toNull(data.referenceCollege),
             toNull(data.referenceDepartment), toNull(data.referenceProgramme), toNull(data.referenceProgrammeType), toNull(data.referenceByName), toNull(data.referenceByMobile), toNull(data.consultancyName),
             toNull(data.consultancyPersonName), toNull(data.consultancyMobile), toNull(data.courseStudied), toNull(data.medium), toNull(data.boardUniversity), toNull(data.nativity),
+            toNull(data.consortiumNumber), toNull(data.consortiumBatch), toNull(data.consortiumRank), toNull(data.counsellingNumber), toNull(data.counsellingRound),
             id
         ];
 
@@ -341,6 +350,22 @@ const sql = `
         `);
         return rows;
     }
+
+    static async getFeesOriginalsReport() {
+        const [rows] = await db.execute(`
+            SELECT * FROM student_fee_certificate_report 
+            ORDER BY application_no ASC
+        `);
+        return rows;
+    }
+
+    static async getCertificateCountReport() {
+        const [rows] = await db.execute(`
+            SELECT * FROM student_certificate_count_report
+        `);
+        return rows;
+    }
+
     static async getCertificates() {
         const [rows] = await db.execute(`
             SELECT 
@@ -578,7 +603,8 @@ const sql = `
             'subject_4_name', 'subject_4_mark', 'subject_5_name', 'subject_5_mark', 'subject_6_name', 'subject_6_mark',
             'total_marks_12th', 'percentage_12th', 'ug_college', 'diploma_college', 'reference_type', 'reference_college',
             'reference_department', 'reference_by_name', 'reference_by_mobile', 'consultancy_name',
-            'consultancy_person_name', 'consultancy_mobile', 'course_studied', 'studied_medium', 'board_university', 'nativity'
+            'consultancy_person_name', 'consultancy_mobile', 'course_studied', 'studied_medium', 'board_university', 'nativity',
+            'consortium_number', 'consortium_batch', 'consortium_rank', 'counselling_number', 'counselling_round'
         ];
 
         for (const record of records) {

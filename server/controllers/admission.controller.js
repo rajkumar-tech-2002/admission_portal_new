@@ -140,6 +140,24 @@ exports.getAdmissions = async (req, res, next) => {
     }
 };
 
+exports.getFeesOriginalsReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getFeesOriginalsReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getCertificateCountReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getCertificateCountReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.updateAdmission = async (req, res, next) => {
     try {
         const { id } = req.params;

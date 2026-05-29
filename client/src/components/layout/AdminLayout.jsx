@@ -170,6 +170,12 @@ const AdminLayout = ({ children }) => {
                                             <NavLink to="/admin/reports/to-gate-note" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                                 <FileText size={16} /> To Gate Note
                                             </NavLink>
+                                            <NavLink to="/admin/reports/fees-originals" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <IndianRupee size={16} /> Fees & Originals
+                                            </NavLink>
+                                            <NavLink to="/admin/reports/certificate-count" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <BarChart3 size={16} /> Certificate Count
+                                            </NavLink>
                                         </div>
                                     )}
                                 </div>

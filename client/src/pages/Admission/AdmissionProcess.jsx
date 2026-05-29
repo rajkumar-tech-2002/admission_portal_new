@@ -170,7 +170,14 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
         courseStudied: '',
         medium: '',
         boardUniversity: '',
-        nativity: 'Tamil Nadu'
+        nativity: 'Tamil Nadu',
+
+        // Tab 9: MQ & GQ Details
+        consortiumNumber: '',
+        consortiumBatch: '',
+        consortiumRank: '',
+        counsellingNumber: '',
+        counsellingRound: ''
     });
 
 
@@ -593,7 +600,8 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
             totalMarks12th: '', percentage12th: '',
             ugCollege: '', diplomaCollege: '',
             referenceType: '', referenceCollege: '', referenceDepartment: '', referenceProgramme: '', referenceProgrammeType: '', referenceByName: '', referenceByMobile: '', consultancyName: '', consultancyPersonName: '', consultancyMobile: '',
-            courseStudied: '', medium: 'English', boardUniversity: '', nativity: 'Tamil Nadu'
+            courseStudied: '', medium: 'English', boardUniversity: '', nativity: 'Tamil Nadu',
+            consortiumNumber: '', consortiumBatch: '', consortiumRank: '', counsellingNumber: '', counsellingRound: ''
         });
         setSelectedDeptId('');
         prevFeeDeps.current = { college: '', department: '', year: '', quota: '' };
@@ -693,7 +701,13 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
             courseStudied: record.course_studied || '',
             medium: record.studied_medium || '',
             boardUniversity: record.board_university || '',
-            nativity: record.nativity || ''
+            nativity: record.nativity || '',
+
+            consortiumNumber: record.consortium_number || '',
+            consortiumBatch: record.consortium_batch || '',
+            consortiumRank: record.consortium_rank || '',
+            counsellingNumber: record.counselling_number || '',
+            counsellingRound: record.counselling_round || ''
         });
         // Restore selectedDeptId by matching college + department + programme uniquely
         const matchedDept = masterData.departments.find(d =>
@@ -827,8 +841,8 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
                                 { id: 4, name: '10th Details' },
                                 { id: 5, name: '12th Details' },
                                 { id: 6, name: 'UG_Details' },
-                                { id: 7, name: 'Reference_Details' }
-                                // { id: 8, name: 'Last Studied' }
+                                { id: 7, name: 'Reference_Details' },
+                                { id: 8, name: 'MQ & GQ' }
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -1719,34 +1733,42 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
                             </div>
                         )}
 
-                        {/* TAB 8: LAST STUDIED (Commented out as requested) 
+                        {/* TAB 8: MQ & GQ DETAILS */}
                         {activeFormTab === 8 && (
                             <div className={styles.formCard}>
-                                <div className={styles.cardSectionTitle}>Prior Schooling Information</div>
+                                <div className={styles.cardSectionTitle}>MQ & GQ Details</div>
+                                
+                                {/* Consortium Details */}
+                                <h4 style={{ gridColumn: '1 / -1', margin: '15px 0 5px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '5px', color: '#4b5563' }}>Consortium Details</h4>
                                 <div className={styles.formGrid}>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>Course Studied</label>
-                                        <input type="text" name="courseStudied" value={formData.courseStudied} onChange={handleChange} className={styles.inputField} placeholder="e.g. HSC (General) / Diploma" />
+                                        <label className={styles.inputLabel}>Consortium No</label>
+                                        <input type="text" name="consortiumNumber" value={formData.consortiumNumber} onChange={handleChange} className={styles.inputField} placeholder="Consortium Number" />
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>Medium</label>
-                                        <select name="medium" value={formData.medium} onChange={handleChange} className={`${styles.inputField} ${styles.selectField}`}>
-                                            <option value="English">English</option>
-                                            <option value="Tamil">Tamil</option>
-                                        </select>
+                                        <label className={styles.inputLabel}>Consortium Batch</label>
+                                        <input type="text" name="consortiumBatch" value={formData.consortiumBatch} onChange={handleChange} className={styles.inputField} placeholder="Consortium Batch" />
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>board University</label>
-                                        <input type="text" name="boardUniversity" value={formData.boardUniversity} onChange={handleChange} className={styles.inputField} placeholder="e.g. State Board / CBSE" />
+                                        <label className={styles.inputLabel}>Consortium Rank</label>
+                                        <input type="text" name="consortiumRank" value={formData.consortiumRank} onChange={handleChange} className={styles.inputField} placeholder="Consortium Rank" />
+                                    </div>
+                                </div>
+                                
+                                {/* Counselling Details */}
+                                <h4 style={{ gridColumn: '1 / -1', margin: '15px 0 5px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '5px', color: '#4b5563' }}>Counselling Details</h4>
+                                <div className={styles.formGrid}>
+                                    <div className={styles.inputGroup}>
+                                        <label className={styles.inputLabel}>Counselling No</label>
+                                        <input type="text" name="counsellingNumber" value={formData.counsellingNumber} onChange={handleChange} className={styles.inputField} placeholder="Counselling Number" />
                                     </div>
                                     <div className={styles.inputGroup}>
-                                        <label className={styles.inputLabel}>Nativity</label>
-                                        <input type="text" name="nativity" value={formData.nativity} onChange={handleChange} className={styles.inputField} placeholder="State of Origin" />
+                                        <label className={styles.inputLabel}>Counselling Round</label>
+                                        <input type="text" name="counsellingRound" value={formData.counsellingRound} onChange={handleChange} className={styles.inputField} placeholder="Counselling Round" />
                                     </div>
                                 </div>
                             </div>
                         )}
-                        */}
 
                         {/* FORM ACTION CONTROL BUTTONS */}
                         <div className={styles.formActions}>
@@ -1768,7 +1790,7 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
                                 </button>
                             )}
 
-                            {activeFormTab < 7 ? (
+                            {activeFormTab < 8 ? (
                                 <button
                                     type="button"
                                     className={`${styles.btn} ${styles.btnPrimary}`}

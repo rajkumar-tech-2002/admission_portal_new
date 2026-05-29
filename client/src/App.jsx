@@ -20,6 +20,8 @@ import AODepartmentCount from './pages/AO/AODepartmentCount';
 import AdmissionProcess from './pages/Admission/AdmissionProcess';
 import ToOfficeReport from './pages/Reports/ToOfficeReport';
 import ToGateNoteReport from './pages/Reports/ToGateNoteReport';
+import FeesAndOriginalsReport from './pages/Reports/FeesAndOriginalsReport';
+import CertificateCountReport from './pages/Reports/CertificateCountReport';
 import EnquiryDashboard from './pages/Enquiry/Dashboard';
 import EnquiryArchivedList from './pages/Enquiry/ArchivedList';
 
@@ -157,6 +159,16 @@ function App() {
           <Route path="reports/to-gate-note" element={
             <RoleRoute allowedRoles={['admin', 'admission_team']}>
               <ToGateNoteReport />
+            </RoleRoute>
+          } />
+          <Route path="reports/fees-originals" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <FeesAndOriginalsReport />
+            </RoleRoute>
+          } />
+          <Route path="reports/certificate-count" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <CertificateCountReport />
             </RoleRoute>
           } />
 
