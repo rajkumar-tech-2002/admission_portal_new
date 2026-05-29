@@ -63,31 +63,39 @@ class Admission {
     } else if (quota === 'Management Quota') {
         mappedQuota = 'MANAGEMENT';
     }
-if (!programme || !programme.trim()) {
-    console.log("Programme missing");
+if (!college || !department || !year || !quota) {
+    console.log("Missing mandatory fee params");
     return null;
 }
 
-const sql = `
+const prog = (programme || '').trim();
+
+let sql = `
     SELECT fees
     FROM course_fee_structure
     WHERE TRIM(institution) = TRIM(?)
-    AND TRIM(programme) = TRIM(?)
     AND TRIM(department) = TRIM(?)
     AND TRIM(year) = TRIM(?)
     AND TRIM(quota) = TRIM(?)
-    LIMIT 1
 `;
 
-    const params = [
-        college.trim(),
-        programme.trim(),
-        department.trim(),
-        year.trim(),
-        mappedQuota.trim()
-    ];
+const params = [
+    (college || '').trim(),
+    (department || '').trim(),
+    (year || '').trim(),
+    (mappedQuota || '').trim()
+];
 
-    console.log("FEE PARAMS =>", params);
+if (prog) {
+    sql += ` AND TRIM(programme) = TRIM(?)`;
+    params.push(prog);
+} else {
+    sql += ` AND (programme IS NULL OR TRIM(programme) = '')`;
+}
+
+sql += ` LIMIT 1`;
+
+console.log("FEE PARAMS =>", params);
 
     const [rows] = await db.execute(sql, params);
 
@@ -188,7 +196,7 @@ const sql = `
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?
             )
         `;
 

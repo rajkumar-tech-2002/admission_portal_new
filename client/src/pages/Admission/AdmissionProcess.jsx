@@ -288,8 +288,9 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
             ) {
                 prevFeeDeps.current = { college, department, programme, year, quota };
 
-                if (college && department && programme && year && quota) {
+                if (college && department && year && quota) {
                     try {
+                        console.log("FETCHING FEE FOR:", { college, department, programme, year, quota });
 
                         const res = await apiService.get(
                             `/admissions/course-fee?college=${encodeURIComponent(college)}&department=${encodeURIComponent(department)}&programme=${encodeURIComponent(programme)}&year=${encodeURIComponent(year)}&quota=${encodeURIComponent(quota)}`
