@@ -17,7 +17,9 @@ router.post('/submit', authMiddleware, admissionController.submitAdmission);
 router.post('/import', authMiddleware, admissionController.importAdmissions);
 router.get('/list', authMiddleware, admissionController.getAdmissions);
 router.get('/reports/fees-originals', authMiddleware, admissionController.getFeesOriginalsReport);
+router.get('/reports/fees-originals-pg', authMiddleware, admissionController.getFeesOriginalsPGReport);
 router.get('/reports/certificate-count', authMiddleware, admissionController.getCertificateCountReport);
+router.get('/reports/certificate-count-pg', authMiddleware, admissionController.getCertificateCountPGReport);
 router.put('/:id', authMiddleware, admissionController.updateAdmission);
 router.delete('/:id', authMiddleware, admissionController.deleteAdmission);
 
@@ -29,6 +31,10 @@ router.delete('/certificates/:id', authMiddleware, admissionController.deleteCer
 router.get('/certificates-pg/list', authMiddleware, admissionController.getCertificatesPG);
 router.post('/certificates-pg/save', authMiddleware, admissionController.saveCertificatePG);
 router.delete('/certificates-pg/:id', authMiddleware, admissionController.deleteCertificatePG);
+
+router.get('/certificates-npc/list', authMiddleware, admissionController.getCertificatesNPC);
+router.post('/certificates-npc/save', authMiddleware, admissionController.saveCertificateNPC);
+router.delete('/certificates-npc/:id', authMiddleware, admissionController.deleteCertificateNPC);
 
 // Fees Actions
 router.get('/fees-students', authMiddleware, admissionController.getFeesStudents);

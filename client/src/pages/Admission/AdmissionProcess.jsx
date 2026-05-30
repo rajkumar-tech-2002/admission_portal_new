@@ -11,6 +11,7 @@ import AdmissionList from './AdmissionList';
 import StaffView from './StaffView';
 import CertificateEntry from './CertificateEntry';
 import CertificateEntryPG from './CertificateEntryPG';
+import CertificateEntryNPC from './CertificateEntryNPC';
 import FeesEntry from './FeesEntry';
 import ConcessionEntry from './ConcessionEntry';
 import AutoSuggestInput from '../../components/layout/AutoSuggestInput';
@@ -1825,6 +1826,11 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
                 {/* 3.1 CERTIFICATE ENTRY PG PORTAL */}
                 {activeSection === 'certificates-pg' && (
                     <CertificateEntryPG />
+                )}
+
+                {/* 3.2 CERTIFICATE ENTRY NPC PORTAL */}
+                {activeSection === 'certificates-npc' && (
+                    <CertificateEntryNPC />
                 )}
 
                 {/* 4. FEES ENTRY PORTAL */}

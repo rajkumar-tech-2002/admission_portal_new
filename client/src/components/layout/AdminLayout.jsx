@@ -143,6 +143,15 @@ const AdminLayout = ({ children }) => {
                                 </NavLink>
 
                                 <NavLink 
+                                    to="/admin/certificate-npc-entry" 
+                                    className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+                                    onClick={closeSidebar}
+                                >
+                                    <Award size={20} />
+                                    Certificate - NPC
+                                </NavLink>
+
+                                <NavLink 
                                     to="/admin/fees-entry" 
                                     className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
                                     onClick={closeSidebar}
@@ -182,8 +191,14 @@ const AdminLayout = ({ children }) => {
                                             <NavLink to="/admin/reports/fees-originals" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                                 <IndianRupee size={16} /> Fees & Originals - UG
                                             </NavLink>
+                                            <NavLink to="/admin/reports/fees-originals-pg" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <IndianRupee size={16} /> Fees & Originals - PG
+                                            </NavLink>
                                             <NavLink to="/admin/reports/certificate-count" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                                 <BarChart3 size={16} /> Certificate Count - UG
+                                            </NavLink>
+                                            <NavLink to="/admin/reports/certificate-count-pg" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <BarChart3 size={16} /> Certificate Count - PG
                                             </NavLink>
                                         </div>
                                     )}

@@ -21,7 +21,9 @@ import AdmissionProcess from './pages/Admission/AdmissionProcess';
 import ToOfficeReport from './pages/Reports/ToOfficeReport';
 import ToGateNoteReport from './pages/Reports/ToGateNoteReport';
 import FeesAndOriginalsReport from './pages/Reports/FeesAndOriginalsReport';
+import FeesAndOriginalsReportPG from './pages/Reports/FeesAndOriginalsReportPG';
 import CertificateCountReport from './pages/Reports/CertificateCountReport';
+import CertificateCountReportPG from './pages/Reports/CertificateCountReportPG';
 import EnquiryDashboard from './pages/Enquiry/Dashboard';
 import EnquiryArchivedList from './pages/Enquiry/ArchivedList';
 
@@ -144,6 +146,11 @@ function App() {
               <AdmissionProcess defaultSection="certificates-pg" />
             </RoleRoute>
           } />
+          <Route path="certificate-npc-entry" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <AdmissionProcess defaultSection="certificates-npc" />
+            </RoleRoute>
+          } />
           <Route path="fees-entry" element={
             <RoleRoute allowedRoles={['admin', 'admission_team']}>
               <AdmissionProcess defaultSection="fees" />
@@ -171,9 +178,19 @@ function App() {
               <FeesAndOriginalsReport />
             </RoleRoute>
           } />
+          <Route path="reports/fees-originals-pg" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <FeesAndOriginalsReportPG />
+            </RoleRoute>
+          } />
           <Route path="reports/certificate-count" element={
             <RoleRoute allowedRoles={['admin', 'admission_team']}>
               <CertificateCountReport />
+            </RoleRoute>
+          } />
+          <Route path="reports/certificate-count-pg" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <CertificateCountReportPG />
             </RoleRoute>
           } />
 

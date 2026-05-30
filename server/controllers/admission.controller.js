@@ -149,9 +149,27 @@ exports.getFeesOriginalsReport = async (req, res, next) => {
     }
 };
 
+exports.getFeesOriginalsPGReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getFeesOriginalsPGReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.getCertificateCountReport = async (req, res, next) => {
     try {
         const data = await Admission.getCertificateCountReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getCertificateCountPGReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getCertificateCountPGReport();
         res.status(200).json({ success: true, data });
     } catch (error) {
         next(error);
@@ -238,6 +256,38 @@ exports.deleteCertificatePG = async (req, res, next) => {
     try {
         const { id } = req.params;
         await Admission.deleteCertificatePG(id);
+        res.status(200).json({ success: true, message: 'Certificate record deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getCertificatesNPC = async (req, res, next) => {
+    try {
+        const certificates = await Admission.getCertificatesNPC();
+        res.status(200).json({ success: true, data: certificates });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.saveCertificateNPC = async (req, res, next) => {
+    try {
+        const data = req.body;
+        if (!data.student_id) {
+            return res.status(400).json({ success: false, message: 'Student ID is required' });
+        }
+        const result = await Admission.saveCertificateNPC(data);
+        res.status(200).json({ success: true, message: 'Certificate details saved successfully', result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteCertificateNPC = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await Admission.deleteCertificateNPC(id);
         res.status(200).json({ success: true, message: 'Certificate record deleted successfully' });
     } catch (error) {
         next(error);
