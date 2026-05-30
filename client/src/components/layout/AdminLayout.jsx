@@ -130,7 +130,16 @@ const AdminLayout = ({ children }) => {
                                     onClick={closeSidebar}
                                 >
                                     <Award size={20} />
-                                    Certificate Entry
+                                    Certificate - UG 
+                                </NavLink>
+
+                                <NavLink 
+                                    to="/admin/certificate-pg-entry" 
+                                    className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+                                    onClick={closeSidebar}
+                                >
+                                    <Award size={20} />
+                                    Certificate - PG
                                 </NavLink>
 
                                 <NavLink 
@@ -171,10 +180,10 @@ const AdminLayout = ({ children }) => {
                                                 <FileText size={16} /> To Gate Note
                                             </NavLink>
                                             <NavLink to="/admin/reports/fees-originals" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <IndianRupee size={16} /> Fees & Originals
+                                                <IndianRupee size={16} /> Fees & Originals - UG
                                             </NavLink>
                                             <NavLink to="/admin/reports/certificate-count" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <BarChart3 size={16} /> Certificate Count
+                                                <BarChart3 size={16} /> Certificate Count - UG
                                             </NavLink>
                                         </div>
                                     )}

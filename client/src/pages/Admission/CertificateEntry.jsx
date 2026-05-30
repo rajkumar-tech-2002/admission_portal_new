@@ -239,7 +239,7 @@ const CertificateEntry = () => {
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Award size={22} style={{ color: 'var(--primary-color)' }} />
-                        <h2 style={{ color: "var(--primary-color)", margin: 0 }}>Certificate Management</h2>
+                        <h2 style={{ color: "var(--primary-color)", margin: 0 }}>Certificate Management - UG (I Year)</h2>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button onClick={handleExcelExport} className={styles.exportBtn} style={{ background: '#10b981', color: '#fff', border: 'none' }}>

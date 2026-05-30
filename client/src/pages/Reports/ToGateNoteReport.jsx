@@ -44,27 +44,22 @@ const ToGateNoteReport = () => {
                     setAdmissions(admRes.data.data);
                 }
 
-                if (masterRes.data.success) {
-                    const md = masterRes.data.data;
-                    
-                    // Extract unique colleges
-                    const uniqueColleges = [...new Set(md.departments.map(d => d.institution).filter(Boolean))];
-                    
-                    // Extract unique quotas and reference types from admissions
                     const admissionData = admRes.data?.data || [];
-                    const uniqueQuotas = [...new Set(admissionData.map(a => a.quota).filter(Boolean))];
-                    const uniqueRefTypes = [...new Set(admissionData.map(a => a.reference_type).filter(Boolean))];
-                    const uniqueStatuses = [...new Set(admissionData.map(a => a.student_status).filter(Boolean))];
+                    const uniqueColleges = [...new Set(admissionData.map(a => a.college).filter(Boolean))].sort();
+                    const uniqueYears = [...new Set(admissionData.map(a => a.admission_year).filter(Boolean))].sort();
+                    const uniqueCourses = [...new Set(admissionData.map(a => a.department).filter(Boolean))].sort();
+                    const uniqueQuotas = [...new Set(admissionData.map(a => a.quota).filter(Boolean))].sort();
+                    const uniqueRefTypes = [...new Set(admissionData.map(a => a.reference_type).filter(Boolean))].sort();
+                    const uniqueStatuses = [...new Set(admissionData.map(a => a.student_status).filter(Boolean))].sort();
                     
                     setMasterData({
                         colleges: uniqueColleges,
-                        departments: md.departments,
-                        years: md.admissionYears,
+                        departments: uniqueCourses,
+                        years: uniqueYears,
                         quotas: uniqueQuotas,
                         referenceTypes: uniqueRefTypes,
                         statuses: uniqueStatuses
                     });
-                }
             } catch (err) {
                 console.error("Failed to fetch data:", err);
                 toast.error("Failed to load report data");
@@ -237,8 +232,8 @@ const ToGateNoteReport = () => {
                             onChange={(e) => setYear(e.target.value)}
                         >
                             <option value="">All Years</option>
-                            {masterData.years.map((y) => (
-                                <option key={y.id} value={y.admission_year_name}>{y.admission_year_name}</option>
+                            {masterData.years.map((y, index) => (
+                                <option key={index} value={y}>{y}</option>
                             ))}
                         </select>
                     </div>
@@ -251,12 +246,9 @@ const ToGateNoteReport = () => {
                             onChange={(e) => setCourse(e.target.value)}
                         >
                             <option value="">All Courses</option>
-                            {masterData.departments
-                                .filter(d => college ? d.institution === college : true)
-                                .map(d => {
-                                    const label = d.program ? `${d.program} - ${d.department}` : d.department;
-                                    return <option key={d.id} value={d.department}>{label}</option>;
-                                })}
+                            {masterData.departments.map((d, index) => (
+                                <option key={index} value={d}>{d}</option>
+                            ))}
                         </select>
                     </div>
 

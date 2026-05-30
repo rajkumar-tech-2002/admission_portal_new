@@ -35,20 +35,18 @@ const CertificateCountReport = () => {
                     setAdmissions(admRes.data.data);
                 }
 
-                if (masterRes.data.success) {
-                    const md = masterRes.data.data;
-                    
-                    const uniqueColleges = [...new Set(md.departments.map(d => d.institution).filter(Boolean))];
                     const admissionData = admRes.data?.data || [];
-                    const uniqueQuotas = [...new Set(admissionData.map(a => a.quota).filter(Boolean))];
+                    const uniqueColleges = [...new Set(admissionData.map(a => a.college).filter(Boolean))].sort();
+                    const uniqueYears = [...new Set(admissionData.map(a => a.admission_year).filter(Boolean))].sort();
+                    const uniqueCourses = [...new Set(admissionData.map(a => a.department).filter(Boolean))].sort();
+                    const uniqueQuotas = [...new Set(admissionData.map(a => a.quota).filter(Boolean))].sort();
                     
                     setMasterData({
                         colleges: uniqueColleges,
-                        departments: md.departments,
-                        years: md.admissionYears,
+                        departments: uniqueCourses,
+                        years: uniqueYears,
                         quotas: uniqueQuotas
                     });
-                }
             } catch (err) {
                 console.error("Failed to fetch data:", err);
                 toast.error("Failed to load report data");
@@ -241,8 +239,8 @@ const CertificateCountReport = () => {
                             onChange={(e) => setYear(e.target.value)}
                         >
                             <option value="">All Years</option>
-                            {masterData.years.map((y) => (
-                                <option key={y.id} value={y.admission_year_name}>{y.admission_year_name}</option>
+                            {masterData.years.map((y, index) => (
+                                <option key={index} value={y}>{y}</option>
                             ))}
                         </select>
                     </div>
@@ -255,12 +253,9 @@ const CertificateCountReport = () => {
                             onChange={(e) => setCourse(e.target.value)}
                         >
                             <option value="">All Courses</option>
-                            {masterData.departments
-                                .filter(d => college ? d.institution === college : true)
-                                .map(d => {
-                                    const label = d.program ? `${d.program} - ${d.department}` : d.department;
-                                    return <option key={d.id} value={d.department}>{label}</option>;
-                                })}
+                            {masterData.departments.map((d, index) => (
+                                <option key={index} value={d}>{d}</option>
+                            ))}
                         </select>
                     </div>
 
@@ -295,6 +290,7 @@ const CertificateCountReport = () => {
                                 <th>Department</th>
                                 <th style={{ textAlign: 'center' }}>Total Students</th>
                                 <th style={{ textAlign: 'center' }}>10th MC</th>
+                                <th style={{ textAlign: 'center' }}>10th Temp</th>
                                 <th style={{ textAlign: 'center' }}>11th MC</th>
                                 <th style={{ textAlign: 'center' }}>12th Temp</th>
                                 <th style={{ textAlign: 'center' }}>12th MC</th>
@@ -319,6 +315,7 @@ const CertificateCountReport = () => {
                                                 <td>{row.department}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.tenth_marksheet_count || ''}</td>
+                                                <td style={{ textAlign: 'center' }}>{row.tenth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.eleventh_marksheet_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_marksheet_count || ''}</td>
@@ -339,6 +336,7 @@ const CertificateCountReport = () => {
                                                 <td colSpan="2">{row.label}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.tenth_marksheet_count || ''}</td>
+                                                <td style={{ textAlign: 'center' }}>{row.tenth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.eleventh_marksheet_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_marksheet_count || ''}</td>
@@ -358,6 +356,7 @@ const CertificateCountReport = () => {
                                                 <td colSpan="3">{row.label}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.tenth_marksheet_count || ''}</td>
+                                                <td style={{ textAlign: 'center' }}>{row.tenth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.eleventh_marksheet_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_marksheet_count || ''}</td>
@@ -376,6 +375,7 @@ const CertificateCountReport = () => {
                                                 <td colSpan="4" style={{ textAlign: 'center' }}>{row.label}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.tenth_marksheet_count || ''}</td>
+                                                <td style={{ textAlign: 'center' }}>{row.tenth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.eleventh_marksheet_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_marksheet_count || ''}</td>
@@ -393,7 +393,7 @@ const CertificateCountReport = () => {
                                 })
                             ) : (
                                 <tr>
-                                     <td colSpan="16" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
+                                     <td colSpan="17" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
                                 </tr>
                             )}
                         </tbody>

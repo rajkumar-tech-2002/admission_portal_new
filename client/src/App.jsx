@@ -139,6 +139,11 @@ function App() {
               <AdmissionProcess defaultSection="certificates" />
             </RoleRoute>
           } />
+          <Route path="certificate-pg-entry" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <AdmissionProcess defaultSection="certificates-pg" />
+            </RoleRoute>
+          } />
           <Route path="fees-entry" element={
             <RoleRoute allowedRoles={['admin', 'admission_team']}>
               <AdmissionProcess defaultSection="fees" />

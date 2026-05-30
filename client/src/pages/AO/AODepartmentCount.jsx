@@ -38,15 +38,14 @@ const AODepartmentCount = () => {
                     setData(reportRes.data.data);
                 }
 
-                if (masterRes.data.success) {
-                    const md = masterRes.data.data;
-                    const uniqueColleges = [...new Set(md.departments.map(d => d.institution).filter(Boolean))];
+                    const reportData = reportRes.data?.data || [];
+                    const uniqueColleges = [...new Set(reportData.map(r => r.college).filter(Boolean))].sort();
+                    const uniqueDepartments = [...new Set(reportData.map(r => r.department).filter(Boolean))].sort();
                     
                     setMasterData({
                         colleges: uniqueColleges,
-                        departments: md.departments
+                        departments: uniqueDepartments
                     });
-                }
             } catch (err) {
                 console.error("Failed to fetch data:", err);
                 toast.error("Failed to load department count report");

@@ -212,6 +212,38 @@ exports.deleteCertificate = async (req, res, next) => {
     }
 };
 
+exports.getCertificatesPG = async (req, res, next) => {
+    try {
+        const certificates = await Admission.getCertificatesPG();
+        res.status(200).json({ success: true, data: certificates });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.saveCertificatePG = async (req, res, next) => {
+    try {
+        const data = req.body;
+        if (!data.student_id) {
+            return res.status(400).json({ success: false, message: 'Student ID is required' });
+        }
+        const result = await Admission.saveCertificatePG(data);
+        res.status(200).json({ success: true, message: 'Certificate details saved successfully', result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteCertificatePG = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await Admission.deleteCertificatePG(id);
+        res.status(200).json({ success: true, message: 'Certificate record deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.getFeesStudents = async (req, res, next) => {
     try {
         const { college, department, programme, year } = req.query;

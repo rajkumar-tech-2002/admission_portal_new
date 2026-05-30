@@ -26,6 +26,10 @@ router.get('/certificates/list', authMiddleware, admissionController.getCertific
 router.post('/certificates/save', authMiddleware, admissionController.saveCertificate);
 router.delete('/certificates/:id', authMiddleware, admissionController.deleteCertificate);
 
+router.get('/certificates-pg/list', authMiddleware, admissionController.getCertificatesPG);
+router.post('/certificates-pg/save', authMiddleware, admissionController.saveCertificatePG);
+router.delete('/certificates-pg/:id', authMiddleware, admissionController.deleteCertificatePG);
+
 // Fees Actions
 router.get('/fees-students', authMiddleware, admissionController.getFeesStudents);
 router.post('/fees/save', authMiddleware, admissionController.saveFee);

@@ -54,23 +54,23 @@ class Admission {
         return rows;
     }
 
-   static async getCourseFee(college, department, programme, year, quota) {
+    static async getCourseFee(college, department, programme, year, quota) {
 
-    let mappedQuota = quota;
+        let mappedQuota = quota;
 
-    if (quota === 'Government Quota') {
-        mappedQuota = 'COUNSELLING';
-    } else if (quota === 'Management Quota') {
-        mappedQuota = 'MANAGEMENT';
-    }
-if (!college || !department || !year || !quota) {
-    console.log("Missing mandatory fee params");
-    return null;
-}
+        if (quota === 'Government Quota') {
+            mappedQuota = 'COUNSELLING';
+        } else if (quota === 'Management Quota') {
+            mappedQuota = 'MANAGEMENT';
+        }
+        if (!college || !department || !year || !quota) {
+            console.log("Missing mandatory fee params");
+            return null;
+        }
 
-const prog = (programme || '').trim();
+        const prog = (programme || '').trim();
 
-let sql = `
+        let sql = `
     SELECT fees
     FROM course_fee_structure
     WHERE TRIM(institution) = TRIM(?)
@@ -79,30 +79,30 @@ let sql = `
     AND TRIM(quota) = TRIM(?)
 `;
 
-const params = [
-    (college || '').trim(),
-    (department || '').trim(),
-    (year || '').trim(),
-    (mappedQuota || '').trim()
-];
+        const params = [
+            (college || '').trim(),
+            (department || '').trim(),
+            (year || '').trim(),
+            (mappedQuota || '').trim()
+        ];
 
-if (prog) {
-    sql += ` AND TRIM(programme) = TRIM(?)`;
-    params.push(prog);
-} else {
-    sql += ` AND (programme IS NULL OR TRIM(programme) = '')`;
-}
+        if (prog) {
+            sql += ` AND TRIM(programme) = TRIM(?)`;
+            params.push(prog);
+        } else {
+            sql += ` AND (programme IS NULL OR TRIM(programme) = '')`;
+        }
 
-sql += ` LIMIT 1`;
+        sql += ` LIMIT 1`;
 
-console.log("FEE PARAMS =>", params);
+        console.log("FEE PARAMS =>", params);
 
-    const [rows] = await db.execute(sql, params);
+        const [rows] = await db.execute(sql, params);
 
-    console.log("FEE RESULT =>", rows);
+        console.log("FEE RESULT =>", rows);
 
-    return rows.length > 0 ? rows[0].fees : null;
-}
+        return rows.length > 0 ? rows[0].fees : null;
+    }
 
     static async getSuggestions(field, query) {
         const allowedFields = ['city', 'address2', 'taluk', 'district', 'state', 'pincode', 'tenth_school_name', 'twelfth_school_name', 'tenth_school_city', 'twelfth_school_city', 'ug_college_name', 'reference_name', 'reference_institution', 'reference_dept'];
@@ -376,16 +376,38 @@ console.log("FEE PARAMS =>", params);
 
     static async getCertificates() {
         const [rows] = await db.execute(`
-            SELECT 
-                sam.id as student_id, sam.application_no, sam.student_name, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota,
-                cgd.id as cert_id,
-                cgd.tenth_marksheet, cgd.tenth_temp, cgd.eleventh_marksheet, cgd.twelfth_marksheet, cgd.twelfth_temp,
-                cgd.transfer_certificate, cgd.community_certificate, cgd.first_graduate_certificate,
-                cgd.income_certificate, cgd.native_certificate, cgd.bonafide_certificate, cgd.JD_certificate, cgd.remarks
-            FROM student_admission_master sam
-            LEFT JOIN certificate_given_details cgd ON sam.id = cgd.student_id
-            ORDER BY sam.created_at DESC
-        `);
+        SELECT 
+            sam.id AS student_id,
+            sam.application_no,
+            sam.student_name,
+            sam.college,
+            sam.programme,
+            sam.department,
+            sam.admission_year,
+            sam.quota,
+            cgd.id AS cert_id,
+            cgd.tenth_marksheet,
+            cgd.tenth_temp,
+            cgd.eleventh_marksheet,
+            cgd.twelfth_marksheet,
+            cgd.twelfth_temp,
+            cgd.transfer_certificate,
+            cgd.community_certificate,
+            cgd.first_graduate_certificate,
+            cgd.income_certificate,
+            cgd.native_certificate,
+            cgd.bonafide_certificate,
+            cgd.JD_certificate,
+            cgd.remarks
+        FROM student_admission_master sam
+        LEFT JOIN certificate_given_details cgd 
+            ON sam.id = cgd.student_id
+        WHERE sam.programme_type = 'UG'
+          AND sam.admission_year = 'I Year'
+          AND sam.college IN ('NEC', 'NCT')
+        ORDER BY sam.admission_date DESC
+    `);
+
         return rows;
     }
 
@@ -435,6 +457,78 @@ console.log("FEE PARAMS =>", params);
 
     static async deleteCertificate(cert_id) {
         await db.execute('DELETE FROM certificate_given_details WHERE id = ?', [cert_id]);
+    }
+
+    static async getCertificatesPG() {
+        const [rows] = await db.execute(`
+            SELECT 
+                sam.id as student_id, sam.application_no, sam.student_name, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota,
+                cgd.id as cert_id,
+                cgd.tancet, cgd.ms_10, cgd.ms_11, cgd.ms_12, cgd.allotment_order, cgd.cc,
+                cgd.dip_sem_1, cgd.dip_sem_2, cgd.dip_sem_3, cgd.dip_sem_4, cgd.dip_sem_5, cgd.dip_sem_6, cgd.dip_cons, cgd.dip_cert, cgd.dip_prov, cgd.tc,
+                cgd.ug_sem_1, cgd.ug_sem_2, cgd.ug_sem_3, cgd.ug_sem_4, cgd.ug_sem_5, cgd.ug_sem_6, cgd.ug_sem_7, cgd.ug_sem_8, cgd.ug_cons, cgd.ug_degree, cgd.ug_prov,
+                cgd.fg_cert, cgd.joint_decl, cgd.remarks
+            FROM student_admission_master sam
+            LEFT JOIN certificate_given_details_engg_pg cgd ON sam.id = cgd.student_id
+            WHERE sam.college IN ('NEC', 'NCT')
+            ORDER BY sam.admission_date DESC
+        `);
+        return rows;
+    }
+
+    static async saveCertificatePG(data) {
+        const {
+            student_id, student_application_no, student_year,
+            tancet, ms_10, ms_11, ms_12, allotment_order, cc,
+            dip_sem_1, dip_sem_2, dip_sem_3, dip_sem_4, dip_sem_5, dip_sem_6, dip_cons, dip_cert, dip_prov, tc,
+            ug_sem_1, ug_sem_2, ug_sem_3, ug_sem_4, ug_sem_5, ug_sem_6, ug_sem_7, ug_sem_8, ug_cons, ug_degree, ug_prov,
+            fg_cert, joint_decl, remarks
+        } = data;
+
+        const [existing] = await db.execute('SELECT id FROM certificate_given_details_engg_pg WHERE student_id = ?', [student_id]);
+
+        if (existing.length > 0) {
+            const sql = `
+                UPDATE certificate_given_details_engg_pg SET
+                    student_application_no = ?, student_year = ?,
+                    tancet = ?, ms_10 = ?, ms_11 = ?, ms_12 = ?, allotment_order = ?, cc = ?,
+                    dip_sem_1 = ?, dip_sem_2 = ?, dip_sem_3 = ?, dip_sem_4 = ?, dip_sem_5 = ?, dip_sem_6 = ?, dip_cons = ?, dip_cert = ?, dip_prov = ?, tc = ?,
+                    ug_sem_1 = ?, ug_sem_2 = ?, ug_sem_3 = ?, ug_sem_4 = ?, ug_sem_5 = ?, ug_sem_6 = ?, ug_sem_7 = ?, ug_sem_8 = ?, ug_cons = ?, ug_degree = ?, ug_prov = ?,
+                    fg_cert = ?, joint_decl = ?, remarks = ?
+                WHERE student_id = ?
+            `;
+            await db.execute(sql, [
+                student_application_no || null, student_year || null,
+                tancet || null, ms_10 || null, ms_11 || null, ms_12 || null, allotment_order || null, cc || null,
+                dip_sem_1 || null, dip_sem_2 || null, dip_sem_3 || null, dip_sem_4 || null, dip_sem_5 || null, dip_sem_6 || null, dip_cons || null, dip_cert || null, dip_prov || null, tc || null,
+                ug_sem_1 || null, ug_sem_2 || null, ug_sem_3 || null, ug_sem_4 || null, ug_sem_5 || null, ug_sem_6 || null, ug_sem_7 || null, ug_sem_8 || null, ug_cons || null, ug_degree || null, ug_prov || null,
+                fg_cert || null, joint_decl || null, remarks || null,
+                student_id
+            ]);
+            return { action: 'updated', id: existing[0].id };
+        } else {
+            const sql = `
+                INSERT INTO certificate_given_details_engg_pg (
+                    student_id, student_application_no, student_year,
+                    tancet, ms_10, ms_11, ms_12, allotment_order, cc,
+                    dip_sem_1, dip_sem_2, dip_sem_3, dip_sem_4, dip_sem_5, dip_sem_6, dip_cons, dip_cert, dip_prov, tc,
+                    ug_sem_1, ug_sem_2, ug_sem_3, ug_sem_4, ug_sem_5, ug_sem_6, ug_sem_7, ug_sem_8, ug_cons, ug_degree, ug_prov,
+                    fg_cert, joint_decl, remarks
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            const [result] = await db.execute(sql, [
+                student_id, student_application_no || null, student_year || null,
+                tancet || null, ms_10 || null, ms_11 || null, ms_12 || null, allotment_order || null, cc || null,
+                dip_sem_1 || null, dip_sem_2 || null, dip_sem_3 || null, dip_sem_4 || null, dip_sem_5 || null, dip_sem_6 || null, dip_cons || null, dip_cert || null, dip_prov || null, tc || null,
+                ug_sem_1 || null, ug_sem_2 || null, ug_sem_3 || null, ug_sem_4 || null, ug_sem_5 || null, ug_sem_6 || null, ug_sem_7 || null, ug_sem_8 || null, ug_cons || null, ug_degree || null, ug_prov || null,
+                fg_cert || null, joint_decl || null, remarks || null
+            ]);
+            return { action: 'inserted', id: result.insertId };
+        }
+    }
+
+    static async deleteCertificatePG(cert_id) {
+        await db.execute('DELETE FROM certificate_given_details_engg_pg WHERE id = ?', [cert_id]);
     }
     static async getFeesStudents(college, department, programme, year) {
         let sql = `SELECT id, application_no, student_name, dob, programme, department, admission_date FROM student_admission_master WHERE 1=1`;

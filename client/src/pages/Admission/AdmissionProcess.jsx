@@ -10,6 +10,7 @@ import styles from '../../components/css/AdmissionProcess.module.css';
 import AdmissionList from './AdmissionList';
 import StaffView from './StaffView';
 import CertificateEntry from './CertificateEntry';
+import CertificateEntryPG from './CertificateEntryPG';
 import FeesEntry from './FeesEntry';
 import ConcessionEntry from './ConcessionEntry';
 import AutoSuggestInput from '../../components/layout/AutoSuggestInput';
@@ -1819,6 +1820,11 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
                 {/* 3. CERTIFICATE ENTRY PORTAL */}
                 {activeSection === 'certificates' && (
                     <CertificateEntry />
+                )}
+
+                {/* 3.1 CERTIFICATE ENTRY PG PORTAL */}
+                {activeSection === 'certificates-pg' && (
+                    <CertificateEntryPG />
                 )}
 
                 {/* 4. FEES ENTRY PORTAL */}
