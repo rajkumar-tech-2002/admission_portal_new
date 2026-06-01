@@ -17,7 +17,6 @@ const AdminLayout = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMasterOpen, setIsMasterOpen] = useState(false);
     const [isReportsOpen, setIsReportsOpen] = useState(false);
-    const [isAOResportsOpen, setIsAOResportsOpen] = useState(false);
     const [isSecretaryReportsOpen, setIsSecretaryReportsOpen] = useState(false);
 
     const role = (sessionStorage.getItem('role') || 'admin').toLowerCase();
@@ -28,12 +27,10 @@ const AdminLayout = ({ children }) => {
     useEffect(() => {
         const isMasterRoute = location.pathname.includes('/admin/master') || location.pathname.includes('/admin/change-password');
         const isReportsRoute = location.pathname.includes('/admin/reports');
-        const isAORoute = location.pathname.includes('/admin/consolidate-report') || location.pathname.includes('/admin/department-count');
-        const isSecretaryRoute = location.pathname.includes('/admin/secretary-report') || location.pathname.includes('/admin/community-report');
+        const isSecretaryRoute = location.pathname.includes('/admin/secretary-report');
         
         setIsMasterOpen(isMasterRoute);
         setIsReportsOpen(isReportsRoute);
-        setIsAOResportsOpen(isAORoute);
         setIsSecretaryReportsOpen(isSecretaryRoute);
     }, [location.pathname]);
 
@@ -192,22 +189,22 @@ const AdminLayout = ({ children }) => {
                                                 <FileText size={16} /> To Gate Note
                                             </NavLink>
                                             <NavLink to="/admin/reports/fees-originals" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <IndianRupee size={16} /> Fees & Originals - UG
+                                                <IndianRupee size={16} /> UG Fees & Docs
                                             </NavLink>
                                             <NavLink to="/admin/reports/fees-originals-pg" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <IndianRupee size={16} /> Fees & Originals - PG
+                                                <IndianRupee size={16} /> PG Fees & Docs
                                             </NavLink>
                                             <NavLink to="/admin/reports/fees-originals-npc" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <IndianRupee size={16} /> Fees & Originals - NPC
+                                                <IndianRupee size={16} /> NPC Fees & Docs
                                             </NavLink>
                                             <NavLink to="/admin/reports/certificate-count" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <BarChart3 size={16} /> Certificate Count - UG
+                                                <BarChart3 size={16} /> UG Cert Count  
                                             </NavLink>
                                             <NavLink to="/admin/reports/certificate-count-pg" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <BarChart3 size={16} /> Certificate Count - PG
+                                                <BarChart3 size={16} /> PG Cert Count  
                                             </NavLink>
                                             <NavLink to="/admin/reports/certificate-count-npc" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <BarChart3 size={16} /> Certificate Count - NPC
+                                                <BarChart3 size={16} /> NPC Cert Count  
                                             </NavLink>
                                         </div>
                                     )}
@@ -226,27 +223,22 @@ const AdminLayout = ({ children }) => {
                                     <UserPlus size={20} />
                                     Admission Records
                                 </NavLink>
-                                <div className={styles.navGroup}>
-                                    <div 
-                                        className={`${styles.navItem} ${isAOResportsOpen ? styles.groupActive : ''}`} 
-                                        onClick={() => setIsAOResportsOpen(!isAOResportsOpen)}
-                                    >
-                                        <BarChart3 size={20} />
-                                        <span style={{ flex: 1 }}>Reports</span>
-                                        {isAOResportsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                                    </div>
-                                    
-                                    {isAOResportsOpen && (
-                                        <div className={styles.subMenu}>
-                                            <NavLink to="/admin/consolidate-report" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <BarChart3 size={16} /> Consolidate
-                                            </NavLink>
-                                            <NavLink to="/admin/department-count" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                                <FileText size={16} /> Department Count
-                                            </NavLink>
-                                        </div>
-                                    )}
-                                </div>
+                                <NavLink to="/admin/consolidate-report" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <BarChart3 size={20} />
+                                    <span>Consolidate Report</span>
+                                </NavLink>
+                                <NavLink to="/admin/mang-couns" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <FileText size={20} />
+                                    <span>Manag/Couns Report</span>
+                                </NavLink>
+                                <NavLink to="/admin/department-count" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <FileText size={20} />
+                                    <span>Department Count</span>
+                                </NavLink>
+                                <NavLink to="/admin/reference-count" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <FileText size={20} />
+                                    <span>Reference Count</span>
+                                </NavLink>
 
                                 <div className={styles.navGroup}>
                                     <div 
@@ -266,12 +258,32 @@ const AdminLayout = ({ children }) => {
                                             <NavLink to="/admin/secretary-report/report-2" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                                 <FileText size={16} /> Report II
                                             </NavLink>
-                                            <NavLink to="/admin/community-report" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <NavLink to="/admin/secretary-report/report-3" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                                 <Users2 size={16} /> Report III
                                             </NavLink>
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Reports Module - For AO */}
+                                <NavLink to="/admin/reports/fees-originals" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <IndianRupee size={16} /> UG Fees & Docs
+                                </NavLink>
+                                <NavLink to="/admin/reports/fees-originals-pg" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <IndianRupee size={16} /> PG Fees & Docs
+                                </NavLink>
+                                <NavLink to="/admin/reports/fees-originals-npc" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <IndianRupee size={16} /> NPC Fees & Docs
+                                </NavLink>
+                                <NavLink to="/admin/reports/certificate-count" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <BarChart3 size={16} /> UG Cert Count
+                                </NavLink>
+                                <NavLink to="/admin/reports/certificate-count-pg" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <BarChart3 size={16} /> PG Cert Count
+                                </NavLink>
+                                <NavLink to="/admin/reports/certificate-count-npc" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem} onClick={closeSidebar}>
+                                    <BarChart3 size={16} /> NPC Cert Count
+                                </NavLink>
                             </>
                         )}
 

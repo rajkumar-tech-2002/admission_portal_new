@@ -19,6 +19,8 @@ import AODepartmentCount from './pages/AO/AODepartmentCount';
 import AOCommunityReport from './pages/AO/AOCommunityReport';
 import AOReferenceTypeReport from './pages/AO/AOReferenceTypeReport';
 import AOReferenceWiseReport from './pages/AO/AOReferenceWiseReport';
+import AOReferenceYearWiseReport from './pages/AO/AOReferenceYearWiseReport';
+import AOMangCounsReport from './pages/AO/AOMangCounsReport';
 
 import AdmissionProcess from './pages/Admission/AdmissionProcess';
 import ToOfficeReport from './pages/Reports/ToOfficeReport';
@@ -129,9 +131,14 @@ function App() {
               <AODepartmentCount />
             </RoleRoute>
           } />
-          <Route path="community-report" element={
+          <Route path="mang-couns" element={
             <RoleRoute allowedRoles={['ao']}>
-              <AOCommunityReport />
+              <AOMangCounsReport />
+            </RoleRoute>
+          } />
+          <Route path="reference-count" element={
+            <RoleRoute allowedRoles={['ao']}>
+              <AOReferenceWiseReport />
             </RoleRoute>
           } />
           <Route path="secretary-report/report-1" element={
@@ -141,7 +148,12 @@ function App() {
           } />
           <Route path="secretary-report/report-2" element={
             <RoleRoute allowedRoles={['ao']}>
-              <AOReferenceWiseReport />
+              <AOCommunityReport />
+            </RoleRoute>
+          } />
+          <Route path="secretary-report/report-3" element={
+            <RoleRoute allowedRoles={['ao']}>
+              <AOReferenceYearWiseReport />
             </RoleRoute>
           } />
           
@@ -194,32 +206,32 @@ function App() {
             </RoleRoute>
           } />
           <Route path="reports/fees-originals" element={
-            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+            <RoleRoute allowedRoles={['admin', 'admission_team', 'ao']}>
               <FeesAndOriginalsReport />
             </RoleRoute>
           } />
           <Route path="reports/fees-originals-pg" element={
-            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+            <RoleRoute allowedRoles={['admin', 'admission_team', 'ao']}>
               <FeesAndOriginalsReportPG />
             </RoleRoute>
           } />
           <Route path="reports/certificate-count" element={
-            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+            <RoleRoute allowedRoles={['admin', 'admission_team', 'ao']}>
               <CertificateCountReport />
             </RoleRoute>
           } />
           <Route path="reports/certificate-count-pg" element={
-            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+            <RoleRoute allowedRoles={['admin', 'admission_team', 'ao']}>
               <CertificateCountReportPG />
             </RoleRoute>
           } />
           <Route path="reports/certificate-count-npc" element={
-            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+            <RoleRoute allowedRoles={['admin', 'admission_team', 'ao']}>
               <CertificateCountReportNPC />
             </RoleRoute>
           } />
           <Route path="reports/fees-originals-npc" element={
-            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+            <RoleRoute allowedRoles={['admin', 'admission_team', 'ao']}>
               <FeesAndOriginalsReportNPC />
             </RoleRoute>
           } />

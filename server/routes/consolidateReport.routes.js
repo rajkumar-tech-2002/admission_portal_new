@@ -12,4 +12,7 @@ router.get('/filters', authMiddleware, consolidateReportController.getConsolidat
 // Get department count report
 router.get('/department-count', authMiddleware, consolidateReportController.getDepartmentCount);
 
+// Get Management/Counselling report
+router.get('/mang-couns', authMiddleware, consolidateReportController.getMangCounsReport);
+
 module.exports = router;

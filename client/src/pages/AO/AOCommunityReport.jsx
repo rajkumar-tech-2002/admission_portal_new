@@ -377,50 +377,50 @@ const AOCommunityReport = () => {
                                         );
                                     } else if (row.type === 'quota_total') {
                                         return (
-                                            <tr key={index} style={{ backgroundColor: '#f3f4f6', fontWeight: 'bold' }}>
+                                            <tr key={index} className={styles.subtotalRow}>
                                                 <td></td>
                                                 <td></td>
-                                                <td colSpan="2">{row.label}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.BC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.BCM_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.MBC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.SC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.SCA_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.ST_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.OC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.Others_Count || ''}</td>
+                                                <td colSpan="2" className={styles.subtotalLabel}>{row.label}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.total_students || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.BC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.BCM_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.MBC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.SC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.SCA_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.ST_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.OC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.Others_Count || 0}</td>
                                             </tr>
                                         );
                                     } else if (row.type === 'year_total') {
                                         return (
-                                            <tr key={index} style={{ backgroundColor: '#e5e7eb', fontWeight: 'bold' }}>
+                                            <tr key={index} className={styles.subtotalRow}>
                                                 <td></td>
-                                                <td colSpan="3">{row.label}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.BC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.BCM_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.MBC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.SC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.SCA_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.ST_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.OC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.Others_Count || ''}</td>
+                                                <td colSpan="3" className={styles.subtotalLabel}>{row.label}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.total_students || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.BC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.BCM_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.MBC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.SC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.SCA_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.ST_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.OC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.Others_Count || 0}</td>
                                             </tr>
                                         );
                                     } else if (row.type === 'grand_total') {
                                         return (
-                                            <tr key={index} style={{ backgroundColor: '#d1d5db', fontWeight: 'bold' }}>
-                                                <td colSpan="4" style={{ textAlign: 'center' }}>{row.label}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.BC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.BCM_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.MBC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.SC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.SCA_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.ST_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.OC_Count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.Others_Count || ''}</td>
+                                            <tr key={index} className={styles.subtotalRow}>
+                                                <td colSpan="4" className={styles.subtotalLabel} style={{ textAlign: 'right', paddingRight: '1rem' }}>{row.label}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.total_students || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.BC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.BCM_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.MBC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.SC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.SCA_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.ST_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.OC_Count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.Others_Count || 0}</td>
                                             </tr>
                                         );
                                     }

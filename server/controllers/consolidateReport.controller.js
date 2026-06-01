@@ -111,3 +111,30 @@ exports.getDepartmentCount = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getMangCounsReport = async (req, res, next) => {
+    try {
+        const { college, quota } = req.query;
+        let query = 'SELECT * FROM admission_report_mang_couns WHERE 1=1';
+        const params = [];
+
+        if (college) {
+            const collegeArray = college.split(',').map(c => c.trim());
+            query += ' AND college IN (?)';
+            params.push(collegeArray);
+        }
+
+        if (quota) {
+            const quotaArray = quota.split(',').map(q => q.trim());
+            query += ' AND quota IN (?)';
+            params.push(quotaArray);
+        }
+
+        query += ' ORDER BY college ASC, quota ASC';
+
+        const [rows] = await pool.query(query, params);
+        res.status(200).json({ success: true, data: rows });
+    } catch (error) {
+        next(error);
+    }
+};

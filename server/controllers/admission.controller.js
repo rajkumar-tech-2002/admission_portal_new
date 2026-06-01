@@ -221,6 +221,15 @@ exports.getReferenceWiseAdmissionCountReport = async (req, res, next) => {
     }
 };
 
+exports.getReferenceYearWiseAdmissionCountReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getReferenceYearWiseAdmissionCountReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.updateAdmission = async (req, res, next) => {
     try {
         const { id } = req.params;

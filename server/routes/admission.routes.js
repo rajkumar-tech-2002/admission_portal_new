@@ -25,6 +25,7 @@ router.get('/reports/certificate-count-npc', authMiddleware, admissionController
 router.get('/reports/community-wise', authMiddleware, admissionController.getCommunityWiseReport);
 router.get('/reports/reference-type-count', authMiddleware, admissionController.getReferenceTypeCountReport);
 router.get('/reports/reference-wise-admission-count', authMiddleware, admissionController.getReferenceWiseAdmissionCountReport);
+router.get('/reports/reference-year-wise-admission-count', authMiddleware, admissionController.getReferenceYearWiseAdmissionCountReport);
 router.put('/:id', authMiddleware, admissionController.updateAdmission);
 router.delete('/:id', authMiddleware, admissionController.deleteAdmission);
 

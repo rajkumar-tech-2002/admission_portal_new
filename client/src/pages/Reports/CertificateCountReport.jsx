@@ -207,7 +207,7 @@ const CertificateCountReport = () => {
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <BarChart3 size={22} style={{ color: 'var(--primary-color)' }} />
-                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Certificate Count Report</h2>
+                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Certificate Count Report (UG)</h2>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         <button onClick={handleExportRecords} className={styles.exportBtn}>

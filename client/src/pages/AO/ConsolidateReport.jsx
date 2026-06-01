@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart3, Search, RotateCcw, Download, Building2, Users, TrendingUp, Database, FileSpreadsheet } from 'lucide-react';
 import apiService from '../../services/api.service';
 import styles from '../../components/css/ConsolidateReport.module.css';
+import dashStyles from '../../components/css/Dashboard.module.css';
 
 const ConsolidateReport = () => {
     const [data, setData] = useState([]);
@@ -167,23 +168,14 @@ const ConsolidateReport = () => {
         <div className={styles.page}>
             <div className={styles.mainCard}>
                 {/* Header */}
-                <div className={styles.header}>
-                    <div className={styles.titleBlock}>
-                        <h1 className={styles.title}>
-                            <span className={styles.titleIcon}>
-                                <BarChart3 size={22} />
-                            </span>
-                            Consolidate Report
-                        </h1>
-                        <p className={styles.subtitle}>Admission consolidate report across all institutions and departments</p>
+                <div className={dashStyles.header}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <BarChart3 size={22} style={{ color: 'var(--primary-color)' }} />
+                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Consolidate Report</h2>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                        <span className={styles.badge}>
-                            <Database size={14} />
-                            {data.length} Records
-                        </span>
-                        <button className={styles.exportBtn} onClick={handleExportCSV} disabled={data.length === 0}>
-                            <Download size={16} />
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <button className={dashStyles.exportBtn} onClick={handleExportCSV} disabled={data.length === 0}>
+                            <Download size={18} />
                             Export CSV
                         </button>
                     </div>

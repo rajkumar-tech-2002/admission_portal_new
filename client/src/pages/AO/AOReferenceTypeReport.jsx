@@ -362,41 +362,41 @@ const AOReferenceTypeReport = () => {
                                         );
                                     } else if (row.type === 'quota_total') {
                                         return (
-                                            <tr key={index} style={{ backgroundColor: '#f3f4f6', fontWeight: 'bold' }}>
+                                            <tr key={index} className={styles.subtotalRow}>
                                                 <td></td>
                                                 <td></td>
-                                                <td colSpan="2">{row.label}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.our_staff_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.direct_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.agent_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.others_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.our_students_count || ''}</td>
-                                                {/* <td style={{ textAlign: 'center' }}>{row.total_count || ''}</td> */}
+                                                <td colSpan="2" className={styles.subtotalLabel}>{row.label}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.our_staff_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.direct_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.agent_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.others_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.our_students_count || 0}</td>
+                                                {/* <td className={styles.subtotalVal}>SUM={row.total_count || 0}</td> */}
                                             </tr>
                                         );
                                     } else if (row.type === 'year_total') {
                                         return (
-                                            <tr key={index} style={{ backgroundColor: '#e5e7eb', fontWeight: 'bold' }}>
+                                            <tr key={index} className={styles.subtotalRow}>
                                                 <td></td>
-                                                <td colSpan="3">{row.label}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.our_staff_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.direct_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.agent_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.others_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.our_students_count || ''}</td>
-                                                {/* <td style={{ textAlign: 'center' }}>{row.total_count || ''}</td> */}
+                                                <td colSpan="3" className={styles.subtotalLabel}>{row.label}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.our_staff_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.direct_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.agent_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.others_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.our_students_count || 0}</td>
+                                                {/* <td className={styles.subtotalVal}>SUM={row.total_count || 0}</td> */}
                                             </tr>
                                         );
                                     } else if (row.type === 'grand_total') {
                                         return (
-                                            <tr key={index} style={{ backgroundColor: '#d1d5db', fontWeight: 'bold' }}>
-                                                <td colSpan="4" style={{ textAlign: 'center' }}>{row.label}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.our_staff_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.direct_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.agent_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.others_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.our_students_count || ''}</td>
-                                                {/* <td style={{ textAlign: 'center' }}>{row.total_count || ''}</td> */}
+                                            <tr key={index} className={styles.subtotalRow}>
+                                                <td colSpan="4" className={styles.subtotalLabel} style={{ textAlign: 'right', paddingRight: '1rem' }}>{row.label}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.our_staff_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.direct_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.agent_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.others_count || 0}</td>
+                                                <td className={styles.subtotalVal}>SUM={row.our_students_count || 0}</td>
+                                                {/* <td className={styles.subtotalVal}>SUM={row.total_count || 0}</td> */}
                                             </tr>
                                         );
                                     }

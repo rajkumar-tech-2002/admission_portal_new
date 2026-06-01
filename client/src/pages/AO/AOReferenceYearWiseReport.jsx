@@ -5,7 +5,7 @@ import styles from '../../components/css/Dashboard.module.css';
 import apiService from '../../services/api.service';
 import toast from 'react-hot-toast';
 
-const AOReferenceWiseReport = () => {
+const AOReferenceYearWiseReport = () => {
     const [records, setRecords] = useState([]);
     const [filteredRecords, setFilteredRecords] = useState([]);
     const [groupedRows, setGroupedRows] = useState([]);
@@ -16,11 +16,11 @@ const AOReferenceWiseReport = () => {
         referenceDepartments: []
     });
 
+    // Filters
     const [search, setSearch] = useState('');
     const [selectedReferenceTypes, setSelectedReferenceTypes] = useState([]);
     const [selectedReferenceColleges, setSelectedReferenceColleges] = useState([]);
     const [selectedReferenceDepartments, setSelectedReferenceDepartments] = useState([]);
-    const [showDiscontinue, setShowDiscontinue] = useState(false);
 
     const availableDepartments = useMemo(() => {
         if (selectedReferenceColleges.length === 0) return masterData.referenceDepartments;
@@ -30,7 +30,7 @@ const AOReferenceWiseReport = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await apiService.get('/admissions/reports/reference-wise-admission-count');
+                const res = await apiService.get('/admissions/reports/reference-year-wise-admission-count');
                 
                 if (res.data.success) {
                     const data = res.data.data || [];
@@ -79,8 +79,7 @@ const AOReferenceWiseReport = () => {
         const data = filteredRecords;
         let rows = [];
 
-        const numFields = ['NEC_Admitted', 'NEC_Discontinue', 'NCT_Admitted', 'NCT_Discontinue', 'NPC_Admitted', 'NPC_Discontinue']; 
-        // 'Total_Admitted', 'Total_Discontinue', 'Total_Count'
+        const numFields = ['I_Year', 'II_Year_LE', 'Total_Admitted'];
         
         const initTotals = () => {
             const t = {};
@@ -170,16 +169,10 @@ const AOReferenceWiseReport = () => {
                 'Reference College': '',
                 'Reference Department': '',
                 'Reference By Name': '',
-                'NEC Admitted': r.NEC_Admitted || 0
+                'I Year': r.I_Year || 0,
+                'II Year (LE)': r.II_Year_LE || 0,
+                'Total Admitted': r.Total_Admitted || 0
             };
-
-            if (showDiscontinue) rowData['NEC Discontinue'] = r.NEC_Discontinue || 0;
-            
-            rowData['NCT Admitted'] = r.NCT_Admitted || 0;
-            if (showDiscontinue) rowData['NCT Discontinue'] = r.NCT_Discontinue || 0;
-            
-            rowData['NPC Admitted'] = r.NPC_Admitted || 0;
-            if (showDiscontinue) rowData['NPC Discontinue'] = r.NPC_Discontinue || 0;
 
             if (r.type === 'data') {
                 rowData['Reference Type'] = r.displayType;
@@ -199,17 +192,12 @@ const AOReferenceWiseReport = () => {
 
         const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Reference_Wise_Count_Report");
-        XLSX.writeFile(wb, `Reference_Wise_Count_Report_${new Date().getTime()}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Year_Wise_Count_Report");
+        XLSX.writeFile(wb, `Year_Wise_Count_Report_${new Date().getTime()}.xlsx`);
     };
 
-    let numCols = ['NEC_Admitted', 'NCT_Admitted', 'NPC_Admitted'];
-    let numHeaders = ['NEC Admitted', 'NCT Admitted', 'NPC Admitted'];
-
-    if (showDiscontinue) {
-        numCols = ['NEC_Admitted', 'NEC_Discontinue', 'NCT_Admitted', 'NCT_Discontinue', 'NPC_Admitted', 'NPC_Discontinue'];
-        numHeaders = ['NEC Admitted', 'NEC Discontinue', 'NCT Admitted', 'NCT Discontinue', 'NPC Admitted', 'NPC Discontinue'];
-    }
+    const numCols = ['I_Year', 'II_Year_LE', 'Total_Admitted'];
+    const numHeaders = ['I Year', 'II Year (LE)', 'Total Admitted'];
 
     return (
         <div className={styles.dashboard} style={{ padding: '0' }}>
@@ -217,7 +205,7 @@ const AOReferenceWiseReport = () => {
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <BarChart3 size={22} style={{ color: 'var(--primary-color)' }} />
-                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Reference Wise Admission Count Report</h2>
+                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Year Wise Contribution Report</h2>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         <button onClick={handleExportRecords} className={styles.exportBtn}>
@@ -246,17 +234,6 @@ const AOReferenceWiseReport = () => {
                         <button className={styles.resetFiltersBtn} onClick={handleResetFilters} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', height: 'fit-content', alignSelf: 'flex-end' }}>
                             <RotateCcw size={14} /> Reset Filters
                         </button>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', color: '#1e293b', fontWeight: '500' }}>
-                            <input 
-                                type="checkbox" 
-                                checked={showDiscontinue} 
-                                onChange={(e) => setShowDiscontinue(e.target.checked)} 
-                                style={{ width: '16px', height: '16px', accentColor: 'var(--primary-color)' }}
-                            />
-                            Show Discontinue Count
-                        </label>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {/* Reference Types */}
@@ -385,7 +362,7 @@ const AOReferenceWiseReport = () => {
                                 })
                             ) : (
                                 <tr>
-                                     <td colSpan="13" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
+                                     <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>No records found</td>
                                 </tr>
                             )}
                         </tbody>
@@ -396,4 +373,4 @@ const AOReferenceWiseReport = () => {
     );
 };
 
-export default AOReferenceWiseReport;
+export default AOReferenceYearWiseReport;

@@ -425,6 +425,13 @@ class Admission {
         return rows;
     }
 
+    static async getReferenceYearWiseAdmissionCountReport() {
+        const [rows] = await db.execute(`
+            SELECT * FROM reference_year_wise_admission_count_report
+        `);
+        return rows;
+    }
+
     static async getCertificates() {
         const [rows] = await db.execute(`
         SELECT 
