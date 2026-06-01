@@ -268,7 +268,7 @@ const CertificateEntryPG = () => {
                         <Award size={22} style={{ color: 'var(--primary-color)' }} />
                         <h2 style={{ color: "var(--primary-color)", margin: 0 }}>Certificate Management - PG (I Year & II Year - LE)</h2>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         <button onClick={handleExcelExport} className={styles.exportBtn} style={{ background: '#10b981', color: '#fff', border: 'none' }}>
                             <Download size={18} /> Export Excel
                         </button>

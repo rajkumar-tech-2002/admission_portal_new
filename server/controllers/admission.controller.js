@@ -158,6 +158,15 @@ exports.getFeesOriginalsPGReport = async (req, res, next) => {
     }
 };
 
+exports.getFeesOriginalsNPCReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getFeesOriginalsNPCReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.getCertificateCountReport = async (req, res, next) => {
     try {
         const data = await Admission.getCertificateCountReport();
@@ -170,6 +179,15 @@ exports.getCertificateCountReport = async (req, res, next) => {
 exports.getCertificateCountPGReport = async (req, res, next) => {
     try {
         const data = await Admission.getCertificateCountPGReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getCertificateCountNPCReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getCertificateCountNPCReport();
         res.status(200).json({ success: true, data });
     } catch (error) {
         next(error);

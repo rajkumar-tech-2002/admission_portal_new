@@ -145,7 +145,7 @@ const AODepartmentCount = () => {
                         <BarChart3 size={22} style={{ color: 'var(--primary-color)' }} />
                         <h2 style={{color:"var(--primary-color)", margin: 0}}>Department Count Report</h2>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         <button onClick={handleExportRecords} className={dashStyles.exportBtn}>
                             <Download size={18} /> Export Excel
                         </button>

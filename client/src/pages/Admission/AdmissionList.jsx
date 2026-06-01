@@ -222,7 +222,7 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh, viewOnl
                         <UserPlus size={22} style={{ color: 'var(--primary-color)' }} />
                         <h2 style={{color:"var(--primary-color)", margin: 0}}>Admission Records</h2>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {!viewOnly && (
                             <>
                                 <input type="file" ref={fileInputRef} onChange={handleImport} accept=".xlsx, .xls" style={{ display: 'none' }} />

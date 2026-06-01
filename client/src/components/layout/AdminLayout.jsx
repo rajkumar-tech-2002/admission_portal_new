@@ -194,11 +194,17 @@ const AdminLayout = ({ children }) => {
                                             <NavLink to="/admin/reports/fees-originals-pg" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                                 <IndianRupee size={16} /> Fees & Originals - PG
                                             </NavLink>
+                                            <NavLink to="/admin/reports/fees-originals-npc" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <IndianRupee size={16} /> Fees & Originals - NPC
+                                            </NavLink>
                                             <NavLink to="/admin/reports/certificate-count" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                                 <BarChart3 size={16} /> Certificate Count - UG
                                             </NavLink>
                                             <NavLink to="/admin/reports/certificate-count-pg" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                                 <BarChart3 size={16} /> Certificate Count - PG
+                                            </NavLink>
+                                            <NavLink to="/admin/reports/certificate-count-npc" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <BarChart3 size={16} /> Certificate Count - NPC
                                             </NavLink>
                                         </div>
                                     )}

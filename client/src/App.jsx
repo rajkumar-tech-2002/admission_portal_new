@@ -24,6 +24,8 @@ import FeesAndOriginalsReport from './pages/Reports/FeesAndOriginalsReport';
 import FeesAndOriginalsReportPG from './pages/Reports/FeesAndOriginalsReportPG';
 import CertificateCountReport from './pages/Reports/CertificateCountReport';
 import CertificateCountReportPG from './pages/Reports/CertificateCountReportPG';
+import CertificateCountReportNPC from './pages/Reports/CertificateCountReportNPC';
+import FeesAndOriginalsReportNPC from './pages/Reports/FeesAndOriginalsReportNPC';
 import EnquiryDashboard from './pages/Enquiry/Dashboard';
 import EnquiryArchivedList from './pages/Enquiry/ArchivedList';
 
@@ -191,6 +193,16 @@ function App() {
           <Route path="reports/certificate-count-pg" element={
             <RoleRoute allowedRoles={['admin', 'admission_team']}>
               <CertificateCountReportPG />
+            </RoleRoute>
+          } />
+          <Route path="reports/certificate-count-npc" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <CertificateCountReportNPC />
+            </RoleRoute>
+          } />
+          <Route path="reports/fees-originals-npc" element={
+            <RoleRoute allowedRoles={['admin', 'admission_team']}>
+              <FeesAndOriginalsReportNPC />
             </RoleRoute>
           } />
 

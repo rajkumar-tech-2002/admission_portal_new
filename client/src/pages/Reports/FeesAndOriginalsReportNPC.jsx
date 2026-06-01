@@ -5,7 +5,7 @@ import styles from '../../components/css/Dashboard.module.css';
 import apiService from '../../services/api.service';
 import toast from 'react-hot-toast';
 
-const FeesAndOriginalsReportPG = () => {
+const FeesAndOriginalsReportNPC = () => {
     const [admissions, setAdmissions] = useState([]);
     const [filteredRecords, setFilteredRecords] = useState([]);
     const [masterData, setMasterData] = useState({
@@ -33,7 +33,7 @@ const FeesAndOriginalsReportPG = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await apiService.get('/admissions/reports/fees-originals-pg');
+                const res = await apiService.get('/admissions/reports/fees-originals-npc');
 
                 if (res.data.success) {
                     setAdmissions(res.data.data);
@@ -133,51 +133,41 @@ const FeesAndOriginalsReportPG = () => {
         setCurrentPage(1);
     };
 
-    const showFgJd = year !== 'I Year';
-    const showUg = year !== 'II Year - LE';
+    const hideIYearCols = year === 'I Year';
+    const hideIIYearLECols = year === 'II Year - LE';
 
     const getColumnsConfig = () => {
         let cols = [
-            { key: 'tancet', label: 'TANCET' },
-            { key: 'ms_10', label: '10th MS' },
-            { key: 'ms_11', label: '11th MS' },
-            { key: 'ms_12', label: '12th MS' },
-            { key: 'allotment_order', label: 'Allotment Order' },
-            { key: 'cc', label: 'CC' },
-            { key: 'dip_sem_1', label: 'Dip Sem 1' },
-            { key: 'dip_sem_2', label: 'Dip Sem 2' },
-            { key: 'dip_sem_3', label: 'Dip Sem 3' },
-            { key: 'dip_sem_4', label: 'Dip Sem 4' },
-            { key: 'dip_sem_5', label: 'Dip Sem 5' },
-            { key: 'dip_sem_6', label: 'Dip Sem 6' },
-            { key: 'dip_cons', label: 'Dip Cons' },
-            { key: 'dip_cert', label: 'Dip Cert' },
-            { key: 'dip_prov', label: 'Dip Prov' },
-            { key: 'tc', label: 'TC' }
+            { key: 'ms_10', label: '10th MS' }
         ];
 
-        if (showUg) {
-            cols = cols.concat([
-                { key: 'ug_sem_1', label: 'UG Sem 1' },
-                { key: 'ug_sem_2', label: 'UG Sem 2' },
-                { key: 'ug_sem_3', label: 'UG Sem 3' },
-                { key: 'ug_sem_4', label: 'UG Sem 4' },
-                { key: 'ug_sem_5', label: 'UG Sem 5' },
-                { key: 'ug_sem_6', label: 'UG Sem 6' },
-                { key: 'ug_sem_7', label: 'UG Sem 7' },
-                { key: 'ug_sem_8', label: 'UG Sem 8' },
-                { key: 'ug_cons', label: 'UG Cons' },
-                { key: 'ug_degree', label: 'UG Degree' },
-                { key: 'ug_prov', label: 'UG Prov' }
-            ]);
+        if (!hideIYearCols) {
+            cols.push(
+                { key: 'ms_11', label: '11th MS' },
+                { key: 'ms_12', label: '12th MS' }
+            );
         }
 
-        if (showFgJd) {
-            cols = cols.concat([
-                { key: 'fg_cert', label: 'FG Cert' },
-                { key: 'joint_decl', label: 'Joint Decl' }
-            ]);
+        cols.push(
+            { key: 'tc', label: 'TC' },
+            { key: 'community_cert', label: 'Community Cert' },
+            { key: 'photo_2_copy', label: 'Photo (2 Copy)' },
+            { key: 'aadhaar', label: 'Aadhaar' }
+        );
+
+        if (!hideIIYearLECols) {
+            cols.push({ key: 'equivalency_cert', label: 'Equivalency Cert' });
         }
+
+        if (!hideIYearCols) {
+            cols.push({ key: 'migration_cert', label: 'Migration Cert' });
+        }
+
+        cols.push(
+            { key: 'ms_iti', label: 'ITI MS' },
+            { key: 'iti_prov', label: 'ITI Prov' },
+            { key: 'iti_cert_add', label: 'ITI Cert Add' }
+        );
 
         return cols;
     };
@@ -220,8 +210,8 @@ const FeesAndOriginalsReportPG = () => {
 
         const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Fees_And_Originals_Report_PG");
-        XLSX.writeFile(wb, `Fees_And_Originals_Report_PG_${new Date().getTime()}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Fees_And_Originals_Report_NPC");
+        XLSX.writeFile(wb, `Fees_And_Originals_Report_NPC_${new Date().getTime()}.xlsx`);
     };
 
     return (
@@ -230,7 +220,7 @@ const FeesAndOriginalsReportPG = () => {
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <IndianRupee size={22} style={{ color: 'var(--primary-color)' }} />
-                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Fees & Originals Report (PG)</h2>
+                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Fees & Originals Report (NPC)</h2>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         <button onClick={handleExportRecords} className={styles.exportBtn}>
@@ -485,4 +475,4 @@ const FeesAndOriginalsReportPG = () => {
     );
 };
 
-export default FeesAndOriginalsReportPG;
+export default FeesAndOriginalsReportNPC;

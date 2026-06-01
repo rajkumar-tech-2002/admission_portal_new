@@ -5,7 +5,7 @@ import styles from '../../components/css/Dashboard.module.css';
 import apiService from '../../services/api.service';
 import toast from 'react-hot-toast';
 
-const CertificateCountReportPG = () => {
+const CertificateCountReportNPC = () => {
     const [admissions, setAdmissions] = useState([]);
     const [filteredRecords, setFilteredRecords] = useState([]);
     const [groupedRows, setGroupedRows] = useState([]);
@@ -26,7 +26,7 @@ const CertificateCountReportPG = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await apiService.get('/admissions/reports/certificate-count-pg');
+                const res = await apiService.get('/admissions/reports/certificate-count-npc');
 
                 if (res.data.success) {
                     setAdmissions(res.data.data);
@@ -72,35 +72,18 @@ const CertificateCountReportPG = () => {
         
         let grandTotals = {
             total_students: 0,
-            tancet_count: 0,
             ms_10_count: 0,
             ms_11_count: 0,
             ms_12_count: 0,
-            allotment_order_count: 0,
-            cc_count: 0,
-            dip_sem_1_count: 0,
-            dip_sem_2_count: 0,
-            dip_sem_3_count: 0,
-            dip_sem_4_count: 0,
-            dip_sem_5_count: 0,
-            dip_sem_6_count: 0,
-            dip_cons_count: 0,
-            dip_cert_count: 0,
-            dip_prov_count: 0,
             tc_count: 0,
-            ug_sem_1_count: 0,
-            ug_sem_2_count: 0,
-            ug_sem_3_count: 0,
-            ug_sem_4_count: 0,
-            ug_sem_5_count: 0,
-            ug_sem_6_count: 0,
-            ug_sem_7_count: 0,
-            ug_sem_8_count: 0,
-            ug_cons_count: 0,
-            ug_degree_count: 0,
-            ug_prov_count: 0,
-            fg_cert_count: 0,
-            joint_decl_count: 0
+            community_cert_count: 0,
+            photo_2_copy_count: 0,
+            aadhaar_count: 0,
+            equivalency_cert_count: 0,
+            migration_cert_count: 0,
+            ms_iti_count: 0,
+            iti_prov_count: 0,
+            iti_cert_add_count: 0
         };
 
         collegesList.forEach(col => {
@@ -172,52 +155,42 @@ const CertificateCountReportPG = () => {
     };
 
     // Derived visibility based on year
-    const showFgJd = year !== 'I Year';
-    const showUg = year !== 'II Year - LE';
+    const hideIYearCols = year === 'I Year';
+    const hideIIYearLECols = year === 'II Year - LE';
 
     const getColumnsConfig = () => {
         let cols = [
             { key: 'total_students', label: 'Total Students' },
-            { key: 'tancet_count', label: 'TANCET' },
-            { key: 'ms_10_count', label: '10th MS' },
-            { key: 'ms_11_count', label: '11th MS' },
-            { key: 'ms_12_count', label: '12th MS' },
-            { key: 'allotment_order_count', label: 'Allotment' },
-            { key: 'cc_count', label: 'CC' },
-            { key: 'dip_sem_1_count', label: 'Dip Sem 1' },
-            { key: 'dip_sem_2_count', label: 'Dip Sem 2' },
-            { key: 'dip_sem_3_count', label: 'Dip Sem 3' },
-            { key: 'dip_sem_4_count', label: 'Dip Sem 4' },
-            { key: 'dip_sem_5_count', label: 'Dip Sem 5' },
-            { key: 'dip_sem_6_count', label: 'Dip Sem 6' },
-            { key: 'dip_cons_count', label: 'Dip Cons' },
-            { key: 'dip_cert_count', label: 'Dip Cert' },
-            { key: 'dip_prov_count', label: 'Dip Prov' },
-            { key: 'tc_count', label: 'TC' }
+            { key: 'ms_10_count', label: '10th MS' }
         ];
 
-        if (showUg) {
-            cols = cols.concat([
-                { key: 'ug_sem_1_count', label: 'UG Sem 1' },
-                { key: 'ug_sem_2_count', label: 'UG Sem 2' },
-                { key: 'ug_sem_3_count', label: 'UG Sem 3' },
-                { key: 'ug_sem_4_count', label: 'UG Sem 4' },
-                { key: 'ug_sem_5_count', label: 'UG Sem 5' },
-                { key: 'ug_sem_6_count', label: 'UG Sem 6' },
-                { key: 'ug_sem_7_count', label: 'UG Sem 7' },
-                { key: 'ug_sem_8_count', label: 'UG Sem 8' },
-                { key: 'ug_cons_count', label: 'UG Cons' },
-                { key: 'ug_degree_count', label: 'UG Degree' },
-                { key: 'ug_prov_count', label: 'UG Prov' }
-            ]);
+        if (!hideIYearCols) {
+            cols.push(
+                { key: 'ms_11_count', label: '11th MS' },
+                { key: 'ms_12_count', label: '12th MS' }
+            );
         }
 
-        if (showFgJd) {
-            cols = cols.concat([
-                { key: 'fg_cert_count', label: 'FG Cert' },
-                { key: 'joint_decl_count', label: 'Joint Decl' }
-            ]);
+        cols.push(
+            { key: 'tc_count', label: 'TC' },
+            { key: 'community_cert_count', label: 'Community Cert' },
+            { key: 'photo_2_copy_count', label: 'Photo (2 Copy)' },
+            { key: 'aadhaar_count', label: 'Aadhaar' }
+        );
+
+        if (!hideIIYearLECols) {
+            cols.push({ key: 'equivalency_cert_count', label: 'Equivalency Cert' });
         }
+
+        if (!hideIYearCols) {
+            cols.push({ key: 'migration_cert_count', label: 'Migration Cert' });
+        }
+
+        cols.push(
+            { key: 'ms_iti_count', label: 'ITI MS' },
+            { key: 'iti_prov_count', label: 'ITI Prov' },
+            { key: 'iti_cert_add_count', label: 'ITI Cert Add' }
+        );
 
         return cols;
     };
@@ -257,8 +230,8 @@ const CertificateCountReportPG = () => {
 
         const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Certificate_Count_PG");
-        XLSX.writeFile(wb, `Certificate_Count_PG_${new Date().getTime()}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Certificate_Count_NPC");
+        XLSX.writeFile(wb, `Certificate_Count_NPC_${new Date().getTime()}.xlsx`);
     };
 
     return (
@@ -267,7 +240,7 @@ const CertificateCountReportPG = () => {
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <BarChart3 size={22} style={{ color: 'var(--primary-color)' }} />
-                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Certificate Count Report (PG)</h2>
+                        <h2 style={{color:"var(--primary-color)", margin: 0}}>Certificate Count Report (NPC)</h2>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         <button onClick={handleExportRecords} className={styles.exportBtn}>
@@ -419,4 +392,4 @@ const CertificateCountReportPG = () => {
     );
 };
 
-export default CertificateCountReportPG;
+export default CertificateCountReportNPC;

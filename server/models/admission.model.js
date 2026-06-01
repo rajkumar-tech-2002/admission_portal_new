@@ -375,6 +375,14 @@ class Admission {
         return rows;
     }
 
+    static async getFeesOriginalsNPCReport() {
+        const [rows] = await db.execute(`
+            SELECT * FROM npc_student_fee_certificate_report 
+            ORDER BY application_no ASC
+        `);
+        return rows;
+    }
+
     static async getCertificateCountReport() {
         const [rows] = await db.execute(`
             SELECT * FROM student_certificate_count_report
@@ -385,6 +393,13 @@ class Admission {
     static async getCertificateCountPGReport() {
         const [rows] = await db.execute(`
             SELECT * FROM pg_student_certificate_count_report
+        `);
+        return rows;
+    }
+
+    static async getCertificateCountNPCReport() {
+        const [rows] = await db.execute(`
+            SELECT * FROM npc_student_certificate_count_report
         `);
         return rows;
     }
