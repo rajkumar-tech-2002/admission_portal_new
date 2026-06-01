@@ -22,6 +22,9 @@ router.get('/reports/fees-originals-npc', authMiddleware, admissionController.ge
 router.get('/reports/certificate-count', authMiddleware, admissionController.getCertificateCountReport);
 router.get('/reports/certificate-count-pg', authMiddleware, admissionController.getCertificateCountPGReport);
 router.get('/reports/certificate-count-npc', authMiddleware, admissionController.getCertificateCountNPCReport);
+router.get('/reports/community-wise', authMiddleware, admissionController.getCommunityWiseReport);
+router.get('/reports/reference-type-count', authMiddleware, admissionController.getReferenceTypeCountReport);
+router.get('/reports/reference-wise-admission-count', authMiddleware, admissionController.getReferenceWiseAdmissionCountReport);
 router.put('/:id', authMiddleware, admissionController.updateAdmission);
 router.delete('/:id', authMiddleware, admissionController.deleteAdmission);
 

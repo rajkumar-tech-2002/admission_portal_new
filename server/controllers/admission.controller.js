@@ -194,6 +194,33 @@ exports.getCertificateCountNPCReport = async (req, res, next) => {
     }
 };
 
+exports.getCommunityWiseReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getCommunityWiseReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getReferenceTypeCountReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getReferenceTypeCountReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getReferenceWiseAdmissionCountReport = async (req, res, next) => {
+    try {
+        const data = await Admission.getReferenceWiseAdmissionCountReport();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.updateAdmission = async (req, res, next) => {
     try {
         const { id } = req.params;

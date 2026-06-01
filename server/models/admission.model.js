@@ -404,6 +404,27 @@ class Admission {
         return rows;
     }
 
+    static async getCommunityWiseReport() {
+        const [rows] = await db.execute(`
+            SELECT * FROM admission_report_community_wise
+        `);
+        return rows;
+    }
+
+    static async getReferenceTypeCountReport() {
+        const [rows] = await db.execute(`
+            SELECT * FROM reference_type_count_report
+        `);
+        return rows;
+    }
+
+    static async getReferenceWiseAdmissionCountReport() {
+        const [rows] = await db.execute(`
+            SELECT * FROM reference_wise_admission_count_report
+        `);
+        return rows;
+    }
+
     static async getCertificates() {
         const [rows] = await db.execute(`
         SELECT 

@@ -16,6 +16,9 @@ import AdminDashboard from './pages/Admin/Dashboard';
 import AdminArchivedList from './pages/Admin/ArchivedList';
 import ConsolidateReport from './pages/AO/ConsolidateReport';
 import AODepartmentCount from './pages/AO/AODepartmentCount';
+import AOCommunityReport from './pages/AO/AOCommunityReport';
+import AOReferenceTypeReport from './pages/AO/AOReferenceTypeReport';
+import AOReferenceWiseReport from './pages/AO/AOReferenceWiseReport';
 
 import AdmissionProcess from './pages/Admission/AdmissionProcess';
 import ToOfficeReport from './pages/Reports/ToOfficeReport';
@@ -124,6 +127,21 @@ function App() {
           <Route path="department-count" element={
             <RoleRoute allowedRoles={['ao']}>
               <AODepartmentCount />
+            </RoleRoute>
+          } />
+          <Route path="community-report" element={
+            <RoleRoute allowedRoles={['ao']}>
+              <AOCommunityReport />
+            </RoleRoute>
+          } />
+          <Route path="secretary-report/report-1" element={
+            <RoleRoute allowedRoles={['ao']}>
+              <AOReferenceTypeReport />
+            </RoleRoute>
+          } />
+          <Route path="secretary-report/report-2" element={
+            <RoleRoute allowedRoles={['ao']}>
+              <AOReferenceWiseReport />
             </RoleRoute>
           } />
           

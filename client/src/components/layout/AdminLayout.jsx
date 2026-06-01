@@ -18,6 +18,7 @@ const AdminLayout = ({ children }) => {
     const [isMasterOpen, setIsMasterOpen] = useState(false);
     const [isReportsOpen, setIsReportsOpen] = useState(false);
     const [isAOResportsOpen, setIsAOResportsOpen] = useState(false);
+    const [isSecretaryReportsOpen, setIsSecretaryReportsOpen] = useState(false);
 
     const role = (sessionStorage.getItem('role') || 'admin').toLowerCase();
     const username = sessionStorage.getItem('username') || 'Admin User';
@@ -28,10 +29,12 @@ const AdminLayout = ({ children }) => {
         const isMasterRoute = location.pathname.includes('/admin/master') || location.pathname.includes('/admin/change-password');
         const isReportsRoute = location.pathname.includes('/admin/reports');
         const isAORoute = location.pathname.includes('/admin/consolidate-report') || location.pathname.includes('/admin/department-count');
+        const isSecretaryRoute = location.pathname.includes('/admin/secretary-report') || location.pathname.includes('/admin/community-report');
         
         setIsMasterOpen(isMasterRoute);
         setIsReportsOpen(isReportsRoute);
         setIsAOResportsOpen(isAORoute);
+        setIsSecretaryReportsOpen(isSecretaryRoute);
     }, [location.pathname]);
 
     const handleLogout = () => {
@@ -244,6 +247,31 @@ const AdminLayout = ({ children }) => {
                                         </div>
                                     )}
                                 </div>
+
+                                <div className={styles.navGroup}>
+                                    <div 
+                                        className={`${styles.navItem} ${isSecretaryReportsOpen ? styles.groupActive : ''}`} 
+                                        onClick={() => setIsSecretaryReportsOpen(!isSecretaryReportsOpen)}
+                                    >
+                                        <BarChart3 size={20} />
+                                        <span style={{ flex: 1 }}>Secretary Report</span>
+                                        {isSecretaryReportsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                    </div>
+                                    
+                                    {isSecretaryReportsOpen && (
+                                        <div className={styles.subMenu}>
+                                            <NavLink to="/admin/secretary-report/report-1" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <FileText size={16} /> Report I
+                                            </NavLink>
+                                            <NavLink to="/admin/secretary-report/report-2" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <FileText size={16} /> Report II
+                                            </NavLink>
+                                            <NavLink to="/admin/community-report" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                                <Users2 size={16} /> Report III
+                                            </NavLink>
+                                        </div>
+                                    )}
+                                </div>
                             </>
                         )}
 
@@ -261,71 +289,71 @@ const AdminLayout = ({ children }) => {
                                 
                                 {isMasterOpen && (
                                     <div className={styles.subMenu}>
-                                        <NavLink to="/admin/master/departments" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <Building2 size={16} /> Department Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/studies" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <GraduationCap size={16} /> Study Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/communities" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <Users2 size={16} /> Community Master
-                                        </NavLink>
                                         <NavLink to="/admin/master/admission-types" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <FileCheck size={16} /> Admission Type
-                                        </NavLink>
-                                        <NavLink to="/admin/master/reference-types" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <UserPlus size={16} /> Reference Type
-                                        </NavLink>
-                                        <NavLink to="/admin/master/admission-statuses" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <Activity size={16} /> Status Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/valid-date" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <Calendar size={16} /> Valid Date Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/districts" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <Building2 size={16} /> District Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/schools" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <GraduationCap size={16} /> School Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/consultancies" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <Users2 size={16} /> Consultancy Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/staff" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <UserPlus size={16} /> Staff Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/annual-income" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <FileCheck size={16} /> Annual Income Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/religions" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <Activity size={16} /> Religion Master
-                                        </NavLink>
-                                        <NavLink to="/admin/master/school-types" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <Calendar size={16} /> School Type Master
                                         </NavLink>
                                         <NavLink to="/admin/master/admission-years" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <Calendar size={16} /> Admission Year Master
                                         </NavLink>
-                                        <NavLink to="/admin/master/groups-12th" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <GraduationCap size={16} /> 12th Group Master
+                                        <NavLink to="/admin/master/annual-income" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <FileCheck size={16} /> Annual Income Master
                                         </NavLink>
-                                        <NavLink to="/admin/master/roles" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <UserPlus size={16} /> Role Master
+                                        <NavLink to="/admin/change-password" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <KeyRound size={16} /> Change Password
+                                        </NavLink>
+                                        <NavLink to="/admin/master/communities" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Users2 size={16} /> Community Master
                                         </NavLink>
                                         <NavLink to="/admin/master/concessions" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <Award size={16} /> Concession Master
                                         </NavLink>
-                                        <NavLink to="/admin/master/users" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <Users size={16} /> User Master
+                                        <NavLink to="/admin/master/consultancies" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Users2 size={16} /> Consultancy Master
                                         </NavLink>
                                         <NavLink to="/admin/master/course-fees" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <IndianRupee size={16} /> Course Fees Fix
                                         </NavLink>
+                                        <NavLink to="/admin/master/departments" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Building2 size={16} /> Department Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/districts" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Building2 size={16} /> District Master
+                                        </NavLink>
                                         <NavLink to="/admin/master/email-logs" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
                                             <Mail size={16} /> Email Logs
                                         </NavLink>
-                                        <NavLink to="/admin/change-password" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
-                                            <KeyRound size={16} /> Change Password
+                                        <NavLink to="/admin/master/reference-types" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <UserPlus size={16} /> Reference Type
+                                        </NavLink>
+                                        <NavLink to="/admin/master/religions" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Activity size={16} /> Religion Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/roles" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <UserPlus size={16} /> Role Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/schools" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <GraduationCap size={16} /> School Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/school-types" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Calendar size={16} /> School Type Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/staff" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <UserPlus size={16} /> Staff Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/admission-statuses" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Activity size={16} /> Status Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/studies" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <GraduationCap size={16} /> Study Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/groups-12th" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <GraduationCap size={16} /> 12th Group Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/users" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Users size={16} /> User Master
+                                        </NavLink>
+                                        <NavLink to="/admin/master/valid-date" className={({ isActive }) => isActive ? `${styles.subNavItem} ${styles.activeSub}` : styles.subNavItem} onClick={closeSidebar}>
+                                            <Calendar size={16} /> Valid Date Master
                                         </NavLink>
                                     </div>
                                 )}
