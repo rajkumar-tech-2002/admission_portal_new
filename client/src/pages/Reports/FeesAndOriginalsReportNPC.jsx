@@ -141,6 +141,10 @@ const FeesAndOriginalsReportNPC = () => {
             { key: 'ms_10', label: '10th MS' }
         ];
 
+        if (year === 'I Year') {
+            cols.push({ key: 'temp_10', label: '10th Temp' });
+        }
+
         if (!hideIYearCols) {
             cols.push(
                 { key: 'ms_11', label: '11th MS' },

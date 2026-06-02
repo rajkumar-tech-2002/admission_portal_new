@@ -100,10 +100,10 @@ const CertificateEntry = () => {
     // Excel Export
     const handleExcelExport = () => {
         if (filteredRecords.length === 0) { toast.error('No records to export'); return; }
-        const headers = ['S.No','App No','Name','College','Programme','Department','Year','Quota','10th MC','10th Temp','11th MC','12th MC','12th Temp','TC','Comm','FGC','IC','NC','BC','JD','Remarks'];
+        const headers = ['S.No','App No','Name','DOB','College','Programme','Department','Year','Quota','10th MC','11th MC','12th MC','12th Temp','TC','Comm','FGC','IC','NC','BC','JD','Remarks'];
         const rows = filteredRecords.map((r, i) => [
-            i + 1, r.application_no, r.student_name, r.college, r.programme, r.department, r.admission_year || '', r.quota || '',
-            r.tenth_marksheet || '', r.tenth_temp || '', r.eleventh_marksheet || '', r.twelfth_marksheet || '', r.twelfth_temp || '',
+            i + 1, r.application_no, r.student_name, r.dob ? new Date(r.dob).toLocaleDateString('en-GB') : '', r.college, r.programme, r.department, r.admission_year || '', r.quota || '',
+            r.tenth_marksheet || '', r.eleventh_marksheet || '', r.twelfth_marksheet || '', r.twelfth_temp || '',
             r.transfer_certificate || '', r.community_certificate || '', r.first_graduate_certificate || '',
             r.income_certificate || '', r.native_certificate || '', r.bonafide_certificate || '',
             r.JD_certificate || '', r.remarks || ''
@@ -139,7 +139,6 @@ const CertificateEntry = () => {
                 student_id: rowData.student_id,
                 student_application_no: rowData.application_no,
                 tenth_marksheet: rowData.tenth_marksheet,
-                tenth_temp: rowData.tenth_temp,
                 eleventh_marksheet: rowData.eleventh_marksheet,
                 twelfth_marksheet: rowData.twelfth_marksheet,
                 twelfth_temp: rowData.twelfth_temp,
@@ -192,7 +191,7 @@ const CertificateEntry = () => {
                     // Update state
                     const emptyCertData = {
                         cert_id: null,
-                        tenth_marksheet: null, tenth_temp: null, eleventh_marksheet: null, twelfth_marksheet: null, twelfth_temp: null,
+                        tenth_marksheet: null, eleventh_marksheet: null, twelfth_marksheet: null, twelfth_temp: null,
                         transfer_certificate: null, community_certificate: null, first_graduate_certificate: null,
                         income_certificate: null, native_certificate: null, bonafide_certificate: null, JD_certificate: null, remarks: null,
                         isDirty: false
@@ -356,12 +355,12 @@ const CertificateEntry = () => {
                                     <th>S.No</th>
                                     <th>App No</th>
                                     <th>Name</th>
+                                    <th>DOB</th>
                                     <th>Coll</th>
                                     <th>Dept</th>
                                     <th>Year</th>
                                     <th>Quota</th>
                                     <th>10th MC</th>
-                                    <th>10th Temp</th>
                                     <th>11th MC</th>
                                     <th>12th MC</th>
                                     <th>12th Temp</th>
@@ -388,12 +387,12 @@ const CertificateEntry = () => {
                                                 <td>{indexOfFirstRecord + index + 1}</td>
                                                 <td><strong>{record.application_no}</strong></td>
                                                 <td>{record.student_name}</td>
+                                                <td>{record.dob ? new Date(record.dob).toLocaleDateString('en-GB') : '-'}</td>
                                                 <td>{record.college}</td>
                                                 <td>{(record.programme && record.programme.trim()) ? `${record.programme} - ${record.department}` : record.department}</td>
                                                 <td>{record.admission_year}</td>
                                                 <td>{record.quota}</td>
                                                 <td><SelectField value={rowData.tenth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'tenth_marksheet', val)} /></td>
-                                                <td><SelectField value={rowData.tenth_temp} onChange={(val) => handleInputChange(record.student_id, 'tenth_temp', val)} /></td>
                                                 <td><SelectField value={rowData.eleventh_marksheet} onChange={(val) => handleInputChange(record.student_id, 'eleventh_marksheet', val)} /></td>
                                                 <td><SelectField value={rowData.twelfth_marksheet} onChange={(val) => handleInputChange(record.student_id, 'twelfth_marksheet', val)} /></td>
                                                 <td><SelectField value={rowData.twelfth_temp} onChange={(val) => handleInputChange(record.student_id, 'twelfth_temp', val)} /></td>

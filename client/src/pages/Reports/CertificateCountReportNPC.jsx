@@ -73,6 +73,7 @@ const CertificateCountReportNPC = () => {
         let grandTotals = {
             total_students: 0,
             ms_10_count: 0,
+            temp_10_count: 0,
             ms_11_count: 0,
             ms_12_count: 0,
             tc_count: 0,
@@ -163,6 +164,10 @@ const CertificateCountReportNPC = () => {
             { key: 'total_students', label: 'Total Students' },
             { key: 'ms_10_count', label: '10th MS' }
         ];
+
+        if (year === 'I Year') {
+            cols.push({ key: 'temp_10_count', label: '10th Temp' });
+        }
 
         if (!hideIYearCols) {
             cols.push(

@@ -438,6 +438,7 @@ class Admission {
             sam.id AS student_id,
             sam.application_no,
             sam.student_name,
+            sam.dob,
             sam.college,
             sam.programme,
             sam.department,
@@ -445,7 +446,6 @@ class Admission {
             sam.quota,
             cgd.id AS cert_id,
             cgd.tenth_marksheet,
-            cgd.tenth_temp,
             cgd.eleventh_marksheet,
             cgd.twelfth_marksheet,
             cgd.twelfth_temp,
@@ -472,7 +472,7 @@ class Admission {
     static async saveCertificate(data) {
         const {
             student_id, student_application_no,
-            tenth_marksheet, tenth_temp, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
+            tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
             transfer_certificate, community_certificate, first_graduate_certificate,
             income_certificate, native_certificate, bonafide_certificate, JD_certificate, remarks
         } = data;
@@ -482,13 +482,13 @@ class Admission {
         if (existing.length > 0) {
             const sql = `
                 UPDATE certificate_given_details SET
-                    tenth_marksheet = ?, tenth_temp = ?, eleventh_marksheet = ?, twelfth_marksheet = ?, twelfth_temp = ?,
+                    tenth_marksheet = ?, eleventh_marksheet = ?, twelfth_marksheet = ?, twelfth_temp = ?,
                     transfer_certificate = ?, community_certificate = ?, first_graduate_certificate = ?,
                     income_certificate = ?, native_certificate = ?, bonafide_certificate = ?, JD_certificate = ?, remarks = ?
                 WHERE student_id = ?
             `;
             await db.execute(sql, [
-                tenth_marksheet || null, tenth_temp || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
+                tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
                 income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null, remarks || null,
                 student_id
@@ -498,14 +498,14 @@ class Admission {
             const sql = `
                 INSERT INTO certificate_given_details (
                     student_id, student_application_no,
-                    tenth_marksheet, tenth_temp, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
+                    tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
                     transfer_certificate, community_certificate, first_graduate_certificate,
                     income_certificate, native_certificate, bonafide_certificate, JD_certificate, remarks
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const [result] = await db.execute(sql, [
                 student_id, student_application_no,
-                tenth_marksheet || null, tenth_temp || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
+                tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
                 income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null, remarks || null
             ]);
@@ -520,7 +520,7 @@ class Admission {
     static async getCertificatesPG() {
         const [rows] = await db.execute(`
             SELECT 
-                sam.id as student_id, sam.application_no, sam.student_name, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota,
+                sam.id as student_id, sam.application_no, sam.student_name, sam.dob, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota,
                 cgd.id as cert_id,
                 cgd.tancet, cgd.ms_10, cgd.ms_11, cgd.ms_12, cgd.allotment_order, cgd.cc,
                 cgd.dip_sem_1, cgd.dip_sem_2, cgd.dip_sem_3, cgd.dip_sem_4, cgd.dip_sem_5, cgd.dip_sem_6, cgd.dip_cons, cgd.dip_cert, cgd.dip_prov, cgd.tc,
@@ -592,9 +592,9 @@ class Admission {
     static async getCertificatesNPC() {
         const [rows] = await db.execute(`
             SELECT 
-                sam.id as student_id, sam.application_no, sam.student_name, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota,
+                sam.id as student_id, sam.application_no, sam.student_name, sam.dob, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota,
                 cgd.id as cert_id, cgd.student_year,
-                cgd.ms_10, cgd.ms_11, cgd.ms_12, cgd.tc, cgd.community_cert, cgd.photo_2_copy, cgd.aadhaar,
+                cgd.ms_10, cgd.temp_10, cgd.ms_11, cgd.ms_12, cgd.tc, cgd.community_cert, cgd.photo_2_copy, cgd.aadhaar,
                 cgd.equivalency_cert, cgd.migration_cert, cgd.ms_iti, cgd.iti_prov, cgd.iti_cert_add, cgd.remarks,
                 cgd.created_at, cgd.updated_at
             FROM student_admission_master sam
@@ -608,7 +608,7 @@ class Admission {
     static async saveCertificateNPC(data) {
         const {
             student_id, student_application_no, student_year,
-            ms_10, ms_11, ms_12, tc, community_cert, photo_2_copy, aadhaar,
+            ms_10, temp_10, ms_11, ms_12, tc, community_cert, photo_2_copy, aadhaar,
             equivalency_cert, migration_cert, ms_iti, iti_prov, iti_cert_add, remarks
         } = data;
 
@@ -618,13 +618,13 @@ class Admission {
             const sql = `
                 UPDATE certificate_given_details_npc SET
                     student_application_no = ?, student_year = ?,
-                    ms_10 = ?, ms_11 = ?, ms_12 = ?, tc = ?, community_cert = ?, photo_2_copy = ?, aadhaar = ?,
+                    ms_10 = ?, temp_10 = ?, ms_11 = ?, ms_12 = ?, tc = ?, community_cert = ?, photo_2_copy = ?, aadhaar = ?,
                     equivalency_cert = ?, migration_cert = ?, ms_iti = ?, iti_prov = ?, iti_cert_add = ?, remarks = ?
                 WHERE student_id = ?
             `;
             await db.execute(sql, [
                 student_application_no || null, student_year || null,
-                ms_10 || null, ms_11 || null, ms_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
+                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
                 equivalency_cert || null, migration_cert || null, ms_iti || null, iti_prov || null, iti_cert_add || null, remarks || null,
                 student_id
             ]);
@@ -633,13 +633,13 @@ class Admission {
             const sql = `
                 INSERT INTO certificate_given_details_npc (
                     student_id, student_application_no, student_year,
-                    ms_10, ms_11, ms_12, tc, community_cert, photo_2_copy, aadhaar,
+                    ms_10, temp_10, ms_11, ms_12, tc, community_cert, photo_2_copy, aadhaar,
                     equivalency_cert, migration_cert, ms_iti, iti_prov, iti_cert_add, remarks
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const [result] = await db.execute(sql, [
                 student_id, student_application_no || null, student_year || null,
-                ms_10 || null, ms_11 || null, ms_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
+                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
                 equivalency_cert || null, migration_cert || null, ms_iti || null, iti_prov || null, iti_cert_add || null, remarks || null
             ]);
             return { action: 'inserted', id: result.insertId };

@@ -160,7 +160,6 @@ const FeesAndOriginalsReport = () => {
             'Reference By Name': r.reference_by_name,
             'Reference By Mobile': r.reference_by_mobile,
             '10th Marksheet': r.tenth_marksheet,
-            '10th Temp': r.tenth_temp,
             '11th Marksheet': r.eleventh_marksheet,
             '12th Marksheet': r.twelfth_marksheet,
             '12th Temp': r.twelfth_temp,
@@ -351,7 +350,6 @@ const FeesAndOriginalsReport = () => {
                                 <th>Ref By Name</th>
                                 <th>Ref By Mobile</th>
                                 <th>10th Marksheet</th>
-                                <th>10th Temp</th>
                                 <th>11th Marksheet</th>
                                 <th>12th Marksheet</th>
                                 <th>12th Temp</th>
@@ -389,7 +387,6 @@ const FeesAndOriginalsReport = () => {
                                         <td>{record.reference_by_name}</td>
                                         <td>{record.reference_by_mobile}</td>
                                         <td>{record.tenth_marksheet}</td>
-                                        <td>{record.tenth_temp}</td>
                                         <td>{record.eleventh_marksheet}</td>
                                         <td>{record.twelfth_marksheet}</td>
                                         <td>{record.twelfth_temp}</td>

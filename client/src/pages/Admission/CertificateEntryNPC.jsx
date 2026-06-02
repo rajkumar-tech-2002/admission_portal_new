@@ -98,14 +98,18 @@ const CertificateEntryNPC = () => {
     };
 
     const showNonIYearFields = yearFilter !== 'I Year';
+    const showIYearOnlyFields = yearFilter === 'I Year';
 
     // Excel Export
     const handleExcelExport = () => {
         if (filteredRecords.length === 0) { toast.error('No records to export'); return; }
         
-        const headers = ['S.No','App No','Name','College','Programme','Department','Year','Quota',
-            '10th MC','TC','Community Cert','Photo (2 Copy)','Aadhaar','Equivalency Cert'
+        const headers = ['S.No','App No','Name','DOB','College','Programme','Department','Year','Quota',
+            '10th MC'
         ];
+        if (showIYearOnlyFields) headers.push('10th Temp');
+        headers.push('TC','Community Cert','Photo (2 Copy)','Aadhaar','Equivalency Cert');
+        
         if (showNonIYearFields) {
             headers.push('11th MC', '12th MC', 'Migration Cert', 'MS ITI', 'ITI Prov', 'ITI Cert Add');
         }
@@ -113,9 +117,13 @@ const CertificateEntryNPC = () => {
 
         const rows = filteredRecords.map((r, i) => {
             const row = [
-                i + 1, r.application_no, r.student_name, r.college, r.programme, r.department, r.admission_year || '', r.quota || '',
-                r.ms_10 || '', r.tc || '', r.community_cert || '', r.photo_2_copy || '', r.aadhaar || '', r.equivalency_cert || ''
+                i + 1, r.application_no, r.student_name, r.dob ? new Date(r.dob).toLocaleDateString('en-GB') : '', r.college, r.programme, r.department, r.admission_year || '', r.quota || '',
+                r.ms_10 || ''
             ];
+            
+            if (showIYearOnlyFields) row.push(r.temp_10 || '');
+            
+            row.push(r.tc || '', r.community_cert || '', r.photo_2_copy || '', r.aadhaar || '', r.equivalency_cert || '');
             
             if (showNonIYearFields) {
                 row.push(r.ms_11 || '', r.ms_12 || '', r.migration_cert || '', r.ms_iti || '', r.iti_prov || '', r.iti_cert_add || '');
@@ -156,6 +164,7 @@ const CertificateEntryNPC = () => {
                 student_application_no: rowData.application_no,
                 student_year: rowData.admission_year,
                 ms_10: rowData.ms_10,
+                temp_10: rowData.temp_10,
                 ms_11: rowData.ms_11,
                 ms_12: rowData.ms_12,
                 tc: rowData.tc,
@@ -205,7 +214,7 @@ const CertificateEntryNPC = () => {
 
                     const emptyCertData = {
                         cert_id: null,
-                        ms_10: null, ms_11: null, ms_12: null, tc: null, community_cert: null, photo_2_copy: null, aadhaar: null,
+                        ms_10: null, temp_10: null, ms_11: null, ms_12: null, tc: null, community_cert: null, photo_2_copy: null, aadhaar: null,
                         equivalency_cert: null, migration_cert: null, ms_iti: null, iti_prov: null, iti_cert_add: null, remarks: null,
                         isDirty: false
                     };
@@ -374,11 +383,13 @@ const CertificateEntryNPC = () => {
                                             <th>S.No</th>
                                             <th>App No</th>
                                             <th>Name</th>
+                                            <th>DOB</th>
                                             <th>Coll</th>
                                             <th>Dept</th>
                                             <th>Year</th>
                                             <th>Quota</th>
                                             <th>10th MC</th>
+                                            {showIYearOnlyFields && <th>10th Temp</th>}
                                             {showNonIYearFields && <th>11th MC</th>}
                                             {showNonIYearFields && <th>12th MC</th>}
                                             <th>TC</th>
@@ -408,11 +419,13 @@ const CertificateEntryNPC = () => {
                                                         <td>{indexOfFirstRecord + index + 1}</td>
                                                         <td><strong>{record.application_no}</strong></td>
                                                         <td>{record.student_name}</td>
+                                                        <td>{record.dob ? new Date(record.dob).toLocaleDateString('en-GB') : '-'}</td>
                                                         <td>{record.college}</td>
                                                         <td>{(record.programme && record.programme.trim()) ? `${record.programme} - ${record.department}` : record.department}</td>
                                                         <td>{record.admission_year}</td>
                                                         <td>{record.quota}</td>
                                                         <td><SelectField value={rowData.ms_10} onChange={(val) => handleInputChange(record.student_id, 'ms_10', val)} /></td>
+                                                        {showIYearOnlyFields && <td><SelectField value={rowData.temp_10} onChange={(val) => handleInputChange(record.student_id, 'temp_10', val)} /></td>}
                                                         
                                                         {showNonIYearFields && <td>{rowShowNonIYear ? <SelectField value={rowData.ms_11} onChange={(val) => handleInputChange(record.student_id, 'ms_11', val)} /> : '-'}</td>}
                                                         {showNonIYearFields && <td>{rowShowNonIYear ? <SelectField value={rowData.ms_12} onChange={(val) => handleInputChange(record.student_id, 'ms_12', val)} /> : '-'}</td>}

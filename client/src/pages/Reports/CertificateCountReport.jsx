@@ -290,7 +290,6 @@ const CertificateCountReport = () => {
                                 <th>Department</th>
                                 <th style={{ textAlign: 'center' }}>Total Students</th>
                                 <th style={{ textAlign: 'center' }}>10th MC</th>
-                                <th style={{ textAlign: 'center' }}>10th Temp</th>
                                 <th style={{ textAlign: 'center' }}>11th MC</th>
                                 <th style={{ textAlign: 'center' }}>12th Temp</th>
                                 <th style={{ textAlign: 'center' }}>12th MC</th>
@@ -315,7 +314,6 @@ const CertificateCountReport = () => {
                                                 <td>{row.department}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.tenth_marksheet_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.tenth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.eleventh_marksheet_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_marksheet_count || ''}</td>
@@ -336,7 +334,6 @@ const CertificateCountReport = () => {
                                                 <td colSpan="2">{row.label}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.tenth_marksheet_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.tenth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.eleventh_marksheet_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_marksheet_count || ''}</td>
@@ -356,7 +353,6 @@ const CertificateCountReport = () => {
                                                 <td colSpan="3">{row.label}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.tenth_marksheet_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.tenth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.eleventh_marksheet_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_marksheet_count || ''}</td>
@@ -375,7 +371,6 @@ const CertificateCountReport = () => {
                                                 <td colSpan="4" style={{ textAlign: 'center' }}>{row.label}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.total_students || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.tenth_marksheet_count || ''}</td>
-                                                <td style={{ textAlign: 'center' }}>{row.tenth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.eleventh_marksheet_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_temp_count || ''}</td>
                                                 <td style={{ textAlign: 'center' }}>{row.twelfth_marksheet_count || ''}</td>

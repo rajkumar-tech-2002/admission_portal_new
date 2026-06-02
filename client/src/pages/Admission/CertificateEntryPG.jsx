@@ -100,14 +100,14 @@ const CertificateEntryPG = () => {
     // Excel Export
     const handleExcelExport = () => {
         if (filteredRecords.length === 0) { toast.error('No records to export'); return; }
-        const headers = ['S.No','App No','Name','College','Programme','Department','Year','Quota',
+        const headers = ['S.No','App No','Name','DOB','College','Programme','Department','Year','Quota',
             'TANCET','10th MC','11th MC','12th MC','Allotment Order','CC',
             'Dip Sem 1','Dip Sem 2','Dip Sem 3','Dip Sem 4','Dip Sem 5','Dip Sem 6','Dip Cons','Dip Cert','Dip Prov','TC',
             'UG Sem 1','UG Sem 2','UG Sem 3','UG Sem 4','UG Sem 5','UG Sem 6','UG Sem 7','UG Sem 8','UG Cons','UG Degree','UG Prov',
             'FGC','JD','Remarks'
         ];
         const rows = filteredRecords.map((r, i) => [
-            i + 1, r.application_no, r.student_name, r.college, r.programme, r.department, r.admission_year || '', r.quota || '',
+            i + 1, r.application_no, r.student_name, r.dob ? new Date(r.dob).toLocaleDateString('en-GB') : '', r.college, r.programme, r.department, r.admission_year || '', r.quota || '',
             r.tancet || '', r.ms_10 || '', r.ms_11 || '', r.ms_12 || '', r.allotment_order || '', r.cc || '',
             r.dip_sem_1 || '', r.dip_sem_2 || '', r.dip_sem_3 || '', r.dip_sem_4 || '', r.dip_sem_5 || '', r.dip_sem_6 || '', r.dip_cons || '', r.dip_cert || '', r.dip_prov || '', r.tc || '',
             r.ug_sem_1 || '', r.ug_sem_2 || '', r.ug_sem_3 || '', r.ug_sem_4 || '', r.ug_sem_5 || '', r.ug_sem_6 || '', r.ug_sem_7 || '', r.ug_sem_8 || '', r.ug_cons || '', r.ug_degree || '', r.ug_prov || '',
@@ -390,6 +390,7 @@ const CertificateEntryPG = () => {
                                             <th>S.No</th>
                                             <th>App No</th>
                                             <th>Name</th>
+                                            <th>DOB</th>
                                             <th>Coll</th>
                                             <th>Dept</th>
                                             <th>Year</th>
@@ -442,6 +443,7 @@ const CertificateEntryPG = () => {
                                                         <td>{indexOfFirstRecord + index + 1}</td>
                                                         <td><strong>{record.application_no}</strong></td>
                                                         <td>{record.student_name}</td>
+                                                        <td>{record.dob ? new Date(record.dob).toLocaleDateString('en-GB') : '-'}</td>
                                                         <td>{record.college}</td>
                                                         <td>{(record.programme && record.programme.trim()) ? `${record.programme} - ${record.department}` : record.department}</td>
                                                         <td>{record.admission_year}</td>
