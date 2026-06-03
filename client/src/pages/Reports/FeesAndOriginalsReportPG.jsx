@@ -202,8 +202,11 @@ const FeesAndOriginalsReportPG = () => {
                 'Total Paid': r.total_paid,
                 'Balance Amount': r.balance_amount,
                 'Father Mobile No': r.father_mobile_no,
+                'Mother Mobile No': r.mother_mobile_no,
                 'Student Mobile No': r.student_mobile_no,
+                'Community': r.community,
                 'Reference Type': r.reference_type,
+                'Consultancy Name': r.consultancy_name,
                 'Reference College': r.reference_college,
                 'Reference Department': r.reference_department,
                 'Reference By Name': r.reference_by_name,
@@ -393,9 +396,12 @@ const FeesAndOriginalsReportPG = () => {
                                         <th>Total Fee</th>
                                         <th>Total Paid</th>
                                         <th>Balance Amount</th>
+                                        <th>Community</th>
                                         <th>Father Mobile No</th>
+                                        <th>Mother Mobile No</th>
                                         <th>Student Mobile No</th>
                                         <th>Ref Type</th>
+                                        <th>Consultancy Name</th>
                                         <th>Ref College</th>
                                         <th>Ref Dept</th>
                                         <th>Ref By Name</th>
@@ -422,9 +428,12 @@ const FeesAndOriginalsReportPG = () => {
                                                 <td>{record.total_fee}</td>
                                                 <td>{record.total_paid}</td>
                                                 <td style={{ color: record.balance_amount > 0 ? 'red' : 'green' }}>{record.balance_amount}</td>
+                                                <td>{record.community}</td>
                                                 <td>{record.father_mobile_no}</td>
+                                                <td>{record.mother_mobile_no}</td>
                                                 <td>{record.student_mobile_no}</td>
                                                 <td>{record.reference_type}</td>
+                                                <td>{record.consultancy_name}</td>
                                                 <td>{record.reference_college}</td>
                                                 <td>{record.reference_department}</td>
                                                 <td>{record.reference_by_name}</td>

@@ -156,7 +156,8 @@ const AdmissionList = ({ admissions, onAdd, onEdit, onDelete, onRefresh, viewOnl
         'subject_4_name', 'subject_4_mark', 'subject_5_name', 'subject_5_mark', 'subject_6_name', 'subject_6_mark',
         'total_marks_12th', 'percentage_12th', 'ug_college', 'diploma_college', 'reference_type', 'reference_college',
         'reference_department', 'reference_by_name', 'reference_by_mobile', 'consultancy_name',
-        'consultancy_person_name', 'consultancy_mobile', 'course_studied', 'studied_medium', 'board_university', 'nativity'
+        'consultancy_person_name', 'consultancy_mobile', 'course_studied', 'studied_medium', 'board_university', 'nativity',
+        'consortium_number', 'consortium_batch', 'consortium_rank', 'counselling_number', 'counselling_round'
     ];
 
     const handleExportTemplate = () => {

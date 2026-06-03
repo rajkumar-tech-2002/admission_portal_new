@@ -20,6 +20,7 @@ const CertificateEntryPG = () => {
     const [deptFilter, setDeptFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
     const [quotaFilter, setQuotaFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
 
     const [filteredRecords, setFilteredRecords] = useState([]);
 
@@ -28,6 +29,7 @@ const CertificateEntryPG = () => {
     const [departments, setDepartments] = useState([]);
     const [years, setYears] = useState([]);
     const [quotas, setQuotas] = useState([]);
+    const [statuses, setStatuses] = useState([]);
 
     // Editing State (track changes locally before save)
     const [editedRows, setEditedRows] = useState({});
@@ -46,11 +48,13 @@ const CertificateEntryPG = () => {
                 }).filter(Boolean))].sort();
                 const uniqueYears = [...new Set(res.data.data.map(item => item.admission_year).filter(Boolean))].sort();
                 const uniqueQuotas = [...new Set(res.data.data.map(item => item.quota).filter(Boolean))].sort();
+                const uniqueStatuses = [...new Set(res.data.data.map(item => item.student_status).filter(Boolean))].sort();
 
                 setColleges(uniqueColleges);
                 setDepartments(uniqueDepts);
                 setYears(uniqueYears);
                 setQuotas(uniqueQuotas);
+                setStatuses(uniqueStatuses);
             }
         } catch (error) {
             console.error('Failed to fetch certificates:', error);
@@ -83,10 +87,11 @@ const CertificateEntryPG = () => {
         }
         if (yearFilter) result = result.filter(r => r.admission_year === yearFilter);
         if (quotaFilter) result = result.filter(r => r.quota === quotaFilter);
+        if (statusFilter) result = result.filter(r => r.student_status === statusFilter);
 
         setFilteredRecords(result);
         setCurrentPage(1);
-    }, [records, search, collegeFilter, deptFilter, yearFilter, quotaFilter]);
+    }, [records, search, collegeFilter, deptFilter, yearFilter, quotaFilter, statusFilter]);
 
     const handleResetFilters = () => {
         setSearch('');
@@ -94,20 +99,21 @@ const CertificateEntryPG = () => {
         setDeptFilter('');
         setYearFilter('');
         setQuotaFilter('');
+        setStatusFilter('');
         setCurrentPage(1);
     };
 
     // Excel Export
     const handleExcelExport = () => {
         if (filteredRecords.length === 0) { toast.error('No records to export'); return; }
-        const headers = ['S.No','App No','Name','DOB','College','Programme','Department','Year','Quota',
+        const headers = ['S.No','App No','Name','DOB','Status','College','Programme','Department','Year','Quota','Community',
             'TANCET','10th MC','11th MC','12th MC','Allotment Order','CC',
             'Dip Sem 1','Dip Sem 2','Dip Sem 3','Dip Sem 4','Dip Sem 5','Dip Sem 6','Dip Cons','Dip Cert','Dip Prov','TC',
             'UG Sem 1','UG Sem 2','UG Sem 3','UG Sem 4','UG Sem 5','UG Sem 6','UG Sem 7','UG Sem 8','UG Cons','UG Degree','UG Prov',
             'FGC','JD','Remarks'
         ];
         const rows = filteredRecords.map((r, i) => [
-            i + 1, r.application_no, r.student_name, r.dob ? new Date(r.dob).toLocaleDateString('en-GB') : '', r.college, r.programme, r.department, r.admission_year || '', r.quota || '',
+            i + 1, r.application_no, r.student_name, r.dob ? new Date(r.dob).toLocaleDateString('en-GB') : '', r.student_status, r.college, r.programme, r.department, r.admission_year || '', r.quota || '', r.community || '',
             r.tancet || '', r.ms_10 || '', r.ms_11 || '', r.ms_12 || '', r.allotment_order || '', r.cc || '',
             r.dip_sem_1 || '', r.dip_sem_2 || '', r.dip_sem_3 || '', r.dip_sem_4 || '', r.dip_sem_5 || '', r.dip_sem_6 || '', r.dip_cons || '', r.dip_cert || '', r.dip_prov || '', r.tc || '',
             r.ug_sem_1 || '', r.ug_sem_2 || '', r.ug_sem_3 || '', r.ug_sem_4 || '', r.ug_sem_5 || '', r.ug_sem_6 || '', r.ug_sem_7 || '', r.ug_sem_8 || '', r.ug_cons || '', r.ug_degree || '', r.ug_prov || '',
@@ -347,6 +353,17 @@ const CertificateEntryPG = () => {
                             {quotas.map(q => <option key={q} value={q}>{q}</option>)}
                         </select>
                     </div>
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Status</label>
+                        <select
+                            className={styles.selectInput}
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="">All Status</option>
+                            {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    </div>
                 </div>
 
                 <div className={styles.resetRow} style={{ marginBottom: '1rem' }}>
@@ -391,10 +408,12 @@ const CertificateEntryPG = () => {
                                             <th>App No</th>
                                             <th>Name</th>
                                             <th>DOB</th>
+                                            <th>Status</th>
                                             <th>Coll</th>
                                             <th>Dept</th>
                                             <th>Year</th>
                                             <th>Quota</th>
+                                            <th>Community</th>
                                             <th>TANCET</th>
                                             <th>10th MC</th>
                                             <th>11th MC</th>
@@ -444,10 +463,12 @@ const CertificateEntryPG = () => {
                                                         <td><strong>{record.application_no}</strong></td>
                                                         <td>{record.student_name}</td>
                                                         <td>{record.dob ? new Date(record.dob).toLocaleDateString('en-GB') : '-'}</td>
+                                                        <td>{record.student_status}</td>
                                                         <td>{record.college}</td>
                                                         <td>{(record.programme && record.programme.trim()) ? `${record.programme} - ${record.department}` : record.department}</td>
                                                         <td>{record.admission_year}</td>
                                                         <td>{record.quota}</td>
+                                                        <td>{record.community}</td>
                                                         <td><SelectField value={rowData.tancet} onChange={(val) => handleInputChange(record.student_id, 'tancet', val)} /></td>
                                                         <td><SelectField value={rowData.ms_10} onChange={(val) => handleInputChange(record.student_id, 'ms_10', val)} /></td>
                                                         <td><SelectField value={rowData.ms_11} onChange={(val) => handleInputChange(record.student_id, 'ms_11', val)} /></td>

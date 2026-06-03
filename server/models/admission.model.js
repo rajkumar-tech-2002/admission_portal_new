@@ -361,24 +361,30 @@ class Admission {
 
     static async getFeesOriginalsReport() {
         const [rows] = await db.execute(`
-            SELECT * FROM student_fee_certificate_report 
-            ORDER BY application_no ASC
+            SELECT r.*, sam.mother_mobile_no, sam.consultancy_name, sam.community 
+            FROM student_fee_certificate_report r
+            LEFT JOIN student_admission_master sam ON r.application_no = sam.application_no
+            ORDER BY r.application_no ASC
         `);
         return rows;
     }
 
     static async getFeesOriginalsPGReport() {
         const [rows] = await db.execute(`
-            SELECT * FROM pg_student_fee_certificate_report 
-            ORDER BY application_no ASC
+            SELECT r.*, sam.mother_mobile_no, sam.consultancy_name, sam.community 
+            FROM pg_student_fee_certificate_report r
+            LEFT JOIN student_admission_master sam ON r.application_no = sam.application_no
+            ORDER BY r.application_no ASC
         `);
         return rows;
     }
 
     static async getFeesOriginalsNPCReport() {
         const [rows] = await db.execute(`
-            SELECT * FROM npc_student_fee_certificate_report 
-            ORDER BY application_no ASC
+            SELECT r.*, sam.mother_mobile_no, sam.consultancy_name, sam.community 
+            FROM npc_student_fee_certificate_report r
+            LEFT JOIN student_admission_master sam ON r.application_no = sam.application_no
+            ORDER BY r.application_no ASC
         `);
         return rows;
     }
@@ -444,6 +450,9 @@ class Admission {
             sam.department,
             sam.admission_year,
             sam.quota,
+            sam.student_status,
+            sam.community,
+            sam.fee,
             cgd.id AS cert_id,
             cgd.tenth_marksheet,
             cgd.eleventh_marksheet,
@@ -520,7 +529,7 @@ class Admission {
     static async getCertificatesPG() {
         const [rows] = await db.execute(`
             SELECT 
-                sam.id as student_id, sam.application_no, sam.student_name, sam.dob, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota,
+                sam.id as student_id, sam.application_no, sam.student_name, sam.dob, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota, sam.student_status, sam.community, sam.fee,
                 cgd.id as cert_id,
                 cgd.tancet, cgd.ms_10, cgd.ms_11, cgd.ms_12, cgd.allotment_order, cgd.cc,
                 cgd.dip_sem_1, cgd.dip_sem_2, cgd.dip_sem_3, cgd.dip_sem_4, cgd.dip_sem_5, cgd.dip_sem_6, cgd.dip_cons, cgd.dip_cert, cgd.dip_prov, cgd.tc,
@@ -592,7 +601,7 @@ class Admission {
     static async getCertificatesNPC() {
         const [rows] = await db.execute(`
             SELECT 
-                sam.id as student_id, sam.application_no, sam.student_name, sam.dob, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota,
+                sam.id as student_id, sam.application_no, sam.student_name, sam.dob, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota, sam.student_status, sam.community, sam.fee,
                 cgd.id as cert_id, cgd.student_year,
                 cgd.ms_10, cgd.temp_10, cgd.ms_11, cgd.ms_12, cgd.tc, cgd.community_cert, cgd.photo_2_copy, cgd.aadhaar,
                 cgd.equivalency_cert, cgd.migration_cert, cgd.ms_iti, cgd.iti_prov, cgd.iti_cert_add, cgd.remarks,
