@@ -30,6 +30,7 @@ const FeesEntry = () => {
     const [listDeptFilter, setListDeptFilter] = useState('');
     const [listQuotaFilter, setListQuotaFilter] = useState('');
     const [listYearFilter, setListYearFilter] = useState('');
+    const [listPaymentModeFilter, setListPaymentModeFilter] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [filteredFeesRecords, setFilteredFeesRecords] = useState([]);
@@ -44,6 +45,7 @@ const FeesEntry = () => {
         student_application_no: '',
         student_dob: '',
         paid_amount: '',
+        payment_mode: 'Cash',
         paid_date: new Date().toISOString().split('T')[0]
     });
 
@@ -115,6 +117,7 @@ const FeesEntry = () => {
 
         if (listQuotaFilter) result = result.filter(r => r.quota === listQuotaFilter);
         if (listYearFilter) result = result.filter(r => r.year_type === listYearFilter);
+        if (listPaymentModeFilter) result = result.filter(r => (r.payment_mode || 'Cash') === listPaymentModeFilter);
 
         if (fromDate) {
             result = result.filter(r => new Date(r.paid_date || r.created_at) >= new Date(fromDate));
@@ -127,7 +130,7 @@ const FeesEntry = () => {
 
         setFilteredFeesRecords(result);
         setCurrentPage(1);
-        }, [feesRecords, listSearch, listCollegeFilter, listDeptFilter, listQuotaFilter, listYearFilter, fromDate, toDate]);
+        }, [feesRecords, listSearch, listCollegeFilter, listDeptFilter, listQuotaFilter, listYearFilter, fromDate, toDate, listPaymentModeFilter]);
 
     const handleResetListFilters = () => {
         setListSearch('');
@@ -135,6 +138,7 @@ const FeesEntry = () => {
         setListDeptFilter('');
         setListQuotaFilter('');
         setListYearFilter('');
+        setListPaymentModeFilter('');
         setFromDate('');
         setToDate('');
         setCurrentPage(1);
@@ -143,7 +147,7 @@ const FeesEntry = () => {
     // Excel Export for Payment List
     const handleExcelExport = () => {
         if (filteredFeesRecords.length === 0) { toast.error('No records to export'); return; }
-        const headers = ['S.No','App No','Student Name','College','Quota','Programme','Department','Year','Paid Amount','Paid Date'];
+        const headers = ['S.No','App No','Student Name','College','Quota','Programme','Department','Year','Paid Amount','Payment Mode','Paid Date'];
         const rows = filteredFeesRecords.map((r, i) => [
             i + 1,
             r.student_application_no,
@@ -154,6 +158,7 @@ const FeesEntry = () => {
             r.department,
             r.year_type,
             r.paid_amount,
+            r.payment_mode || 'Cash',
             r.paid_date ? r.paid_date.substring(0, 10).split('-').reverse().join('-') : ''
         ]);
         const csv = [headers, ...rows].map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -270,6 +275,7 @@ const FeesEntry = () => {
                     student_application_no: '',
                     student_dob: '',
                     paid_amount: '',
+                    payment_mode: 'Cash',
                     paid_date: new Date().toISOString().split('T')[0]
                 });
                 setStudentSearchTerm('');
@@ -294,6 +300,7 @@ const FeesEntry = () => {
             student_application_no: record.student_application_no || '',
             student_dob: dob,
             paid_amount: record.paid_amount || '',
+            payment_mode: record.payment_mode || 'Cash',
             paid_date: record.paid_date ? formatDateForInput(record.paid_date) : new Date().toISOString().split('T')[0]
         });
         
@@ -414,6 +421,19 @@ const FeesEntry = () => {
                             </div>
 
                             <div className={styles.filterGroup}>
+                                <label className={styles.filterLabel}>Payment Mode</label>
+                                <select 
+                                    className={styles.selectInput}
+                                    value={listPaymentModeFilter}
+                                    onChange={(e) => setListPaymentModeFilter(e.target.value)}
+                                >
+                                    <option value="">All Modes</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Online">Online</option>
+                                </select>
+                            </div>
+
+                            <div className={styles.filterGroup}>
                                 <label className={styles.filterLabel}>From Date (Paid)</label>
                                 <input 
                                     type="date" 
@@ -477,6 +497,7 @@ const FeesEntry = () => {
                                             <th>Department</th>
                                             <th>Year</th>
                                             <th>Paid Amount</th>
+                                            <th>Payment Mode</th>
                                             <th>Paid Date</th>
                                             <th>Action</th>
                                         </tr>
@@ -493,6 +514,7 @@ const FeesEntry = () => {
                                                     <td>{(record.programme && record.programme.trim()) ? `${record.programme} - ${record.department}` : record.department}</td>
                                                     <td>{record.year_type}</td>
                                                     <td style={{ fontWeight: 'bold', color: '#059669' }}>₹{parseFloat(record.paid_amount || 0).toLocaleString()}</td>
+                                                    <td>{record.payment_mode || 'Cash'}</td>
                                                     <td>{record.paid_date ? formatDate(record.paid_date) : ''}</td>
                                                     <td>
                                                         
@@ -657,6 +679,19 @@ const FeesEntry = () => {
                                     min="0"
                                     step="0.01"
                                 />
+                            </div>
+
+                            <div className={styles.filterGroup}>
+                                <label className={styles.filterLabel}>Payment Mode <span style={{color: 'red'}}>*</span></label>
+                                <select 
+                                    className={styles.selectInput} 
+                                    value={formData.payment_mode}
+                                    onChange={(e) => setFormData(prev => ({...prev, payment_mode: e.target.value}))}
+                                    required
+                                >
+                                    <option value="Cash">Cash</option>
+                                    <option value="Online">Online</option>
+                                </select>
                             </div>
 
                             <div className={styles.filterGroup}>
