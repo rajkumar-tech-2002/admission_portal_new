@@ -207,6 +207,8 @@ const FeesAndOriginalsReportPG = () => {
                 'Community': r.community,
                 'Reference Type': r.reference_type,
                 'Consultancy Name': r.consultancy_name,
+                'Consultancy Person Name': r.consultancy_person_name,
+                'Consultancy Mobile': r.consultancy_mobile,
                 'Reference College': r.reference_college,
                 'Reference Department': r.reference_department,
                 'Reference By Name': r.reference_by_name,
@@ -402,6 +404,8 @@ const FeesAndOriginalsReportPG = () => {
                                         <th>Student Mobile No</th>
                                         <th>Ref Type</th>
                                         <th>Consultancy Name</th>
+                                        <th>Consultancy Person Name</th>
+                                        <th>Consultancy Mobile</th>
                                         <th>Ref College</th>
                                         <th>Ref Dept</th>
                                         <th>Ref By Name</th>
@@ -434,6 +438,8 @@ const FeesAndOriginalsReportPG = () => {
                                                 <td>{record.student_mobile_no}</td>
                                                 <td>{record.reference_type}</td>
                                                 <td>{record.consultancy_name}</td>
+                                                <td>{record.consultancy_person_name}</td>
+                                                <td>{record.consultancy_mobile}</td>
                                                 <td>{record.reference_college}</td>
                                                 <td>{record.reference_department}</td>
                                                 <td>{record.reference_by_name}</td>

@@ -361,30 +361,21 @@ class Admission {
 
     static async getFeesOriginalsReport() {
         const [rows] = await db.execute(`
-            SELECT r.*, sam.mother_mobile_no, sam.consultancy_name, sam.community 
-            FROM student_fee_certificate_report r
-            LEFT JOIN student_admission_master sam ON r.application_no = sam.application_no
-            ORDER BY r.application_no ASC
+            SELECT * FROM student_fee_certificate_report ORDER BY application_no ASC
         `);
         return rows;
     }
 
     static async getFeesOriginalsPGReport() {
         const [rows] = await db.execute(`
-            SELECT r.*, sam.mother_mobile_no, sam.consultancy_name, sam.community 
-            FROM pg_student_fee_certificate_report r
-            LEFT JOIN student_admission_master sam ON r.application_no = sam.application_no
-            ORDER BY r.application_no ASC
+            SELECT * FROM pg_student_fee_certificate_report ORDER BY application_no ASC
         `);
         return rows;
     }
 
     static async getFeesOriginalsNPCReport() {
         const [rows] = await db.execute(`
-            SELECT r.*, sam.mother_mobile_no, sam.consultancy_name, sam.community 
-            FROM npc_student_fee_certificate_report r
-            LEFT JOIN student_admission_master sam ON r.application_no = sam.application_no
-            ORDER BY r.application_no ASC
+            SELECT * FROM npc_student_fee_certificate_report ORDER BY application_no ASC
         `);
         return rows;
     }

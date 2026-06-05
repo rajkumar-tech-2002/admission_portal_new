@@ -558,7 +558,7 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
             if (name === 'tenthMark') {
                 const marks = parseFloat(value) || 0;
                 const total = parseFloat(prev.totalMarks10th) || 500;
-                updated.percentage10th = ((marks / total) * 100).toFixed(2) + '%';
+                updated.percentage10th = ((marks / total) * 100).toFixed(2);
             }
 
             // Dynamic calculation for 12th Marks Total and Percentage
@@ -576,7 +576,7 @@ const AdmissionProcess = ({ defaultSection = 'entry', viewOnly = false }) => {
 
                 const total = sub1 + eng + sub2 + sub3 + sub4 + sub5 + sub6;
                 updated.totalMarks12th = total.toString();
-                updated.percentage12th = ((total / 600) * 100).toFixed(2) + '%';
+                updated.percentage12th = ((total / 600) * 100).toFixed(2);
             }
 
             return updated;

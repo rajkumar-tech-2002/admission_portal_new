@@ -236,6 +236,9 @@ const RecordReport = ({ recordId, data, onClose, standalone = false }) => {
                         <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
                         <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
                         <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
+                        <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
+                        <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
+                        <tr><td>&nbsp;</td><td></td><td></td><td></td></tr>
                     </tbody>
                 </table>
 
