@@ -1,0 +1,119 @@
+﻿diff --git a/client/src/pages/Admission/CertificateEntryNPC.jsx b/client/src/pages/Admission/CertificateEntryNPC.jsx
+index e7a5c61..c270b0a 100644
+--- a/client/src/pages/Admission/CertificateEntryNPC.jsx
++++ b/client/src/pages/Admission/CertificateEntryNPC.jsx
+@@ -117,7 +117,7 @@ const CertificateEntryNPC = () => {
+         headers.push('TC','Community Cert','Photo (2 Copy)','Aadhaar','Equivalency Cert');
+         
+         if (showNonIYearFields) {
+-            headers.push('11th MC', '12th MC', 'Migration Cert', 'MS ITI', 'ITI Prov', 'ITI Cert Add');
++            headers.push('11th MC', '12th MC', '12th Temp', 'Migration Cert', 'MS ITI', 'ITI Prov', 'ITI Cert Add');
+         }
+         headers.push('Remarks');
+ 
+@@ -132,7 +132,7 @@ const CertificateEntryNPC = () => {
+             row.push(r.tc || '', r.community_cert || '', r.photo_2_copy || '', r.aadhaar || '', r.equivalency_cert || '');
+             
+             if (showNonIYearFields) {
+-                row.push(r.ms_11 || '', r.ms_12 || '', r.migration_cert || '', r.ms_iti || '', r.iti_prov || '', r.iti_cert_add || '');
++                row.push(r.ms_11 || '', r.ms_12 || '', r.temp_12 || '', r.migration_cert || '', r.ms_iti || '', r.iti_prov || '', r.iti_cert_add || '');
+             }
+             row.push(r.remarks || '');
+             return row;
+@@ -173,6 +173,7 @@ const CertificateEntryNPC = () => {
+                 temp_10: rowData.temp_10,
+                 ms_11: rowData.ms_11,
+                 ms_12: rowData.ms_12,
++                temp_12: rowData.temp_12,
+                 tc: rowData.tc,
+                 community_cert: rowData.community_cert,
+                 photo_2_copy: rowData.photo_2_copy,
+@@ -220,7 +221,7 @@ const CertificateEntryNPC = () => {
+ 
+                     const emptyCertData = {
+                         cert_id: null,
+-                        ms_10: null, temp_10: null, ms_11: null, ms_12: null, tc: null, community_cert: null, photo_2_copy: null, aadhaar: null,
++                        ms_10: null, temp_10: null, ms_11: null, ms_12: null, temp_12: null, tc: null, community_cert: null, photo_2_copy: null, aadhaar: null,
+                         equivalency_cert: null, migration_cert: null, ms_iti: null, iti_prov: null, iti_cert_add: null, remarks: null,
+                         isDirty: false
+                     };
+@@ -411,6 +412,7 @@ const CertificateEntryNPC = () => {
+                                             {showIYearOnlyFields && <th>10th Temp</th>}
+                                             {showNonIYearFields && <th>11th MC</th>}
+                                             {showNonIYearFields && <th>12th MC</th>}
++                                            {showNonIYearFields && <th>12th Temp</th>}
+                                             <th>TC</th>
+                                             <th>Community Cert</th>
+                                             <th>Photo (2 Copy)</th>
+@@ -438,7 +440,7 @@ const CertificateEntryNPC = () => {
+                                                     npcFields.push('temp_10');
+                                                 }
+                                                 if (record.admission_year !== 'I Year') {
+-                                                    npcFields.push('ms_11', 'ms_12', 'migration_cert', 'ms_iti', 'iti_prov', 'iti_cert_add');
++                                                    npcFields.push('ms_11', 'ms_12', 'temp_12', 'migration_cert', 'ms_iti', 'iti_prov', 'iti_cert_add');
+                                                 }
+                                                 const isAllYes = npcFields.every(f => rowData[f] === 'Yes');
+ 
+@@ -459,6 +461,7 @@ const CertificateEntryNPC = () => {
+                                                         
+                                                         {showNonIYearFields && <td>{rowShowNonIYear ? <SelectField value={rowData.ms_11} onChange={(val) => handleInputChange(record.student_id, 'ms_11', val)} /> : '-'}</td>}
+                                                         {showNonIYearFields && <td>{rowShowNonIYear ? <SelectField value={rowData.ms_12} onChange={(val) => handleInputChange(record.student_id, 'ms_12', val)} /> : '-'}</td>}
++                                                        {showNonIYearFields && <td>{rowShowNonIYear ? <SelectField value={rowData.temp_12} onChange={(val) => handleInputChange(record.student_id, 'temp_12', val)} /> : '-'}</td>}
+                                                         
+                                                         <td><SelectField value={rowData.tc} onChange={(val) => handleInputChange(record.student_id, 'tc', val)} /></td>
+                                                         <td><SelectField value={rowData.community_cert} onChange={(val) => handleInputChange(record.student_id, 'community_cert', val)} /></td>
+diff --git a/server/models/admission.model.js b/server/models/admission.model.js
+index 0ee6bf4..970fd5e 100644
+--- a/server/models/admission.model.js
++++ b/server/models/admission.model.js
+@@ -612,7 +612,7 @@ class Admission {
+             SELECT 
+                 sam.id as student_id, sam.application_no, sam.student_name, sam.dob, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota, sam.student_status, sam.community, sam.fee,
+                 cgd.id as cert_id, cgd.student_year,
+-                cgd.ms_10, cgd.temp_10, cgd.ms_11, cgd.ms_12, cgd.tc, cgd.community_cert, cgd.photo_2_copy, cgd.aadhaar,
++                cgd.ms_10, cgd.temp_10, cgd.ms_11, cgd.ms_12, cgd.temp_12, cgd.tc, cgd.community_cert, cgd.photo_2_copy, cgd.aadhaar,
+                 cgd.equivalency_cert, cgd.migration_cert, cgd.ms_iti, cgd.iti_prov, cgd.iti_cert_add, cgd.remarks,
+                 cgd.created_at, cgd.updated_at
+             FROM student_admission_master sam
+@@ -626,7 +626,7 @@ class Admission {
+     static async saveCertificateNPC(data) {
+         const {
+             student_id, student_application_no, student_year,
+-            ms_10, temp_10, ms_11, ms_12, tc, community_cert, photo_2_copy, aadhaar,
++            ms_10, temp_10, ms_11, ms_12, temp_12, tc, community_cert, photo_2_copy, aadhaar,
+             equivalency_cert, migration_cert, ms_iti, iti_prov, iti_cert_add, remarks
+         } = data;
+ 
+@@ -636,13 +636,13 @@ class Admission {
+             const sql = `
+                 UPDATE certificate_given_details_npc SET
+                     student_application_no = ?, student_year = ?,
+-                    ms_10 = ?, temp_10 = ?, ms_11 = ?, ms_12 = ?, tc = ?, community_cert = ?, photo_2_copy = ?, aadhaar = ?,
++                    ms_10 = ?, temp_10 = ?, ms_11 = ?, ms_12 = ?, temp_12 = ?, tc = ?, community_cert = ?, photo_2_copy = ?, aadhaar = ?,
+                     equivalency_cert = ?, migration_cert = ?, ms_iti = ?, iti_prov = ?, iti_cert_add = ?, remarks = ?
+                 WHERE student_id = ?
+             `;
+             await db.execute(sql, [
+                 student_application_no || null, student_year || null,
+-                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
++                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, temp_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
+                 equivalency_cert || null, migration_cert || null, ms_iti || null, iti_prov || null, iti_cert_add || null, remarks || null,
+                 student_id
+             ]);
+@@ -651,13 +651,13 @@ class Admission {
+             const sql = `
+                 INSERT INTO certificate_given_details_npc (
+                     student_id, student_application_no, student_year,
+-                    ms_10, temp_10, ms_11, ms_12, tc, community_cert, photo_2_copy, aadhaar,
++                    ms_10, temp_10, ms_11, ms_12, temp_12, tc, community_cert, photo_2_copy, aadhaar,
+                     equivalency_cert, migration_cert, ms_iti, iti_prov, iti_cert_add, remarks
+-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
++                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             `;
+             const [result] = await db.execute(sql, [
+                 student_id, student_application_no || null, student_year || null,
+-                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
++                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, temp_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
+                 equivalency_cert || null, migration_cert || null, ms_iti || null, iti_prov || null, iti_cert_add || null, remarks || null
+             ]);
+             return { action: 'inserted', id: result.insertId };

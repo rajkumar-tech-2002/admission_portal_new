@@ -77,6 +77,7 @@ const CertificateCountReportNPC = () => {
             temp_10_count: 0,
             ms_11_count: 0,
             ms_12_count: 0,
+            temp_12_count: 0,
             tc_count: 0,
             community_cert_count: 0,
             photo_2_copy_count: 0,
@@ -174,7 +175,8 @@ const CertificateCountReportNPC = () => {
         if (!hideIYearCols) {
             cols.push(
                 { key: 'ms_11_count', label: '11th MS' },
-                { key: 'ms_12_count', label: '12th MS' }
+                { key: 'ms_12_count', label: '12th MS' },
+                { key: 'temp_12_count', label: '12th Temp' }
             );
         }
 

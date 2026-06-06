@@ -148,7 +148,8 @@ const FeesAndOriginalsReportNPC = () => {
         if (!hideIYearCols) {
             cols.push(
                 { key: 'ms_11', label: '11th MS' },
-                { key: 'ms_12', label: '12th MS' }
+                { key: 'ms_12', label: '12th MS' },
+                { key: 'temp_12', label: '12th Temp' }
             );
         }
 
