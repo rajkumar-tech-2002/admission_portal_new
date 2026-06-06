@@ -117,7 +117,7 @@ const CertificateEntryNPC = () => {
         headers.push('TC','Community Cert','Photo (2 Copy)','Aadhaar','Equivalency Cert');
         
         if (showNonIYearFields) {
-            headers.push('11th MC', '12th MC', 'Migration Cert', 'MS ITI', 'ITI Prov', 'ITI Cert Add');
+            headers.push('11th MC', '12th MC', '12th Temp', 'Migration Cert', 'MS ITI', 'ITI Prov', 'ITI Cert Add');
         }
         headers.push('Remarks');
 
@@ -132,7 +132,7 @@ const CertificateEntryNPC = () => {
             row.push(r.tc || '', r.community_cert || '', r.photo_2_copy || '', r.aadhaar || '', r.equivalency_cert || '');
             
             if (showNonIYearFields) {
-                row.push(r.ms_11 || '', r.ms_12 || '', r.migration_cert || '', r.ms_iti || '', r.iti_prov || '', r.iti_cert_add || '');
+                row.push(r.ms_11 || '', r.ms_12 || '', r.temp_12 || '', r.migration_cert || '', r.ms_iti || '', r.iti_prov || '', r.iti_cert_add || '');
             }
             row.push(r.remarks || '');
             return row;
@@ -173,6 +173,7 @@ const CertificateEntryNPC = () => {
                 temp_10: rowData.temp_10,
                 ms_11: rowData.ms_11,
                 ms_12: rowData.ms_12,
+                temp_12: rowData.temp_12,
                 tc: rowData.tc,
                 community_cert: rowData.community_cert,
                 photo_2_copy: rowData.photo_2_copy,
@@ -220,7 +221,7 @@ const CertificateEntryNPC = () => {
 
                     const emptyCertData = {
                         cert_id: null,
-                        ms_10: null, temp_10: null, ms_11: null, ms_12: null, tc: null, community_cert: null, photo_2_copy: null, aadhaar: null,
+                        ms_10: null, temp_10: null, ms_11: null, ms_12: null, temp_12: null, tc: null, community_cert: null, photo_2_copy: null, aadhaar: null,
                         equivalency_cert: null, migration_cert: null, ms_iti: null, iti_prov: null, iti_cert_add: null, remarks: null,
                         isDirty: false
                     };
@@ -411,6 +412,7 @@ const CertificateEntryNPC = () => {
                                             {showIYearOnlyFields && <th>10th Temp</th>}
                                             {showNonIYearFields && <th>11th MC</th>}
                                             {showNonIYearFields && <th>12th MC</th>}
+                                            {showNonIYearFields && <th>12th Temp</th>}
                                             <th>TC</th>
                                             <th>Community Cert</th>
                                             <th>Photo (2 Copy)</th>
@@ -438,7 +440,7 @@ const CertificateEntryNPC = () => {
                                                     npcFields.push('temp_10');
                                                 }
                                                 if (record.admission_year !== 'I Year') {
-                                                    npcFields.push('ms_11', 'ms_12', 'migration_cert', 'ms_iti', 'iti_prov', 'iti_cert_add');
+                                                    npcFields.push('ms_11', 'ms_12', 'temp_12', 'migration_cert', 'ms_iti', 'iti_prov', 'iti_cert_add');
                                                 }
                                                 const isAllYes = npcFields.every(f => rowData[f] === 'Yes');
 
@@ -459,6 +461,7 @@ const CertificateEntryNPC = () => {
                                                         
                                                         {showNonIYearFields && <td>{rowShowNonIYear ? <SelectField value={rowData.ms_11} onChange={(val) => handleInputChange(record.student_id, 'ms_11', val)} /> : '-'}</td>}
                                                         {showNonIYearFields && <td>{rowShowNonIYear ? <SelectField value={rowData.ms_12} onChange={(val) => handleInputChange(record.student_id, 'ms_12', val)} /> : '-'}</td>}
+                                                        {showNonIYearFields && <td>{rowShowNonIYear ? <SelectField value={rowData.temp_12} onChange={(val) => handleInputChange(record.student_id, 'temp_12', val)} /> : '-'}</td>}
                                                         
                                                         <td><SelectField value={rowData.tc} onChange={(val) => handleInputChange(record.student_id, 'tc', val)} /></td>
                                                         <td><SelectField value={rowData.community_cert} onChange={(val) => handleInputChange(record.student_id, 'community_cert', val)} /></td>

@@ -612,7 +612,7 @@ class Admission {
             SELECT 
                 sam.id as student_id, sam.application_no, sam.student_name, sam.dob, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota, sam.student_status, sam.community, sam.fee,
                 cgd.id as cert_id, cgd.student_year,
-                cgd.ms_10, cgd.temp_10, cgd.ms_11, cgd.ms_12, cgd.tc, cgd.community_cert, cgd.photo_2_copy, cgd.aadhaar,
+                cgd.ms_10, cgd.temp_10, cgd.ms_11, cgd.ms_12, cgd.temp_12, cgd.tc, cgd.community_cert, cgd.photo_2_copy, cgd.aadhaar,
                 cgd.equivalency_cert, cgd.migration_cert, cgd.ms_iti, cgd.iti_prov, cgd.iti_cert_add, cgd.remarks,
                 cgd.created_at, cgd.updated_at
             FROM student_admission_master sam
@@ -626,7 +626,7 @@ class Admission {
     static async saveCertificateNPC(data) {
         const {
             student_id, student_application_no, student_year,
-            ms_10, temp_10, ms_11, ms_12, tc, community_cert, photo_2_copy, aadhaar,
+            ms_10, temp_10, ms_11, ms_12, temp_12, tc, community_cert, photo_2_copy, aadhaar,
             equivalency_cert, migration_cert, ms_iti, iti_prov, iti_cert_add, remarks
         } = data;
 
@@ -636,13 +636,13 @@ class Admission {
             const sql = `
                 UPDATE certificate_given_details_npc SET
                     student_application_no = ?, student_year = ?,
-                    ms_10 = ?, temp_10 = ?, ms_11 = ?, ms_12 = ?, tc = ?, community_cert = ?, photo_2_copy = ?, aadhaar = ?,
+                    ms_10 = ?, temp_10 = ?, ms_11 = ?, ms_12 = ?, temp_12 = ?, tc = ?, community_cert = ?, photo_2_copy = ?, aadhaar = ?,
                     equivalency_cert = ?, migration_cert = ?, ms_iti = ?, iti_prov = ?, iti_cert_add = ?, remarks = ?
                 WHERE student_id = ?
             `;
             await db.execute(sql, [
                 student_application_no || null, student_year || null,
-                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
+                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, temp_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
                 equivalency_cert || null, migration_cert || null, ms_iti || null, iti_prov || null, iti_cert_add || null, remarks || null,
                 student_id
             ]);
@@ -651,13 +651,13 @@ class Admission {
             const sql = `
                 INSERT INTO certificate_given_details_npc (
                     student_id, student_application_no, student_year,
-                    ms_10, temp_10, ms_11, ms_12, tc, community_cert, photo_2_copy, aadhaar,
+                    ms_10, temp_10, ms_11, ms_12, temp_12, tc, community_cert, photo_2_copy, aadhaar,
                     equivalency_cert, migration_cert, ms_iti, iti_prov, iti_cert_add, remarks
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const [result] = await db.execute(sql, [
                 student_id, student_application_no || null, student_year || null,
-                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
+                ms_10 || null, temp_10 || null, ms_11 || null, ms_12 || null, temp_12 || null, tc || null, community_cert || null, photo_2_copy || null, aadhaar || null,
                 equivalency_cert || null, migration_cert || null, ms_iti || null, iti_prov || null, iti_cert_add || null, remarks || null
             ]);
             return { action: 'inserted', id: result.insertId };
