@@ -169,7 +169,8 @@ exports.getFeesOriginalsNPCReport = async (req, res, next) => {
 
 exports.getCertificateCountReport = async (req, res, next) => {
     try {
-        const data = await Admission.getCertificateCountReport();
+        const { status } = req.query;
+        const data = await Admission.getCertificateCountReport(status);
         res.status(200).json({ success: true, data });
     } catch (error) {
         next(error);
@@ -178,7 +179,8 @@ exports.getCertificateCountReport = async (req, res, next) => {
 
 exports.getCertificateCountPGReport = async (req, res, next) => {
     try {
-        const data = await Admission.getCertificateCountPGReport();
+        const { status } = req.query;
+        const data = await Admission.getCertificateCountPGReport(status);
         res.status(200).json({ success: true, data });
     } catch (error) {
         next(error);
@@ -187,7 +189,8 @@ exports.getCertificateCountPGReport = async (req, res, next) => {
 
 exports.getCertificateCountNPCReport = async (req, res, next) => {
     try {
-        const data = await Admission.getCertificateCountNPCReport();
+        const { status } = req.query;
+        const data = await Admission.getCertificateCountNPCReport(status);
         res.status(200).json({ success: true, data });
     } catch (error) {
         next(error);

@@ -22,12 +22,13 @@ const CertificateCountReport = () => {
     const [year, setYear] = useState('');
     const [course, setCourse] = useState(''); // Department
     const [quota, setQuota] = useState('');
+    const [status, setStatus] = useState('All');
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [admRes, masterRes] = await Promise.all([
-                    apiService.get('/admissions/reports/certificate-count'),
+                    apiService.get(`/admissions/reports/certificate-count?status=${status}`),
                     apiService.get('/master')
                 ]);
 
@@ -53,7 +54,7 @@ const CertificateCountReport = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [status]);
 
     useEffect(() => {
         let result = admissions;
@@ -154,6 +155,7 @@ const CertificateCountReport = () => {
         setYear('');
         setCourse('');
         setQuota('');
+        setStatus('All');
     };
 
     const handleExportRecords = () => {
@@ -217,6 +219,19 @@ const CertificateCountReport = () => {
                 </div>
 
                 <div className={styles.filters} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Status</label>
+                        <select 
+                            className={styles.selectInput}
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                        >
+                            <option value="All">All</option>
+                            <option value="Admitted">Admitted</option>
+                            <option value="Discontinue">Discontinue</option>
+                        </select>
+                    </div>
+
                     <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>College</label>
                         <select 

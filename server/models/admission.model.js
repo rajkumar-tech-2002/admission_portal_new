@@ -380,23 +380,41 @@ class Admission {
         return rows;
     }
 
-    static async getCertificateCountReport() {
+    static async getCertificateCountReport(status = 'All') {
+        let viewName = 'student_certificate_count_report';
+        if (status === 'Admitted') {
+            viewName = 'student_certificate_count_report_admitted';
+        } else if (status === 'Discontinue') {
+            viewName = 'student_certificate_count_report_discontinue';
+        }
         const [rows] = await db.execute(`
-            SELECT * FROM student_certificate_count_report
+            SELECT * FROM ${viewName}
         `);
         return rows;
     }
 
-    static async getCertificateCountPGReport() {
+    static async getCertificateCountPGReport(status = 'All') {
+        let viewName = 'pg_student_certificate_count_report';
+        if (status === 'Admitted') {
+            viewName = 'pg_student_certificate_count_report_admitted';
+        } else if (status === 'Discontinue') {
+            viewName = 'pg_student_certificate_count_report_discontinue';
+        }
         const [rows] = await db.execute(`
-            SELECT * FROM pg_student_certificate_count_report
+            SELECT * FROM ${viewName}
         `);
         return rows;
     }
 
-    static async getCertificateCountNPCReport() {
+    static async getCertificateCountNPCReport(status = 'All') {
+        let viewName = 'npc_student_certificate_count_report';
+        if (status === 'Admitted') {
+            viewName = 'npc_student_certificate_count_report_admitted';
+        } else if (status === 'Discontinue') {
+            viewName = 'npc_student_certificate_count_report_discontinue';
+        }
         const [rows] = await db.execute(`
-            SELECT * FROM npc_student_certificate_count_report
+            SELECT * FROM ${viewName}
         `);
         return rows;
     }

@@ -400,9 +400,16 @@ const CertificateEntry = () => {
                                         const rowData = editedRows[record.student_id] || record;
                                         const isDirty = rowData.isDirty;
                                         const certId = rowData.cert_id;
+                                        
+                                        const certFields = [
+                                            'tenth_marksheet', 'eleventh_marksheet', 'twelfth_marksheet', 'twelfth_temp', 
+                                            'transfer_certificate', 'community_certificate', 'first_graduate_certificate', 
+                                            'income_certificate', 'native_certificate', 'bonafide_certificate', 'JD_certificate'
+                                        ];
+                                        const isAllYes = certFields.every(f => rowData[f] === 'Yes');
 
                                         return (
-                                            <tr key={record.student_id} style={{ backgroundColor: isDirty ? '#fef9c3' : 'transparent', transition: 'background-color 0.3s' }}>
+                                            <tr key={record.student_id} style={{ backgroundColor: isDirty ? '#fef9c3' : (isAllYes ? '#dcfce7' : 'transparent'), transition: 'background-color 0.3s' }}>
                                                 <td>{indexOfFirstRecord + index + 1}</td>
                                                 <td><strong>{record.application_no}</strong></td>
                                                 <td>{record.student_name}</td>

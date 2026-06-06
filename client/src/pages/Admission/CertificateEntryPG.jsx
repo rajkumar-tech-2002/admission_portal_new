@@ -457,8 +457,20 @@ const CertificateEntryPG = () => {
                                                 const rowShowUg = record.admission_year !== 'II Year - LE';
                                                 const rowShowFg = record.admission_year !== 'I Year';
 
+                                                const pgFields = [
+                                                    'tancet', 'ms_10', 'ms_11', 'ms_12', 'allotment_order', 'cc',
+                                                    'dip_sem_1', 'dip_sem_2', 'dip_sem_3', 'dip_sem_4', 'dip_sem_5', 'dip_sem_6', 'dip_cons', 'dip_cert', 'dip_prov', 'tc'
+                                                ];
+                                                if (rowShowUg) {
+                                                    pgFields.push('ug_sem_1', 'ug_sem_2', 'ug_sem_3', 'ug_sem_4', 'ug_sem_5', 'ug_sem_6', 'ug_sem_7', 'ug_sem_8', 'ug_cons', 'ug_degree', 'ug_prov');
+                                                }
+                                                if (rowShowFg) {
+                                                    pgFields.push('fg_cert', 'joint_decl');
+                                                }
+                                                const isAllYes = pgFields.every(f => rowData[f] === 'Yes');
+
                                                 return (
-                                                    <tr key={record.student_id} style={{ backgroundColor: isDirty ? '#fef9c3' : 'transparent', transition: 'background-color 0.3s' }}>
+                                                    <tr key={record.student_id} style={{ backgroundColor: isDirty ? '#fef9c3' : (isAllYes ? '#dcfce7' : 'transparent'), transition: 'background-color 0.3s' }}>
                                                         <td>{indexOfFirstRecord + index + 1}</td>
                                                         <td><strong>{record.application_no}</strong></td>
                                                         <td>{record.student_name}</td>

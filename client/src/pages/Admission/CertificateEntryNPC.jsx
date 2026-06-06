@@ -433,8 +433,17 @@ const CertificateEntryNPC = () => {
                                                 
                                                 const rowShowNonIYear = record.admission_year !== 'I Year';
 
+                                                const npcFields = ['ms_10', 'tc', 'community_cert', 'photo_2_copy', 'aadhaar', 'equivalency_cert'];
+                                                if (record.admission_year === 'I Year') {
+                                                    npcFields.push('temp_10');
+                                                }
+                                                if (record.admission_year !== 'I Year') {
+                                                    npcFields.push('ms_11', 'ms_12', 'migration_cert', 'ms_iti', 'iti_prov', 'iti_cert_add');
+                                                }
+                                                const isAllYes = npcFields.every(f => rowData[f] === 'Yes');
+
                                                 return (
-                                                    <tr key={record.student_id} style={{ backgroundColor: isDirty ? '#fef9c3' : 'transparent', transition: 'background-color 0.3s' }}>
+                                                    <tr key={record.student_id} style={{ backgroundColor: isDirty ? '#fef9c3' : (isAllYes ? '#dcfce7' : 'transparent'), transition: 'background-color 0.3s' }}>
                                                          <td>{indexOfFirstRecord + index + 1}</td>
                                                          <td><strong>{record.application_no}</strong></td>
                                                          <td>{record.student_name}</td>
