@@ -23,7 +23,6 @@ const FeesAndOriginalsReportPG = () => {
     // Filters
     const [search, setSearch] = useState('');
     const [college, setCollege] = useState('');
-    const [year, setYear] = useState('');
     const [course, setCourse] = useState(''); // Department
     const [quota, setQuota] = useState('');
     const [status, setStatus] = useState('');
@@ -48,7 +47,6 @@ const FeesAndOriginalsReportPG = () => {
                     setMasterData({
                         colleges: uniqueColleges,
                         departments: uniqueCourses,
-                        years: uniqueYears,
                         quotas: uniqueQuotas,
                         statuses: uniqueStatuses
                     });
@@ -79,10 +77,6 @@ const FeesAndOriginalsReportPG = () => {
             result = result.filter(r => (r.college || '').trim() === college);
         }
 
-        // Year Filter
-        if (year) {
-            result = result.filter(r => (r.admission_year || '') === year);
-        }
 
         // Course/Department Filter
         if (course) {
@@ -111,7 +105,7 @@ const FeesAndOriginalsReportPG = () => {
 
         setFilteredRecords(result);
         setCurrentPage(1);
-    }, [admissions, search, college, year, course, quota, status, fromDate, toDate]);
+    }, [admissions, search, college, course, quota, status, fromDate, toDate]);
 
     // Pagination Logic
     const indexOfLastRecord = currentPage * recordsPerPage;
@@ -124,7 +118,6 @@ const FeesAndOriginalsReportPG = () => {
     const handleResetFilters = () => {
         setSearch('');
         setCollege('');
-        setYear('');
         setCourse('');
         setQuota('');
         setStatus('');
@@ -133,17 +126,15 @@ const FeesAndOriginalsReportPG = () => {
         setCurrentPage(1);
     };
 
-    const showFgJd = year !== 'I Year';
-    const showUg = year !== 'II Year - LE';
-
     const getColumnsConfig = () => {
-        let cols = [
+        return [
             { key: 'tancet', label: 'TANCET' },
             { key: 'ms_10', label: '10th MS' },
             { key: 'ms_11', label: '11th MS' },
             { key: 'ms_12', label: '12th MS' },
-            { key: 'allotment_order', label: 'Allotment Order' },
-            { key: 'cc', label: 'CC' },
+            { key: 'transfer_cert', label: 'TC' },
+            { key: 'income_cert', label: 'Income Cert' },
+            { key: 'com_cert', label: 'Comm Cert' },
             { key: 'dip_sem_1', label: 'Dip Sem 1' },
             { key: 'dip_sem_2', label: 'Dip Sem 2' },
             { key: 'dip_sem_3', label: 'Dip Sem 3' },
@@ -153,33 +144,18 @@ const FeesAndOriginalsReportPG = () => {
             { key: 'dip_cons', label: 'Dip Cons' },
             { key: 'dip_cert', label: 'Dip Cert' },
             { key: 'dip_prov', label: 'Dip Prov' },
-            { key: 'tc', label: 'TC' }
+            { key: 'ug_sem_1', label: 'UG Sem 1' },
+            { key: 'ug_sem_2', label: 'UG Sem 2' },
+            { key: 'ug_sem_3', label: 'UG Sem 3' },
+            { key: 'ug_sem_4', label: 'UG Sem 4' },
+            { key: 'ug_sem_5', label: 'UG Sem 5' },
+            { key: 'ug_sem_6', label: 'UG Sem 6' },
+            { key: 'ug_sem_7', label: 'UG Sem 7' },
+            { key: 'ug_sem_8', label: 'UG Sem 8' },
+            { key: 'ug_cons', label: 'UG Cons' },
+            { key: 'ug_degree', label: 'UG Degree' },
+            { key: 'ug_prov', label: 'UG Prov' }
         ];
-
-        if (showUg) {
-            cols = cols.concat([
-                { key: 'ug_sem_1', label: 'UG Sem 1' },
-                { key: 'ug_sem_2', label: 'UG Sem 2' },
-                { key: 'ug_sem_3', label: 'UG Sem 3' },
-                { key: 'ug_sem_4', label: 'UG Sem 4' },
-                { key: 'ug_sem_5', label: 'UG Sem 5' },
-                { key: 'ug_sem_6', label: 'UG Sem 6' },
-                { key: 'ug_sem_7', label: 'UG Sem 7' },
-                { key: 'ug_sem_8', label: 'UG Sem 8' },
-                { key: 'ug_cons', label: 'UG Cons' },
-                { key: 'ug_degree', label: 'UG Degree' },
-                { key: 'ug_prov', label: 'UG Prov' }
-            ]);
-        }
-
-        if (showFgJd) {
-            cols = cols.concat([
-                { key: 'fg_cert', label: 'FG Cert' },
-                { key: 'joint_decl', label: 'Joint Decl' }
-            ]);
-        }
-
-        return cols;
     };
 
     const columns = getColumnsConfig();
@@ -245,19 +221,7 @@ const FeesAndOriginalsReportPG = () => {
                 </div>
 
                 <div className={styles.filters} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-                    <div className={styles.filterGroup}>
-                        <label className={styles.filterLabel}>Year <span style={{color:'red'}}>*</span></label>
-                        <select 
-                            className={styles.selectInput}
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                        >
-                            <option value="">Select Year to View Report</option>
-                            {masterData.years.map((y, index) => (
-                                <option key={index} value={y}>{y}</option>
-                            ))}
-                        </select>
-                    </div>
+
 
                     <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>Global Search</label>
@@ -356,12 +320,7 @@ const FeesAndOriginalsReportPG = () => {
                     </button>
                 </div>
 
-                {!year ? (
-                    <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280', background: '#f9fafb', borderRadius: '8px' }}>
-                        Please select an Admission Year to view the report.
-                    </div>
-                ) : (
-                    <>
+
                         <div className={styles.tableControls}>
                             <div className={styles.limitSelector}>
                                 <label>Show</label>
@@ -493,8 +452,7 @@ const FeesAndOriginalsReportPG = () => {
                                 </div>
                             </div>
                         )}
-                    </>
-                )}
+
             </div>
         </div>
     );

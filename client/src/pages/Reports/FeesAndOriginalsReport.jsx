@@ -138,45 +138,69 @@ const FeesAndOriginalsReport = () => {
     const handleExportRecords = () => {
         if (filteredRecords.length === 0) return toast.error("No records to export");
         
-        // Define columns to export for the report
-        const exportData = filteredRecords.map((r, i) => ({
-            'S.No': i + 1,
-            'Application Number': r.application_no,
-            'Student Name': r.student_name,
-            'College': r.college,
-            'Admission Date': r.admission_date ? r.admission_date.substring(0, 10).split('-').reverse().join('-') : '',
-            'Department': r.department,
-            'Admission Year': r.admission_year,
-            'Quota': r.quota,
-            'Student Status': r.student_status,
-            'Total Fee': r.total_fee,
-            'Total Paid': r.total_paid,
-            'Balance Amount': r.balance_amount,
-            'Father Mobile No': r.father_mobile_no,
-            'Mother Mobile No': r.mother_mobile_no,
-            'Student Mobile No': r.student_mobile_no,
-            'Community': r.community,
-            'Reference Type': r.reference_type,
-            'Consultancy Name': r.consultancy_name,
-            'Consultancy Person Name': r.consultancy_person_name,
-            'Consultancy Mobile': r.consultancy_mobile,
-            'Reference College': r.reference_college,
-            'Reference Department': r.reference_department,
-            'Reference By Name': r.reference_by_name,
-            'Reference By Mobile': r.reference_by_mobile,
-            '10th Marksheet': r.tenth_marksheet,
-            '11th Marksheet': r.eleventh_marksheet,
-            '12th Marksheet': r.twelfth_marksheet,
-            '12th Temp': r.twelfth_temp,
-            'Transfer Certificate': r.transfer_certificate,
-            'Community Certificate': r.community_certificate,
-            'First Graduate Certificate': r.first_graduate_certificate,
-            'Income Certificate': r.income_certificate,
-            'Native Certificate': r.native_certificate,
-            'Bonafide Certificate': r.bonafide_certificate,
-            'JD Certificate': r.JD_certificate,
-            'Remarks': r.remarks
-        }));
+        const exportData = filteredRecords.map((r, i) => {
+            const data = {
+                'S.No': i + 1,
+                'Application Number': r.application_no,
+                'Student Name': r.student_name,
+                'College': r.college,
+                'Admission Date': r.admission_date ? r.admission_date.substring(0, 10).split('-').reverse().join('-') : '',
+                'Department': r.department,
+                'Admission Year': r.admission_year,
+                'Quota': r.quota,
+                'Student Status': r.student_status,
+                'Total Fee': r.total_fee,
+                'Total Paid': r.total_paid,
+                'Balance Amount': r.balance_amount,
+                'Community': r.community,
+                'Father Mobile No': r.father_mobile_no,
+                'Mother Mobile No': r.mother_mobile_no,
+                'Student Mobile No': r.student_mobile_no,
+                'Reference Type': r.reference_type,
+                'Consultancy Name': r.consultancy_name,
+                'Consultancy Person Name': r.consultancy_person_name,
+                'Consultancy Mobile': r.consultancy_mobile,
+                'Reference College': r.reference_college,
+                'Reference Department': r.reference_department,
+                'Reference By Name': r.reference_by_name,
+                'Reference By Mobile': r.reference_by_mobile,
+                '10th Marksheet': r.tenth_marksheet,
+                '11th Marksheet': r.eleventh_marksheet,
+                '12th Marksheet': r.twelfth_marksheet
+            };
+
+            if (year === 'I Year') {
+                data['12th Temp'] = r.twelfth_temp;
+            }
+
+            data['TC'] = r.transfer_certificate;
+            data['Community Cert'] = r.community_certificate;
+            data['First Grad Cert'] = r.first_graduate_certificate;
+            data['Income Cert'] = r.income_certificate;
+            data['Native Cert'] = r.native_certificate;
+
+            if (year === 'I Year') {
+                data['Bonafide Cert'] = r.bonafide_certificate;
+            }
+
+            data['JD Cert'] = r.JD_certificate;
+
+            if (year === 'II Year - LE') {
+                data['Allot Order'] = r.allotment_order;
+                data['Dip Sem 1'] = r.dip_sem_1;
+                data['Dip Sem 2'] = r.dip_sem_2;
+                data['Dip Sem 3'] = r.dip_sem_3;
+                data['Dip Sem 4'] = r.dip_sem_4;
+                data['Dip Sem 5'] = r.dip_sem_5;
+                data['Dip Sem 6'] = r.dip_sem_6;
+                data['Dip Cons'] = r.dip_cons;
+                data['Dip Cert'] = r.dip_cert;
+                data['Dip Prov'] = r.dip_prov;
+            }
+
+            data['Remarks'] = r.remarks;
+            return data;
+        });
 
         const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
@@ -200,6 +224,21 @@ const FeesAndOriginalsReport = () => {
                 </div>
 
                 <div className={styles.filters} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+
+                    <div className={styles.filterGroup}>
+                        <label className={styles.filterLabel}>Year <span style={{color:'red'}}>*</span></label>
+                        <select 
+                            className={styles.selectInput}
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                            style={{ borderColor: !year ? 'red' : '#e5e7eb' }}
+                        >
+                            <option value="">Select Year</option>
+                            {masterData.years.map((y, index) => (
+                                <option key={index} value={y}>{y}</option>
+                            ))}
+                        </select>
+                    </div>
                     <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>Global Search</label>
                         <div style={{ position: 'relative' }}>
@@ -224,20 +263,6 @@ const FeesAndOriginalsReport = () => {
                             <option value="">All Colleges</option>
                             {masterData.colleges.map((c, i) => (
                                 <option key={i} value={c}>{c}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className={styles.filterGroup}>
-                        <label className={styles.filterLabel}>Year</label>
-                        <select 
-                            className={styles.selectInput}
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                        >
-                            <option value="">All Years</option>
-                            {masterData.years.map((y, index) => (
-                                <option key={index} value={y}>{y}</option>
                             ))}
                         </select>
                     </div>
@@ -331,8 +356,14 @@ const FeesAndOriginalsReport = () => {
                     </div>
                 </div>
 
-                <div className={styles.tableContainer} style={{ overflowX: 'auto' }}>
-                    <table className={styles.table} style={{ whiteSpace: 'nowrap' }}>
+                {!year ? (
+                    <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                        Please select an Admission Year to view the report.
+                    </div>
+                ) : (
+                <>
+                    <div className={styles.tableContainer} style={{ overflowX: 'auto' }}>
+                        <table className={styles.table} style={{ whiteSpace: 'nowrap' }}>
                         <thead>
                             <tr>
                                 <th>S.No</th>
@@ -362,14 +393,28 @@ const FeesAndOriginalsReport = () => {
                                 <th>10th Marksheet</th>
                                 <th>11th Marksheet</th>
                                 <th>12th Marksheet</th>
-                                <th>12th Temp</th>
+                                {year === 'I Year' && <th>12th Temp</th>}
                                 <th>TC</th>
                                 <th>Community Cert</th>
                                 <th>First Grad Cert</th>
                                 <th>Income Cert</th>
                                 <th>Native Cert</th>
-                                <th>Bonafide Cert</th>
+                                {year === 'I Year' && <th>Bonafide Cert</th>}
                                 <th>JD Cert</th>
+                                {year === 'II Year - LE' && (
+                                    <>
+                                        <th>Allot Order</th>
+                                        <th>Dip Sem 1</th>
+                                        <th>Dip Sem 2</th>
+                                        <th>Dip Sem 3</th>
+                                        <th>Dip Sem 4</th>
+                                        <th>Dip Sem 5</th>
+                                        <th>Dip Sem 6</th>
+                                        <th>Dip Cons</th>
+                                        <th>Dip Cert</th>
+                                        <th>Dip Prov</th>
+                                    </>
+                                )}
                                 <th>Remarks</th>
                             </tr>
                         </thead>
@@ -404,14 +449,28 @@ const FeesAndOriginalsReport = () => {
                                         <td>{record.tenth_marksheet}</td>
                                         <td>{record.eleventh_marksheet}</td>
                                         <td>{record.twelfth_marksheet}</td>
-                                        <td>{record.twelfth_temp}</td>
+                                        {year === 'I Year' && <td>{record.twelfth_temp}</td>}
                                         <td>{record.transfer_certificate}</td>
                                         <td>{record.community_certificate}</td>
                                         <td>{record.first_graduate_certificate}</td>
                                         <td>{record.income_certificate}</td>
                                         <td>{record.native_certificate}</td>
-                                        <td>{record.bonafide_certificate}</td>
+                                        {year === 'I Year' && <td>{record.bonafide_certificate}</td>}
                                         <td>{record.JD_certificate}</td>
+                                        {year === 'II Year - LE' && (
+                                            <>
+                                                <td>{record.allotment_order}</td>
+                                                <td>{record.dip_sem_1}</td>
+                                                <td>{record.dip_sem_2}</td>
+                                                <td>{record.dip_sem_3}</td>
+                                                <td>{record.dip_sem_4}</td>
+                                                <td>{record.dip_sem_5}</td>
+                                                <td>{record.dip_sem_6}</td>
+                                                <td>{record.dip_cons}</td>
+                                                <td>{record.dip_cert}</td>
+                                                <td>{record.dip_prov}</td>
+                                            </>
+                                        )}
                                         <td>{record.remarks}</td>
                                     </tr>
                                 ))
@@ -455,6 +514,8 @@ const FeesAndOriginalsReport = () => {
                             </button>
                         </div>
                     </div>
+                )}
+                </>
                 )}
             </div>
         </div>

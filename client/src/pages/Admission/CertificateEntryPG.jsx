@@ -107,17 +107,17 @@ const CertificateEntryPG = () => {
     const handleExcelExport = () => {
         if (filteredRecords.length === 0) { toast.error('No records to export'); return; }
         const headers = ['S.No','App No','Name','DOB','Status','College','Programme','Department','Year','Quota','Community',
-            'TANCET','10th MC','11th MC','12th MC','Allotment Order','CC',
-            'Dip Sem 1','Dip Sem 2','Dip Sem 3','Dip Sem 4','Dip Sem 5','Dip Sem 6','Dip Cons','Dip Cert','Dip Prov','TC',
+            'TANCET','10th MC','11th MC','12th MC','TC','IC','CC',
+            'Dip Sem 1','Dip Sem 2','Dip Sem 3','Dip Sem 4','Dip Sem 5','Dip Sem 6','Dip Cons','Dip Cert','Dip Prov',
             'UG Sem 1','UG Sem 2','UG Sem 3','UG Sem 4','UG Sem 5','UG Sem 6','UG Sem 7','UG Sem 8','UG Cons','UG Degree','UG Prov',
-            'FGC','JD','Remarks'
+            'Remarks'
         ];
         const rows = filteredRecords.map((r, i) => [
             i + 1, r.application_no, r.student_name, r.dob ? new Date(r.dob).toLocaleDateString('en-GB') : '', r.student_status, r.college, r.programme, r.department, r.admission_year || '', r.quota || '', r.community || '',
-            r.tancet || '', r.ms_10 || '', r.ms_11 || '', r.ms_12 || '', r.allotment_order || '', r.cc || '',
-            r.dip_sem_1 || '', r.dip_sem_2 || '', r.dip_sem_3 || '', r.dip_sem_4 || '', r.dip_sem_5 || '', r.dip_sem_6 || '', r.dip_cons || '', r.dip_cert || '', r.dip_prov || '', r.tc || '',
+            r.tancet || '', r.ms_10 || '', r.ms_11 || '', r.ms_12 || '', r.transfer_cert || '', r.income_cert || '', r.com_cert || '',
+            r.dip_sem_1 || '', r.dip_sem_2 || '', r.dip_sem_3 || '', r.dip_sem_4 || '', r.dip_sem_5 || '', r.dip_sem_6 || '', r.dip_cons || '', r.dip_cert || '', r.dip_prov || '',
             r.ug_sem_1 || '', r.ug_sem_2 || '', r.ug_sem_3 || '', r.ug_sem_4 || '', r.ug_sem_5 || '', r.ug_sem_6 || '', r.ug_sem_7 || '', r.ug_sem_8 || '', r.ug_cons || '', r.ug_degree || '', r.ug_prov || '',
-            r.fg_cert || '', r.joint_decl || '', r.remarks || ''
+            r.remarks || ''
         ]);
         const csv = [headers, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -149,13 +149,13 @@ const CertificateEntryPG = () => {
             const payload = {
                 student_id: rowData.student_id,
                 student_application_no: rowData.application_no,
-                student_year: rowData.admission_year,
                 tancet: rowData.tancet,
                 ms_10: rowData.ms_10,
                 ms_11: rowData.ms_11,
                 ms_12: rowData.ms_12,
-                allotment_order: rowData.allotment_order,
-                cc: rowData.cc,
+                transfer_cert: rowData.transfer_cert,
+                income_cert: rowData.income_cert,
+                com_cert: rowData.com_cert,
                 dip_sem_1: rowData.dip_sem_1,
                 dip_sem_2: rowData.dip_sem_2,
                 dip_sem_3: rowData.dip_sem_3,
@@ -165,7 +165,6 @@ const CertificateEntryPG = () => {
                 dip_cons: rowData.dip_cons,
                 dip_cert: rowData.dip_cert,
                 dip_prov: rowData.dip_prov,
-                tc: rowData.tc,
                 ug_sem_1: rowData.ug_sem_1,
                 ug_sem_2: rowData.ug_sem_2,
                 ug_sem_3: rowData.ug_sem_3,
@@ -177,8 +176,6 @@ const CertificateEntryPG = () => {
                 ug_cons: rowData.ug_cons,
                 ug_degree: rowData.ug_degree,
                 ug_prov: rowData.ug_prov,
-                fg_cert: rowData.fg_cert,
-                joint_decl: rowData.joint_decl,
                 remarks: rowData.remarks
             };
 
@@ -221,10 +218,10 @@ const CertificateEntryPG = () => {
                     // Update state
                     const emptyCertData = {
                         cert_id: null,
-                        tancet: null, ms_10: null, ms_11: null, ms_12: null, allotment_order: null, cc: null,
-                        dip_sem_1: null, dip_sem_2: null, dip_sem_3: null, dip_sem_4: null, dip_sem_5: null, dip_sem_6: null, dip_cons: null, dip_cert: null, dip_prov: null, tc: null,
+                        tancet: null, ms_10: null, ms_11: null, ms_12: null, transfer_cert: null, income_cert: null, com_cert: null,
+                        dip_sem_1: null, dip_sem_2: null, dip_sem_3: null, dip_sem_4: null, dip_sem_5: null, dip_sem_6: null, dip_cons: null, dip_cert: null, dip_prov: null,
                         ug_sem_1: null, ug_sem_2: null, ug_sem_3: null, ug_sem_4: null, ug_sem_5: null, ug_sem_6: null, ug_sem_7: null, ug_sem_8: null, ug_cons: null, ug_degree: null, ug_prov: null,
-                        fg_cert: null, joint_decl: null, remarks: null,
+                        remarks: null,
                         isDirty: false
                     };
 
@@ -263,16 +260,13 @@ const CertificateEntryPG = () => {
         </select>
     );
 
-    const showUgFields = yearFilter !== 'II Year - LE';
-    const showFgFields = yearFilter !== 'I Year';
-
     return (
         <div className={styles.dashboard} style={{ padding: '0' }}>
             <div className={styles.mainCard}>
                 <div className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Award size={22} style={{ color: 'var(--primary-color)' }} />
-                        <h2 style={{ color: "var(--primary-color)", margin: 0 }}>Certificate Management - PG (I Year & II Year - LE)</h2>
+                        <h2 style={{ color: "var(--primary-color)", margin: 0 }}>Certificate Management - PG</h2>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         <button onClick={handleExcelExport} className={styles.exportBtn} style={{ background: '#10b981', color: '#fff', border: 'none' }}>
@@ -284,21 +278,7 @@ const CertificateEntryPG = () => {
                     </div>
                 </div>
 
-                <div className={styles.filters}>
-                    <div className={styles.filterGroup}>
-                        <label className={styles.filterLabel}>Year <span style={{color:'red'}}>*</span></label>
-                        <select
-                            className={styles.selectInput}
-                            value={yearFilter}
-                            onChange={(e) => setYearFilter(e.target.value)}
-                            style={{ borderColor: !yearFilter ? 'red' : '#e5e7eb' }}
-                        >
-                            <option value="">Select Year</option>
-                            {years.map(y => <option key={y} value={y}>{y}</option>)}
-                        </select>
-                    </div>
-
-                    <div className={styles.filterGroup}>
+                <div className={styles.filters}>                    <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>Global Search</label>
                         <div style={{ position: 'relative' }}>
                             <input
@@ -372,13 +352,7 @@ const CertificateEntryPG = () => {
                     </button>
                 </div>
 
-                {!yearFilter ? (
-                    <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
-                        Please select an Admission Year to view the certificate entry records.
-                    </div>
-                ) : (
-                    <>
-                        <div className={styles.tableControls}>
+                <div className={styles.tableControls}>
                             <div className={styles.limitSelector}>
                                 <label>Show</label>
                                 <select
@@ -418,7 +392,8 @@ const CertificateEntryPG = () => {
                                             <th>10th MC</th>
                                             <th>11th MC</th>
                                             <th>12th MC</th>
-                                            <th>Allot Order</th>
+                                            <th>TC</th>
+                                            <th>IC</th>
                                             <th>CC</th>
                                             <th>Dip Sem 1</th>
                                             <th>Dip Sem 2</th>
@@ -429,20 +404,17 @@ const CertificateEntryPG = () => {
                                             <th>Dip Cons</th>
                                             <th>Dip Cert</th>
                                             <th>Dip Prov</th>
-                                            <th>TC</th>
-                                            {showUgFields && <th>UG Sem 1</th>}
-                                            {showUgFields && <th>UG Sem 2</th>}
-                                            {showUgFields && <th>UG Sem 3</th>}
-                                            {showUgFields && <th>UG Sem 4</th>}
-                                            {showUgFields && <th>UG Sem 5</th>}
-                                            {showUgFields && <th>UG Sem 6</th>}
-                                            {showUgFields && <th>UG Sem 7</th>}
-                                            {showUgFields && <th>UG Sem 8</th>}
-                                            {showUgFields && <th>UG Cons</th>}
-                                            {showUgFields && <th>UG Degree</th>}
-                                            {showUgFields && <th>UG Prov</th>}
-                                            {showFgFields && <th>FGC</th>}
-                                            {showFgFields && <th>JD</th>}
+                                            <th>UG Sem 1</th>
+                                            <th>UG Sem 2</th>
+                                            <th>UG Sem 3</th>
+                                            <th>UG Sem 4</th>
+                                            <th>UG Sem 5</th>
+                                            <th>UG Sem 6</th>
+                                            <th>UG Sem 7</th>
+                                            <th>UG Sem 8</th>
+                                            <th>UG Cons</th>
+                                            <th>UG Degree</th>
+                                            <th>UG Prov</th>
                                             <th>Remarks</th>
                                             <th>Action</th>
                                         </tr>
@@ -453,24 +425,17 @@ const CertificateEntryPG = () => {
                                                 const rowData = editedRows[record.student_id] || record;
                                                 const isDirty = rowData.isDirty;
                                                 const certId = rowData.cert_id;
-                                                
-                                                const rowShowUg = record.admission_year !== 'II Year - LE';
-                                                const rowShowFg = record.admission_year !== 'I Year';
-
                                                 const pgFields = [
-                                                    'tancet', 'ms_10', 'ms_11', 'ms_12', 'allotment_order', 'cc',
-                                                    'dip_sem_1', 'dip_sem_2', 'dip_sem_3', 'dip_sem_4', 'dip_sem_5', 'dip_sem_6', 'dip_cons', 'dip_cert', 'dip_prov', 'tc'
+                                                    'tancet', 'ms_10', 'ms_11', 'ms_12', 'transfer_cert', 'income_cert', 'com_cert',
+                                                    'dip_sem_1', 'dip_sem_2', 'dip_sem_3', 'dip_sem_4', 'dip_sem_5', 'dip_sem_6', 'dip_cons', 'dip_cert', 'dip_prov',
+                                                    'ug_sem_1', 'ug_sem_2', 'ug_sem_3', 'ug_sem_4', 'ug_sem_5', 'ug_sem_6', 'ug_sem_7', 'ug_sem_8', 'ug_cons', 'ug_degree', 'ug_prov'
                                                 ];
-                                                if (rowShowUg) {
-                                                    pgFields.push('ug_sem_1', 'ug_sem_2', 'ug_sem_3', 'ug_sem_4', 'ug_sem_5', 'ug_sem_6', 'ug_sem_7', 'ug_sem_8', 'ug_cons', 'ug_degree', 'ug_prov');
-                                                }
-                                                if (rowShowFg) {
-                                                    pgFields.push('fg_cert', 'joint_decl');
-                                                }
                                                 const isAllYes = pgFields.every(f => rowData[f] === 'Yes');
+                                                const hasNullOrEmpty = pgFields.some(f => !rowData[f] || rowData[f] === '');
+                                                const bgColor = isDirty ? '#fef9c3' : (isAllYes ? '#dcfce7' : '#fee2e2');
 
                                                 return (
-                                                    <tr key={record.student_id} style={{ backgroundColor: isDirty ? '#fef9c3' : (isAllYes ? '#dcfce7' : 'transparent'), transition: 'background-color 0.3s' }}>
+                                                    <tr key={record.student_id} style={{ backgroundColor: bgColor, transition: 'background-color 0.3s' }}>
                                                         <td>{indexOfFirstRecord + index + 1}</td>
                                                         <td><strong>{record.application_no}</strong></td>
                                                         <td>{record.student_name}</td>
@@ -485,8 +450,9 @@ const CertificateEntryPG = () => {
                                                         <td><SelectField value={rowData.ms_10} onChange={(val) => handleInputChange(record.student_id, 'ms_10', val)} /></td>
                                                         <td><SelectField value={rowData.ms_11} onChange={(val) => handleInputChange(record.student_id, 'ms_11', val)} /></td>
                                                         <td><SelectField value={rowData.ms_12} onChange={(val) => handleInputChange(record.student_id, 'ms_12', val)} /></td>
-                                                        <td><SelectField value={rowData.allotment_order} onChange={(val) => handleInputChange(record.student_id, 'allotment_order', val)} /></td>
-                                                        <td><SelectField value={rowData.cc} onChange={(val) => handleInputChange(record.student_id, 'cc', val)} /></td>
+                                                        <td><SelectField value={rowData.transfer_cert} onChange={(val) => handleInputChange(record.student_id, 'transfer_cert', val)} /></td>
+                                                        <td><SelectField value={rowData.income_cert} onChange={(val) => handleInputChange(record.student_id, 'income_cert', val)} /></td>
+                                                        <td><SelectField value={rowData.com_cert} onChange={(val) => handleInputChange(record.student_id, 'com_cert', val)} /></td>
                                                         
                                                         <td><SelectField value={rowData.dip_sem_1} onChange={(val) => handleInputChange(record.student_id, 'dip_sem_1', val)} /></td>
                                                         <td><SelectField value={rowData.dip_sem_2} onChange={(val) => handleInputChange(record.student_id, 'dip_sem_2', val)} /></td>
@@ -497,22 +463,18 @@ const CertificateEntryPG = () => {
                                                         <td><SelectField value={rowData.dip_cons} onChange={(val) => handleInputChange(record.student_id, 'dip_cons', val)} /></td>
                                                         <td><SelectField value={rowData.dip_cert} onChange={(val) => handleInputChange(record.student_id, 'dip_cert', val)} /></td>
                                                         <td><SelectField value={rowData.dip_prov} onChange={(val) => handleInputChange(record.student_id, 'dip_prov', val)} /></td>
-                                                        <td><SelectField value={rowData.tc} onChange={(val) => handleInputChange(record.student_id, 'tc', val)} /></td>
 
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_sem_1} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_1', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_sem_2} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_2', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_sem_3} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_3', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_sem_4} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_4', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_sem_5} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_5', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_sem_6} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_6', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_sem_7} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_7', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_sem_8} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_8', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_cons} onChange={(val) => handleInputChange(record.student_id, 'ug_cons', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_degree} onChange={(val) => handleInputChange(record.student_id, 'ug_degree', val)} /> : '-'}</td>}
-                                                        {showUgFields && <td>{rowShowUg ? <SelectField value={rowData.ug_prov} onChange={(val) => handleInputChange(record.student_id, 'ug_prov', val)} /> : '-'}</td>}
-
-                                                        {showFgFields && <td>{rowShowFg ? <SelectField value={rowData.fg_cert} onChange={(val) => handleInputChange(record.student_id, 'fg_cert', val)} /> : '-'}</td>}
-                                                        {showFgFields && <td>{rowShowFg ? <SelectField value={rowData.joint_decl} onChange={(val) => handleInputChange(record.student_id, 'joint_decl', val)} /> : '-'}</td>}
+                                                        <td><SelectField value={rowData.ug_sem_1} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_1', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_sem_2} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_2', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_sem_3} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_3', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_sem_4} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_4', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_sem_5} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_5', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_sem_6} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_6', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_sem_7} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_7', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_sem_8} onChange={(val) => handleInputChange(record.student_id, 'ug_sem_8', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_cons} onChange={(val) => handleInputChange(record.student_id, 'ug_cons', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_degree} onChange={(val) => handleInputChange(record.student_id, 'ug_degree', val)} /></td>
+                                                        <td><SelectField value={rowData.ug_prov} onChange={(val) => handleInputChange(record.student_id, 'ug_prov', val)} /></td>
 
                                                         <td>
                                                             <input
@@ -592,10 +554,8 @@ const CertificateEntryPG = () => {
                                         Next
                                     </button>
                                 </div>
-                            </div>
+                    </div>
                         )}
-                    </>
-                )}
             </div>
         </div>
     );

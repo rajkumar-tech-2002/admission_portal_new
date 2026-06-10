@@ -19,7 +19,6 @@ const CertificateCountReportPG = () => {
 
     // Filters
     const [college, setCollege] = useState('');
-    const [year, setYear] = useState('');
     const [course, setCourse] = useState(''); // Department
     const [quota, setQuota] = useState('');
     const [status, setStatus] = useState('All');
@@ -41,7 +40,6 @@ const CertificateCountReportPG = () => {
                     setMasterData({
                         colleges: uniqueColleges,
                         departments: uniqueCourses,
-                        years: uniqueYears,
                         quotas: uniqueQuotas
                     });
                 }
@@ -57,12 +55,11 @@ const CertificateCountReportPG = () => {
         let result = admissions;
 
         if (college) result = result.filter(r => (r.college || '').trim() === college);
-        if (year) result = result.filter(r => (r.admission_year || '') === year);
         if (course) result = result.filter(r => (r.department || '') === course);
         if (quota) result = result.filter(r => (r.quota || '') === quota);
 
         setFilteredRecords(result);
-    }, [admissions, college, year, course, quota]);
+    }, [admissions, college, course, quota]);
 
     useEffect(() => {
         // Process grouping
@@ -77,8 +74,9 @@ const CertificateCountReportPG = () => {
             ms_10_count: 0,
             ms_11_count: 0,
             ms_12_count: 0,
-            allotment_order_count: 0,
-            cc_count: 0,
+            transfer_cert_count: 0,
+            income_cert_count: 0,
+            com_cert_count: 0,
             dip_sem_1_count: 0,
             dip_sem_2_count: 0,
             dip_sem_3_count: 0,
@@ -88,7 +86,6 @@ const CertificateCountReportPG = () => {
             dip_cons_count: 0,
             dip_cert_count: 0,
             dip_prov_count: 0,
-            tc_count: 0,
             ug_sem_1_count: 0,
             ug_sem_2_count: 0,
             ug_sem_3_count: 0,
@@ -99,9 +96,7 @@ const CertificateCountReportPG = () => {
             ug_sem_8_count: 0,
             ug_cons_count: 0,
             ug_degree_count: 0,
-            ug_prov_count: 0,
-            fg_cert_count: 0,
-            joint_decl_count: 0
+            ug_prov_count: 0
         };
 
         collegesList.forEach(col => {
@@ -167,25 +162,21 @@ const CertificateCountReportPG = () => {
 
     const handleResetFilters = () => {
         setCollege('');
-        setYear('');
         setCourse('');
         setQuota('');
         setStatus('All');
     };
 
-    // Derived visibility based on year
-    const showFgJd = year !== 'I Year';
-    const showUg = year !== 'II Year - LE';
-
     const getColumnsConfig = () => {
-        let cols = [
+        return [
             { key: 'total_students', label: 'Total Students' },
             { key: 'tancet_count', label: 'TANCET' },
             { key: 'ms_10_count', label: '10th MS' },
             { key: 'ms_11_count', label: '11th MS' },
             { key: 'ms_12_count', label: '12th MS' },
-            { key: 'allotment_order_count', label: 'Allotment' },
-            { key: 'cc_count', label: 'CC' },
+            { key: 'transfer_cert_count', label: 'TC' },
+            { key: 'income_cert_count', label: 'Income Cert' },
+            { key: 'com_cert_count', label: 'Comm Cert' },
             { key: 'dip_sem_1_count', label: 'Dip Sem 1' },
             { key: 'dip_sem_2_count', label: 'Dip Sem 2' },
             { key: 'dip_sem_3_count', label: 'Dip Sem 3' },
@@ -195,33 +186,18 @@ const CertificateCountReportPG = () => {
             { key: 'dip_cons_count', label: 'Dip Cons' },
             { key: 'dip_cert_count', label: 'Dip Cert' },
             { key: 'dip_prov_count', label: 'Dip Prov' },
-            { key: 'tc_count', label: 'TC' }
+            { key: 'ug_sem_1_count', label: 'UG Sem 1' },
+            { key: 'ug_sem_2_count', label: 'UG Sem 2' },
+            { key: 'ug_sem_3_count', label: 'UG Sem 3' },
+            { key: 'ug_sem_4_count', label: 'UG Sem 4' },
+            { key: 'ug_sem_5_count', label: 'UG Sem 5' },
+            { key: 'ug_sem_6_count', label: 'UG Sem 6' },
+            { key: 'ug_sem_7_count', label: 'UG Sem 7' },
+            { key: 'ug_sem_8_count', label: 'UG Sem 8' },
+            { key: 'ug_cons_count', label: 'UG Cons' },
+            { key: 'ug_degree_count', label: 'UG Degree' },
+            { key: 'ug_prov_count', label: 'UG Prov' }
         ];
-
-        if (showUg) {
-            cols = cols.concat([
-                { key: 'ug_sem_1_count', label: 'UG Sem 1' },
-                { key: 'ug_sem_2_count', label: 'UG Sem 2' },
-                { key: 'ug_sem_3_count', label: 'UG Sem 3' },
-                { key: 'ug_sem_4_count', label: 'UG Sem 4' },
-                { key: 'ug_sem_5_count', label: 'UG Sem 5' },
-                { key: 'ug_sem_6_count', label: 'UG Sem 6' },
-                { key: 'ug_sem_7_count', label: 'UG Sem 7' },
-                { key: 'ug_sem_8_count', label: 'UG Sem 8' },
-                { key: 'ug_cons_count', label: 'UG Cons' },
-                { key: 'ug_degree_count', label: 'UG Degree' },
-                { key: 'ug_prov_count', label: 'UG Prov' }
-            ]);
-        }
-
-        if (showFgJd) {
-            cols = cols.concat([
-                { key: 'fg_cert_count', label: 'FG Cert' },
-                { key: 'joint_decl_count', label: 'Joint Decl' }
-            ]);
-        }
-
-        return cols;
     };
 
     const columns = getColumnsConfig();
@@ -292,19 +268,7 @@ const CertificateCountReportPG = () => {
                         </select>
                     </div>
 
-                    <div className={styles.filterGroup}>
-                        <label className={styles.filterLabel}>Year <span style={{color:'red'}}>*</span></label>
-                        <select 
-                            className={styles.selectInput}
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                        >
-                            <option value="">Select Year to View Report</option>
-                            {masterData.years.map((y, index) => (
-                                <option key={index} value={y}>{y}</option>
-                            ))}
-                        </select>
-                    </div>
+
 
                     <div className={styles.filterGroup}>
                         <label className={styles.filterLabel}>College</label>
@@ -355,11 +319,7 @@ const CertificateCountReportPG = () => {
                     </button>
                 </div>
 
-                {!year ? (
-                    <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280', background: '#f9fafb', borderRadius: '8px' }}>
-                        Please select an Admission Year to view the report.
-                    </div>
-                ) : (
+
                     <div className={styles.tableContainer} style={{ overflowX: 'auto', maxHeight: '70vh' }}>
                         <table className={styles.table} style={{ whiteSpace: 'nowrap' }}>
                             <thead style={{ position: 'sticky', top: 0, zIndex: 1, backgroundColor: '#f9fafb' }}>
@@ -428,7 +388,6 @@ const CertificateCountReportPG = () => {
                             </tbody>
                         </table>
                     </div>
-                )}
             </div>
         </div>
     );

@@ -474,12 +474,21 @@ class Admission {
             cgd.native_certificate,
             cgd.bonafide_certificate,
             cgd.JD_certificate,
+            cgd.allotment_order,
+            cgd.dip_sem_1,
+            cgd.dip_sem_2,
+            cgd.dip_sem_3,
+            cgd.dip_sem_4,
+            cgd.dip_sem_5,
+            cgd.dip_sem_6,
+            cgd.dip_cons,
+            cgd.dip_cert,
+            cgd.dip_prov,
             cgd.remarks
         FROM student_admission_master sam
         LEFT JOIN certificate_given_details cgd 
             ON sam.id = cgd.student_id
         WHERE sam.programme_type = 'UG'
-          AND sam.admission_year = 'I Year'
           AND sam.college IN ('NEC', 'NCT')
         ORDER BY sam.admission_date DESC
     `);
@@ -492,7 +501,9 @@ class Admission {
             student_id, student_application_no,
             tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
             transfer_certificate, community_certificate, first_graduate_certificate,
-            income_certificate, native_certificate, bonafide_certificate, JD_certificate, remarks
+            income_certificate, native_certificate, bonafide_certificate, JD_certificate,
+            allotment_order, dip_sem_1, dip_sem_2, dip_sem_3, dip_sem_4, dip_sem_5, dip_sem_6,
+            dip_cons, dip_cert, dip_prov, remarks
         } = data;
 
         const [existing] = await db.execute('SELECT id FROM certificate_given_details WHERE student_id = ?', [student_id]);
@@ -502,13 +513,17 @@ class Admission {
                 UPDATE certificate_given_details SET
                     tenth_marksheet = ?, eleventh_marksheet = ?, twelfth_marksheet = ?, twelfth_temp = ?,
                     transfer_certificate = ?, community_certificate = ?, first_graduate_certificate = ?,
-                    income_certificate = ?, native_certificate = ?, bonafide_certificate = ?, JD_certificate = ?, remarks = ?
+                    income_certificate = ?, native_certificate = ?, bonafide_certificate = ?, JD_certificate = ?,
+                    allotment_order = ?, dip_sem_1 = ?, dip_sem_2 = ?, dip_sem_3 = ?, dip_sem_4 = ?, dip_sem_5 = ?, dip_sem_6 = ?,
+                    dip_cons = ?, dip_cert = ?, dip_prov = ?, remarks = ?
                 WHERE student_id = ?
             `;
             await db.execute(sql, [
                 tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
-                income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null, remarks || null,
+                income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null,
+                allotment_order || null, dip_sem_1 || null, dip_sem_2 || null, dip_sem_3 || null, dip_sem_4 || null, dip_sem_5 || null, dip_sem_6 || null,
+                dip_cons || null, dip_cert || null, dip_prov || null, remarks || null,
                 student_id
             ]);
             return { action: 'updated', id: existing[0].id };
@@ -518,14 +533,18 @@ class Admission {
                     student_id, student_application_no,
                     tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
                     transfer_certificate, community_certificate, first_graduate_certificate,
-                    income_certificate, native_certificate, bonafide_certificate, JD_certificate, remarks
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    income_certificate, native_certificate, bonafide_certificate, JD_certificate,
+                    allotment_order, dip_sem_1, dip_sem_2, dip_sem_3, dip_sem_4, dip_sem_5, dip_sem_6,
+                    dip_cons, dip_cert, dip_prov, remarks
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const [result] = await db.execute(sql, [
                 student_id, student_application_no,
                 tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
-                income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null, remarks || null
+                income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null,
+                allotment_order || null, dip_sem_1 || null, dip_sem_2 || null, dip_sem_3 || null, dip_sem_4 || null, dip_sem_5 || null, dip_sem_6 || null,
+                dip_cons || null, dip_cert || null, dip_prov || null, remarks || null
             ]);
             return { action: 'inserted', id: result.insertId };
         }
@@ -540,13 +559,13 @@ class Admission {
             SELECT 
                 sam.id as student_id, sam.application_no, sam.student_name, sam.dob, sam.college, sam.programme, sam.department, sam.admission_year, sam.quota, sam.student_status, sam.community, sam.fee,
                 cgd.id as cert_id,
-                cgd.tancet, cgd.ms_10, cgd.ms_11, cgd.ms_12, cgd.allotment_order, cgd.cc,
-                cgd.dip_sem_1, cgd.dip_sem_2, cgd.dip_sem_3, cgd.dip_sem_4, cgd.dip_sem_5, cgd.dip_sem_6, cgd.dip_cons, cgd.dip_cert, cgd.dip_prov, cgd.tc,
+                cgd.tancet, cgd.ms_10, cgd.ms_11, cgd.ms_12, cgd.transfer_cert, cgd.income_cert, cgd.com_cert,
+                cgd.dip_sem_1, cgd.dip_sem_2, cgd.dip_sem_3, cgd.dip_sem_4, cgd.dip_sem_5, cgd.dip_sem_6, cgd.dip_cons, cgd.dip_cert, cgd.dip_prov,
                 cgd.ug_sem_1, cgd.ug_sem_2, cgd.ug_sem_3, cgd.ug_sem_4, cgd.ug_sem_5, cgd.ug_sem_6, cgd.ug_sem_7, cgd.ug_sem_8, cgd.ug_cons, cgd.ug_degree, cgd.ug_prov,
-                cgd.fg_cert, cgd.joint_decl, cgd.remarks
+                cgd.remarks
             FROM student_admission_master sam
             LEFT JOIN certificate_given_details_engg_pg cgd ON sam.id = cgd.student_id
-            WHERE sam.college IN ('NEC', 'NCT')
+            WHERE sam.programme_type = 'PG' AND sam.college IN ('NEC', 'NCT')
             ORDER BY sam.admission_date DESC
         `);
         return rows;
@@ -554,11 +573,11 @@ class Admission {
 
     static async saveCertificatePG(data) {
         const {
-            student_id, student_application_no, student_year,
-            tancet, ms_10, ms_11, ms_12, allotment_order, cc,
-            dip_sem_1, dip_sem_2, dip_sem_3, dip_sem_4, dip_sem_5, dip_sem_6, dip_cons, dip_cert, dip_prov, tc,
+            student_id, student_application_no,
+            tancet, ms_10, ms_11, ms_12, transfer_cert, income_cert, com_cert,
+            dip_sem_1, dip_sem_2, dip_sem_3, dip_sem_4, dip_sem_5, dip_sem_6, dip_cons, dip_cert, dip_prov,
             ug_sem_1, ug_sem_2, ug_sem_3, ug_sem_4, ug_sem_5, ug_sem_6, ug_sem_7, ug_sem_8, ug_cons, ug_degree, ug_prov,
-            fg_cert, joint_decl, remarks
+            remarks
         } = data;
 
         const [existing] = await db.execute('SELECT id FROM certificate_given_details_engg_pg WHERE student_id = ?', [student_id]);
@@ -566,38 +585,38 @@ class Admission {
         if (existing.length > 0) {
             const sql = `
                 UPDATE certificate_given_details_engg_pg SET
-                    student_application_no = ?, student_year = ?,
-                    tancet = ?, ms_10 = ?, ms_11 = ?, ms_12 = ?, allotment_order = ?, cc = ?,
-                    dip_sem_1 = ?, dip_sem_2 = ?, dip_sem_3 = ?, dip_sem_4 = ?, dip_sem_5 = ?, dip_sem_6 = ?, dip_cons = ?, dip_cert = ?, dip_prov = ?, tc = ?,
+                    student_application_no = ?,
+                    tancet = ?, ms_10 = ?, ms_11 = ?, ms_12 = ?, transfer_cert = ?, income_cert = ?, com_cert = ?,
+                    dip_sem_1 = ?, dip_sem_2 = ?, dip_sem_3 = ?, dip_sem_4 = ?, dip_sem_5 = ?, dip_sem_6 = ?, dip_cons = ?, dip_cert = ?, dip_prov = ?,
                     ug_sem_1 = ?, ug_sem_2 = ?, ug_sem_3 = ?, ug_sem_4 = ?, ug_sem_5 = ?, ug_sem_6 = ?, ug_sem_7 = ?, ug_sem_8 = ?, ug_cons = ?, ug_degree = ?, ug_prov = ?,
-                    fg_cert = ?, joint_decl = ?, remarks = ?
+                    remarks = ?
                 WHERE student_id = ?
             `;
             await db.execute(sql, [
-                student_application_no || null, student_year || null,
-                tancet || null, ms_10 || null, ms_11 || null, ms_12 || null, allotment_order || null, cc || null,
-                dip_sem_1 || null, dip_sem_2 || null, dip_sem_3 || null, dip_sem_4 || null, dip_sem_5 || null, dip_sem_6 || null, dip_cons || null, dip_cert || null, dip_prov || null, tc || null,
+                student_application_no || null,
+                tancet || null, ms_10 || null, ms_11 || null, ms_12 || null, transfer_cert || null, income_cert || null, com_cert || null,
+                dip_sem_1 || null, dip_sem_2 || null, dip_sem_3 || null, dip_sem_4 || null, dip_sem_5 || null, dip_sem_6 || null, dip_cons || null, dip_cert || null, dip_prov || null,
                 ug_sem_1 || null, ug_sem_2 || null, ug_sem_3 || null, ug_sem_4 || null, ug_sem_5 || null, ug_sem_6 || null, ug_sem_7 || null, ug_sem_8 || null, ug_cons || null, ug_degree || null, ug_prov || null,
-                fg_cert || null, joint_decl || null, remarks || null,
+                remarks || null,
                 student_id
             ]);
             return { action: 'updated', id: existing[0].id };
         } else {
             const sql = `
                 INSERT INTO certificate_given_details_engg_pg (
-                    student_id, student_application_no, student_year,
-                    tancet, ms_10, ms_11, ms_12, allotment_order, cc,
-                    dip_sem_1, dip_sem_2, dip_sem_3, dip_sem_4, dip_sem_5, dip_sem_6, dip_cons, dip_cert, dip_prov, tc,
+                    student_id, student_application_no,
+                    tancet, ms_10, ms_11, ms_12, transfer_cert, income_cert, com_cert,
+                    dip_sem_1, dip_sem_2, dip_sem_3, dip_sem_4, dip_sem_5, dip_sem_6, dip_cons, dip_cert, dip_prov,
                     ug_sem_1, ug_sem_2, ug_sem_3, ug_sem_4, ug_sem_5, ug_sem_6, ug_sem_7, ug_sem_8, ug_cons, ug_degree, ug_prov,
-                    fg_cert, joint_decl, remarks
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    remarks
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const [result] = await db.execute(sql, [
-                student_id, student_application_no || null, student_year || null,
-                tancet || null, ms_10 || null, ms_11 || null, ms_12 || null, allotment_order || null, cc || null,
-                dip_sem_1 || null, dip_sem_2 || null, dip_sem_3 || null, dip_sem_4 || null, dip_sem_5 || null, dip_sem_6 || null, dip_cons || null, dip_cert || null, dip_prov || null, tc || null,
+                student_id, student_application_no || null,
+                tancet || null, ms_10 || null, ms_11 || null, ms_12 || null, transfer_cert || null, income_cert || null, com_cert || null,
+                dip_sem_1 || null, dip_sem_2 || null, dip_sem_3 || null, dip_sem_4 || null, dip_sem_5 || null, dip_sem_6 || null, dip_cons || null, dip_cert || null, dip_prov || null,
                 ug_sem_1 || null, ug_sem_2 || null, ug_sem_3 || null, ug_sem_4 || null, ug_sem_5 || null, ug_sem_6 || null, ug_sem_7 || null, ug_sem_8 || null, ug_cons || null, ug_degree || null, ug_prov || null,
-                fg_cert || null, joint_decl || null, remarks || null
+                remarks || null
             ]);
             return { action: 'inserted', id: result.insertId };
         }
