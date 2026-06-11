@@ -148,6 +148,7 @@ const CertificateEntry = () => {
             const payload = {
                 student_id: rowData.student_id,
                 student_application_no: rowData.application_no,
+                student_year: rowData.admission_year,
                 tenth_marksheet: rowData.tenth_marksheet,
                 eleventh_marksheet: rowData.eleventh_marksheet,
                 twelfth_marksheet: rowData.twelfth_marksheet,

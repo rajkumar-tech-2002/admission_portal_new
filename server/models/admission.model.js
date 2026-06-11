@@ -498,7 +498,7 @@ class Admission {
 
     static async saveCertificate(data) {
         const {
-            student_id, student_application_no,
+            student_id, student_application_no, student_year,
             tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
             transfer_certificate, community_certificate, first_graduate_certificate,
             income_certificate, native_certificate, bonafide_certificate, JD_certificate,
@@ -511,6 +511,7 @@ class Admission {
         if (existing.length > 0) {
             const sql = `
                 UPDATE certificate_given_details SET
+                    student_application_no = ?, student_year = ?,
                     tenth_marksheet = ?, eleventh_marksheet = ?, twelfth_marksheet = ?, twelfth_temp = ?,
                     transfer_certificate = ?, community_certificate = ?, first_graduate_certificate = ?,
                     income_certificate = ?, native_certificate = ?, bonafide_certificate = ?, JD_certificate = ?,
@@ -519,6 +520,7 @@ class Admission {
                 WHERE student_id = ?
             `;
             await db.execute(sql, [
+                student_application_no || null, student_year || null,
                 tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
                 income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null,
@@ -530,16 +532,16 @@ class Admission {
         } else {
             const sql = `
                 INSERT INTO certificate_given_details (
-                    student_id, student_application_no,
+                    student_id, student_application_no, student_year,
                     tenth_marksheet, eleventh_marksheet, twelfth_marksheet, twelfth_temp,
                     transfer_certificate, community_certificate, first_graduate_certificate,
                     income_certificate, native_certificate, bonafide_certificate, JD_certificate,
                     allotment_order, dip_sem_1, dip_sem_2, dip_sem_3, dip_sem_4, dip_sem_5, dip_sem_6,
                     dip_cons, dip_cert, dip_prov, remarks
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const [result] = await db.execute(sql, [
-                student_id, student_application_no,
+                student_id, student_application_no, student_year || null,
                 tenth_marksheet || null, eleventh_marksheet || null, twelfth_marksheet || null, twelfth_temp || null,
                 transfer_certificate || null, community_certificate || null, first_graduate_certificate || null,
                 income_certificate || null, native_certificate || null, bonafide_certificate || null, JD_certificate || null,
