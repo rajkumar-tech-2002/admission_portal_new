@@ -1,0 +1,408 @@
+.dashboard {
+    padding: 0;
+}
+
+.mainCard {
+    background-color: var(--surface-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 1.5rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.resetRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.statsCard {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.statsCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.statsIcon {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8fafc;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.statsInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.statsLabel {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.statsValue {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0.25rem 0 0 0;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+/* Color Effects on Border and Text Only (On Hover) */
+.enquiryCard:hover { border-color: #3b82f6; border-width: 2px; }
+.enquiryCard:hover .statsValue, .enquiryCard:hover .statsIcon { color: #3b82f6; }
+
+.admittedCard:hover { border-color: #10b981; border-width: 2px; }
+.admittedCard:hover .statsValue, .admittedCard:hover .statsIcon { color: #10b981; }
+
+.discontinueCard:hover { border-color: #ef4444; border-width: 2px; }
+.discontinueCard:hover .statsValue, .discontinueCard:hover .statsIcon { color: #ef4444; }
+
+.activeCard:hover { border-color: #8b5cf6; border-width: 2px; }
+.activeCard:hover .statsValue, .activeCard:hover .statsIcon { color: #8b5cf6; }
+
+.archivedCard:hover { border-color: #f59e0b; border-width: 2px; }
+.archivedCard:hover .statsValue, .archivedCard:hover .statsIcon { color: #f59e0b; }
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filterLabel {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.searchInput, .selectInput, .dateInput {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+.searchInput:focus, .selectInput:focus, .dateInput:focus {
+    border-color: var(--primary-color);
+}
+
+.tableContainer {
+    overflow-x: auto;
+    max-height: 60vh; /* Allow vertical scrolling with sticky header */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.table th, .table td {
+    padding: 0.7rem 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid #f1f5f9;
+    font-size: 0.85rem;
+}
+
+.table th {
+    background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.table th:last-child {
+    border-right: none;
+}
+
+.table td {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table tr:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.numCell {
+    text-align: center;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.subtotalRow {
+    background-color: #f0f4ff !important;
+    border-top: 2px solid #c7d2fe;
+    border-bottom: 2px solid #c7d2fe;
+}
+
+.subtotalRow td {
+    font-weight: 700 !important;
+    font-size: 0.8rem;
+    color: #1e3a8a !important;
+    padding: 0.55rem 0.85rem !important;
+    background-color: transparent !important;
+}
+
+.subtotalLabel {
+    font-weight: 800;
+    color: #1e3a8a;
+    white-space: nowrap;
+}
+
+.subtotalVal {
+    text-align: center;
+    font-weight: 700;
+    color: #1e40af;
+    white-space: nowrap;
+}
+
+.statusBadge, .statusSelect {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.statusSelect {
+    border: 1px solid transparent;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    text-align: center;
+}
+
+.statusSelect:focus {
+    border-color: var(--primary-color);
+}
+
+.status-Enquiry { background-color: #dbeafe; color: #1e40af; }
+.status-Admitted { background-color: #d1fae5; color: #065f46; }
+.status-Discontinue { background-color: #fee2e2; color: #b91c1c; }
+
+/* Email Status Colors */
+.email-Pending { background-color: #f1f5f9; color: #64748b; }
+.email-Sent { background-color: #d1fae5; color: #065f46; }
+.email-Failed { background-color: #fee2e2; color: #b91c1c; }
+
+.exportBtn {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.exportBtn:hover {
+    background-color: #059669;
+}
+
+.tableControls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.limitSelector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.limitSelect {
+    padding: 0.4rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    outline: none;
+    cursor: pointer;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.paginationInfo {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.paginationControls {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.pageBtn {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--surface-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.pageBtn:hover:not(:disabled) {
+    background-color: #f1f5f9;
+}
+
+.pageBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.activePage {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.activePage:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+}
+
+.resetFiltersBtn {
+    padding: 0.6rem 1.2rem;
+    background-color: var(--surface-color);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.resetFiltersBtn:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: var(--primary-color);
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.editBtn, .deleteBtn, .viewBtn, .mailBtn {
+    padding: 0.4rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.editBtn {
+    background-color: rgba(30, 58, 138, 0.08);
+    color: var(--primary-color);
+}
+
+.editBtn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.deleteBtn {
+    background-color: rgba(239, 68, 68, 0.08);
+    color: var(--danger-color);
+}
+
+.deleteBtn:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.viewBtn {
+    background-color: rgba(245, 158, 11, 0.08);
+    color: #f59e0b;
+}
+
+.viewBtn:hover {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.mailBtn {
+    background-color: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+}
+
+.mailBtn:hover {
+    background-color: #10b981;
+    color: white;
+}
