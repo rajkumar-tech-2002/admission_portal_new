@@ -727,7 +727,7 @@ class Admission {
             const sql = `
                 UPDATE student_fees_details SET
                     college = ?, department = ?, programme = ?, year_type = ?, student_application_no = ?, 
-                    student_name = ?, student_dob = ?, paid_date = ?, paid_amount = ?, student_quota = ?, payment_mode = ?
+                    student_name = ?, student_dob = ?, paid_date = ?, paid_amount = ?, student_quota = ?, payment_mode = ?, if_return = ?
                 WHERE id = ?
             `;
             const values = [
@@ -742,6 +742,7 @@ class Admission {
                 data.paid_amount || null,
                 studentQuota,
                 data.payment_mode || 'Cash',
+                data.if_return || 'No',
                 data.id
             ];
             await db.execute(sql, values);
@@ -749,8 +750,8 @@ class Admission {
         } else {
             const sql = `
                 INSERT INTO student_fees_details (
-                    college, department, programme, year_type, student_application_no, student_name, student_dob, paid_date, paid_amount, student_quota, payment_mode
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    college, department, programme, year_type, student_application_no, student_name, student_dob, paid_date, paid_amount, student_quota, payment_mode, if_return
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             const values = [
                 data.college || null,
@@ -763,7 +764,8 @@ class Admission {
                 data.paid_date || null,
                 data.paid_amount || null,
                 studentQuota,
-                data.payment_mode || 'Cash'
+                data.payment_mode || 'Cash',
+                data.if_return || 'No'
             ];
 
             const [result] = await db.execute(sql, values);

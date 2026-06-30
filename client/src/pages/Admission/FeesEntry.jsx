@@ -46,6 +46,7 @@ const FeesEntry = () => {
         student_dob: '',
         paid_amount: '',
         payment_mode: 'Cash',
+        if_return: 'No',
         paid_date: new Date().toISOString().split('T')[0]
     });
 
@@ -147,7 +148,7 @@ const FeesEntry = () => {
     // Excel Export for Payment List
     const handleExcelExport = () => {
         if (filteredFeesRecords.length === 0) { toast.error('No records to export'); return; }
-        const headers = ['S.No','App No','Student Name','College','Quota','Programme','Department','Year','Paid Amount','Payment Mode','Paid Date'];
+        const headers = ['S.No','App No','Student Name','College','Quota','Programme','Department','Year','Paid Amount','Payment Mode','Paid Date','Refund?'];
         const rows = filteredFeesRecords.map((r, i) => [
             i + 1,
             r.student_application_no,
@@ -159,7 +160,8 @@ const FeesEntry = () => {
             r.year_type,
             r.paid_amount,
             r.payment_mode || 'Cash',
-            r.paid_date ? r.paid_date.substring(0, 10).split('-').reverse().join('-') : ''
+            r.paid_date ? r.paid_date.substring(0, 10).split('-').reverse().join('-') : '',
+            r.if_return || 'No'
         ]);
         const csv = [headers, ...rows].map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
         const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -262,6 +264,12 @@ const FeesEntry = () => {
             return;
         }
 
+        const amount = parseFloat(formData.paid_amount);
+        if ((formData.if_return === 'No' || !formData.if_return) && amount < 0) {
+            toast.error('Payment amount cannot be negative unless it is a refund.');
+            return;
+        }
+
         try {
             const res = await apiService.post('/admissions/fees/save', formData);
             if (res.data.success) {
@@ -276,6 +284,7 @@ const FeesEntry = () => {
                     student_dob: '',
                     paid_amount: '',
                     payment_mode: 'Cash',
+                    if_return: 'No',
                     paid_date: new Date().toISOString().split('T')[0]
                 });
                 setStudentSearchTerm('');
@@ -301,6 +310,7 @@ const FeesEntry = () => {
             student_dob: dob,
             paid_amount: record.paid_amount || '',
             payment_mode: record.payment_mode || 'Cash',
+            if_return: record.if_return || 'No',
             paid_date: record.paid_date ? formatDateForInput(record.paid_date) : new Date().toISOString().split('T')[0]
         });
         
@@ -513,7 +523,24 @@ const FeesEntry = () => {
                                                     <td>{record.quota || '—'}</td>
                                                     <td>{(record.programme && record.programme.trim()) ? `${record.programme} - ${record.department}` : record.department}</td>
                                                     <td>{record.year_type}</td>
-                                                    <td style={{ fontWeight: 'bold', color: '#059669' }}>₹{parseFloat(record.paid_amount || 0).toLocaleString()}</td>
+                                                    <td style={{ fontWeight: 'bold', color: record.if_return === 'Yes' ? '#ef4444' : '#059669' }}>
+                                                        ₹{parseFloat(record.paid_amount || 0).toLocaleString()}
+                                                        {record.if_return === 'Yes' && (
+                                                            <span style={{ 
+                                                                fontSize: '0.7rem', 
+                                                                marginLeft: '6px', 
+                                                                backgroundColor: '#fee2e2', 
+                                                                color: '#ef4444', 
+                                                                padding: '2px 6px', 
+                                                                borderRadius: '4px',
+                                                                border: '1px solid #fca5a5',
+                                                                verticalAlign: 'middle',
+                                                                display: 'inline-block'
+                                                            }}>
+                                                                Refund
+                                                            </span>
+                                                        )}
+                                                    </td>
                                                     <td>{record.payment_mode || 'Cash'}</td>
                                                     <td>{record.paid_date ? formatDate(record.paid_date) : ''}</td>
                                                     <td>
@@ -668,6 +695,28 @@ const FeesEntry = () => {
                             </div>
 
                             <div className={styles.filterGroup}>
+                                <label className={styles.filterLabel}>Refund? <span style={{color: 'red'}}>*</span></label>
+                                <select 
+                                    className={styles.selectInput} 
+                                    value={formData.if_return || 'No'}
+                                    onChange={(e) => {
+                                        const isRefund = e.target.value;
+                                        setFormData(prev => {
+                                            const updated = { ...prev, if_return: isRefund };
+                                            if (isRefund === 'No' && parseFloat(prev.paid_amount) < 0) {
+                                                updated.paid_amount = '';
+                                            }
+                                            return updated;
+                                        });
+                                    }}
+                                    required
+                                >
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+
+                            <div className={styles.filterGroup}>
                                 <label className={styles.filterLabel}>Payment Amount <span style={{color: 'red'}}>*</span></label>
                                 <input 
                                     type="number" 
@@ -676,7 +725,7 @@ const FeesEntry = () => {
                                     value={formData.paid_amount}
                                     onChange={(e) => setFormData(prev => ({...prev, paid_amount: e.target.value}))}
                                     required
-                                    min="0"
+                                    min={formData.if_return === 'Yes' ? undefined : '0'}
                                     step="0.01"
                                 />
                             </div>
