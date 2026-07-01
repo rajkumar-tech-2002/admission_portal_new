@@ -414,7 +414,7 @@ const Dashboard = () => {
                             className={styles.viewBtn}
                             onClick={() => {
                               window.open(
-                                `/admission_portal_new/report-print/${record.id}`,
+                                `/admission_portal/report-print/${record.id}`,
                                 "_blank",
                               );
                             }}
